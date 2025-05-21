@@ -15,8 +15,7 @@ function isValidResult(result: number[] | null): boolean {
   return (
     Array.isArray(result) &&
     result.length === 6 &&
-    result.every((pos) => typeof pos === 'number' && pos > 0) &&
-    new Set(result).size === 6
+    result.every((pos) => typeof pos === 'number' && pos > 0)
   );
 }
 
