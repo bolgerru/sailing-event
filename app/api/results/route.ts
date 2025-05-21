@@ -222,8 +222,7 @@ function resolveTeamGroup(teams: TeamStats[], races: Race[]): TeamStats[] {
   }
 
   // For 3+ team ties or if 2 teams are still tied, use common opponents
-  const sortedTeams = teams.sort((a, b) => getCommonOpponentStats(a.team, b.team, races));
-  return sortedTeams;
+  return teams.sort((a, b) => getCommonOpponentStats(a.team, b.team, races));
 }
 
 // Modify the race processing in computeLeaderboard
@@ -292,6 +291,8 @@ function computeLeaderboard(races: Race[]): TeamStats[] {
     .flatMap(([_, group]) => resolveTeamGroup(group, races));
 
   // Replace the place assignment section in computeLeaderboard:
+
+  // Assign places based on final position after tie-breaking
   let currentPlace = 1;
   let samePlace = 1;
   sortedTeams.forEach((team, index) => {
@@ -307,15 +308,19 @@ function computeLeaderboard(races: Race[]): TeamStats[] {
         const tiedTeams = sortedTeams.filter(t => t.winPercentage === team.winPercentage);
         console.log(`Checking tie between ${tiedTeams.map(t => t.team).join(', ')}`);
         
-        // Get head-to-head records
-        const h2h = getHeadToHeadRecord(team.team, prevTeam.team, races);
-        const reverseH2h = getHeadToHeadRecord(prevTeam.team, team.team, races);
+        // Resolve the tie and get the new order
+        const resolvedGroup = resolveTeamGroup(tiedTeams, races);
         
-        // Check if teams are tied (equal h2h points or no common opponents)
-        const commonOpponents = getCommonOpponentStats(team.team, prevTeam.team, races);
-        const areTied = h2h.avgPoints === reverseH2h.avgPoints || commonOpponents === 0;
+        // Find positions of current and previous team in resolved group
+        const currentPos = resolvedGroup.findIndex(t => t.team === team.team);
+        const prevPos = resolvedGroup.findIndex(t => t.team === prevTeam.team);
         
-        // Fix the console.log statements in the place assignment section:
+        // Check if teams are actually tied after all tiebreakers
+        const areTied = currentPos === prevPos || 
+                       (resolvedGroup.length > 2 && 
+                        getHeadToHeadRecord(team.team, prevTeam.team, races).avgPoints === 
+                        getHeadToHeadRecord(prevTeam.team, team.team, races).avgPoints);
+        
         if (areTied) {
           team.place = prevTeam.place;
           samePlace++;
