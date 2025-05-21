@@ -1,0 +1,90 @@
+[
+  {
+    "team": "TCD 1",
+    "wins": 4,
+    "totalRaces": 4,
+    "points": 0,
+    "winPercentage": 100,
+    "place": 1
+  },
+  {
+    "team": "TCD 2",
+    "wins": 0,
+    "totalRaces": 1,
+    "points": 0,
+    "winPercentage": 0,
+    "place": 2
+  },
+  {
+    "team": "TCD 3",
+    "wins": 0,
+    "totalRaces": 1,
+    "points": 0,
+    "winPercentage": 0,
+    "place": 2
+  },
+  {
+    "team": "TCD 4",
+    "wins": 0,
+    "totalRaces": 1,
+    "points": 0,
+    "winPercentage": 0,
+    "place": 2
+  },
+  {
+    "team": "UCD 1",
+    "wins": 0,
+    "totalRaces": 1,
+    "points": 0,
+    "winPercentage": 0,
+    "place": 2
+  },
+  {
+    "team": "UCD 2",
+    "wins": 0,
+    "totalRaces": 0,
+    "points": 0,
+    "winPercentage": 0,
+    "place": 2
+  },
+  {
+    "team": "UCD 3",
+    "wins": 0,
+    "totalRaces": 0,
+    "points": 0,
+    "winPercentage": 0,
+    "place": 2
+  },
+  {
+    "team": "UCD 4",
+    "wins": 0,
+    "totalRaces": 0,
+    "points": 0,
+    "winPercentage": 0,
+    "place": 2
+  },
+  {
+    "team": "QUB",
+    "wins": 0,
+    "totalRaces": 0,
+    "points": 0,
+    "winPercentage": 0,
+    "place": 2
+  },
+  {
+    "team": "UCC 1",
+    "wins": 0,
+    "totalRaces": 0,
+    "points": 0,
+    "winPercentage": 0,
+    "place": 2
+  },
+  {
+    "team": "UCC 2",
+    "wins": 0,
+    "totalRaces": 0,
+    "points": 0,
+    "winPercentage": 0,
+    "place": 2
+  }
+]

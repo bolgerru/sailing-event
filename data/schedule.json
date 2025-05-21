@@ -1,0 +1,937 @@
+[
+  {
+    "raceNumber": 1,
+    "teamA": "TCD 1",
+    "teamB": "TCD 2",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  },
+  {
+    "raceNumber": 2,
+    "teamA": "TCD 1",
+    "teamB": "TCD 3",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  },
+  {
+    "raceNumber": 3,
+    "teamA": "TCD 1",
+    "teamB": "TCD 4",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  },
+  {
+    "raceNumber": 4,
+    "teamA": "TCD 1",
+    "teamB": "UCD 1",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  },
+  {
+    "raceNumber": 5,
+    "teamA": "TCD 1",
+    "teamB": "UCD 2",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 6,
+    "teamA": "TCD 1",
+    "teamB": "UCD 3",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 7,
+    "teamA": "TCD 1",
+    "teamB": "UCD 4",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 8,
+    "teamA": "TCD 1",
+    "teamB": "QUB",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 9,
+    "teamA": "TCD 1",
+    "teamB": "UCC 1",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 10,
+    "teamA": "TCD 1",
+    "teamB": "UCC 2",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 11,
+    "teamA": "TCD 2",
+    "teamB": "TCD 3",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 12,
+    "teamA": "TCD 2",
+    "teamB": "TCD 4",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 13,
+    "teamA": "TCD 2",
+    "teamB": "UCD 1",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 14,
+    "teamA": "TCD 2",
+    "teamB": "UCD 2",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 15,
+    "teamA": "TCD 2",
+    "teamB": "UCD 3",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 16,
+    "teamA": "TCD 2",
+    "teamB": "UCD 4",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 17,
+    "teamA": "TCD 2",
+    "teamB": "QUB",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 18,
+    "teamA": "TCD 2",
+    "teamB": "UCC 1",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 19,
+    "teamA": "TCD 2",
+    "teamB": "UCC 2",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 20,
+    "teamA": "TCD 3",
+    "teamB": "TCD 4",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 21,
+    "teamA": "TCD 3",
+    "teamB": "UCD 1",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 22,
+    "teamA": "TCD 3",
+    "teamB": "UCD 2",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 23,
+    "teamA": "TCD 3",
+    "teamB": "UCD 3",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 24,
+    "teamA": "TCD 3",
+    "teamB": "UCD 4",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 25,
+    "teamA": "TCD 3",
+    "teamB": "QUB",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 26,
+    "teamA": "TCD 3",
+    "teamB": "UCC 1",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 27,
+    "teamA": "TCD 3",
+    "teamB": "UCC 2",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 28,
+    "teamA": "TCD 4",
+    "teamB": "UCD 1",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 29,
+    "teamA": "TCD 4",
+    "teamB": "UCD 2",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 30,
+    "teamA": "TCD 4",
+    "teamB": "UCD 3",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 31,
+    "teamA": "TCD 4",
+    "teamB": "UCD 4",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 32,
+    "teamA": "TCD 4",
+    "teamB": "QUB",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 33,
+    "teamA": "TCD 4",
+    "teamB": "UCC 1",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 34,
+    "teamA": "TCD 4",
+    "teamB": "UCC 2",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 35,
+    "teamA": "UCD 1",
+    "teamB": "UCD 2",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 36,
+    "teamA": "UCD 1",
+    "teamB": "UCD 3",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 37,
+    "teamA": "UCD 1",
+    "teamB": "UCD 4",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 38,
+    "teamA": "UCD 1",
+    "teamB": "QUB",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 39,
+    "teamA": "UCD 1",
+    "teamB": "UCC 1",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 40,
+    "teamA": "UCD 1",
+    "teamB": "UCC 2",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 41,
+    "teamA": "UCD 2",
+    "teamB": "UCD 3",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 42,
+    "teamA": "UCD 2",
+    "teamB": "UCD 4",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 43,
+    "teamA": "UCD 2",
+    "teamB": "QUB",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 44,
+    "teamA": "UCD 2",
+    "teamB": "UCC 1",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 45,
+    "teamA": "UCD 2",
+    "teamB": "UCC 2",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 46,
+    "teamA": "UCD 3",
+    "teamB": "UCD 4",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 47,
+    "teamA": "UCD 3",
+    "teamB": "QUB",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 48,
+    "teamA": "UCD 3",
+    "teamB": "UCC 1",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 49,
+    "teamA": "UCD 3",
+    "teamB": "UCC 2",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 50,
+    "teamA": "UCD 4",
+    "teamB": "QUB",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 51,
+    "teamA": "UCD 4",
+    "teamB": "UCC 1",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 52,
+    "teamA": "UCD 4",
+    "teamB": "UCC 2",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 53,
+    "teamA": "QUB",
+    "teamB": "UCC 1",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 54,
+    "teamA": "QUB",
+    "teamB": "UCC 2",
+    "boats": {
+      "teamA": "ISA Blue",
+      "teamB": "ISA White"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 55,
+    "teamA": "UCC 1",
+    "teamB": "UCC 2",
+    "boats": {
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  }
+]
