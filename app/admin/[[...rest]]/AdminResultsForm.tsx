@@ -21,16 +21,17 @@ interface BoatSet {
 
 export default function AdminResultsForm({ races: initialRaces }: { races: Race[] }) {
   const [races, setRaces] = useState<Race[]>(initialRaces);
-  const [formData, setFormData] = useState<{ [key: number]: number[] }>({});
+  const [formData, setFormData] = useState<{ [key: number]: (number | '')[] }>({});
   const [teamInput, setTeamInput] = useState<string>('');
   const [showTeamInput, setShowTeamInput] = useState(false);
   const [boatSets, setBoatSets] = useState<BoatSet[]>([]);
 
   useEffect(() => {
-    // Load initial form data
-    const initialData: { [key: number]: number[] } = {};
+    // Load initial form data - set empty strings instead of zeros
+    const initialData: { [key: number]: (number | '')[] } = {};
     initialRaces.forEach((race) => {
-      initialData[race.raceNumber] = race.result || Array(6).fill(0);
+      // Use race.result if it exists, otherwise use array of empty strings
+      initialData[race.raceNumber] = race.result || Array(6).fill('');
     });
     setFormData(initialData);
 
@@ -59,9 +60,9 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
       if (response.ok) {
         const freshRaces = await response.json();
         setRaces(freshRaces);
-        const updatedData: { [key: number]: number[] } = {};
+        const updatedData: { [key: number]: (number | '')[] } = {};
         freshRaces.forEach((race: Race) => {
-          updatedData[race.raceNumber] = race.result || Array(6).fill(0);
+          updatedData[race.raceNumber] = race.result || Array(6).fill('');
         });
         setFormData(updatedData);
       } else {
@@ -72,9 +73,9 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     }
   };
 
-  const determineWinner = (race: Race, result: number[]): string => {
-    const teamABoats = result.slice(0, 3);
-    const teamBBoats = result.slice(3, 6);
+  const determineWinner = (race: Race, result: (number | '')[]): string => {
+    const teamABoats = result.slice(0, 3).map(v => typeof v === 'number' ? v : 0);
+    const teamBBoats = result.slice(3, 6).map(v => typeof v === 'number' ? v : 0);
     const sumA = teamABoats.reduce((a, b) => a + b, 0);
     const sumB = teamBBoats.reduce((a, b) => a + b, 0);
 
@@ -86,9 +87,9 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
   };
 
   const handleChange = (raceNumber: number, index: number, value: number) => {
-    const current = formData[raceNumber] || Array(6).fill(0);
+    const current = formData[raceNumber] || Array(6).fill('');  // Changed from fill(0) to fill('')
     const updated = [...current];
-    updated[index] = value;
+    updated[index] = value || '';  // Use empty string if value is 0 or empty
     setFormData({ ...formData, [raceNumber]: updated });
   };
 
@@ -97,7 +98,9 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     if (
       result &&
       result.length === 6 &&
-      result.every((pos) => typeof pos === 'number' && pos >= 1)
+      result.every((pos): pos is number => 
+        typeof pos === 'number' && pos >= 1
+      )
     ) {
       const race = races.find((r) => r.raceNumber === raceNumber);
       if (!race) return alert('Race not found');
@@ -129,7 +132,8 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
   };
 
   const handleClear = async (raceNumber: number) => {
-    setFormData({ ...formData, [raceNumber]: Array(6).fill(0) });
+    // Set to empty strings instead of zeros
+    setFormData({ ...formData, [raceNumber]: Array(6).fill('') });
 
     const res = await fetch('/api/results', {
       method: 'POST',
@@ -212,6 +216,18 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     await fetchRaces();
   };
 
+  // Helper function to determine if team is winning (add this before the return statement)
+  const getTeamScore = (positions: (number | '')[], startIndex: number) => {
+    return positions
+      ?.slice(startIndex, startIndex + 3)
+      .reduce<number>((sum, pos) => {
+        if (typeof pos === 'number') {
+          return sum + pos;
+        }
+        return sum;
+      }, 0);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 mb-6">
@@ -284,81 +300,151 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
 
       {races.map((race) => {
         const result = formData[race.raceNumber];
-        const winner = result && result.every((n) => n >= 1)
-          ? determineWinner(race, result)
-          : null;
+        const teamAScore = getTeamScore(result, 0);
+        const teamBScore = getTeamScore(result, 3);
+        const isTeamAWinning = teamAScore < teamBScore;
+        const isTeamBWinning = teamBScore < teamAScore;
+        const winner = result && result.every((n) => 
+          typeof n === 'number' && n >= 1
+        ) ? determineWinner(race, result) : null;
 
         return (
-          <div key={race.raceNumber} className="p-4 bg-white border rounded-md">
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold">
+          <div key={race.raceNumber} className="p-3 bg-white border rounded-md">
+            <div className="mb-3">
+              <h2 className="text-base md:text-lg font-semibold">
                 Race {race.raceNumber}: {race.teamA} vs {race.teamB}
               </h2>
-              <div className="text-sm text-gray-600 mt-1">
+              <div className="text-xs md:text-sm text-gray-600 mt-1">
                 Boats: {race.boats?.[`set-1-team1`]} vs {race.boats?.[`set-1-team2`]}
               </div>
             </div>
             
             {winner && (
-              <div className="mb-4 text-green-700 font-semibold">
+              <div className="mb-3 text-green-700 font-semibold text-sm md:text-base">
                 Winner: {winner}
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-8 mb-4">
+            <div className="space-y-4 md:grid md:grid-cols-2 md:gap-4 md:space-y-0">
               {/* Team A Boats */}
               <div className="space-y-2">
-                <h3 className="font-medium text-blue-600">{race.teamA}</h3>
-                <div className="space-y-2 bg-blue-50 p-3 rounded-md">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <label className="text-sm w-16">Boat {i + 1}</label>
-                      <input
-                        type="number"
-                        min={0}
-                        value={formData[race.raceNumber]?.[i] ?? ''}
-                        onChange={(e) =>
-                          handleChange(race.raceNumber, i, Number(e.target.value))
-                        }
-                        className="w-full border rounded px-2 py-1"
-                      />
-                    </div>
-                  ))}
+                <h3 className={`font-medium text-sm md:text-base ${
+                  isTeamAWinning ? 'text-green-600' : 'text-red-600'
+                }`}>{race.teamA}</h3>
+                <div className={`space-y-4 p-3 rounded-md ${
+                  isTeamAWinning ? 'bg-green-50' : 'bg-red-50'
+                }`}>
+                  <div className="bg-white shadow-sm p-2 rounded-md">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="space-y-2 mb-2 last:mb-0">
+                        <div className="flex justify-between text-xs">
+                          <label>Boat {i + 1}</label>
+                          <span className="font-medium">
+                            {formData[race.raceNumber]?.[i] || '-'}
+                          </span>
+                        </div>
+                        <div className="flex gap-1">
+                          {[1, 2, 3, 4, 5, 6].map((num) => (
+                            <button
+                              key={num}
+                              onClick={() => handleChange(race.raceNumber, i, num)}
+                              className={`flex-1 h-8 text-sm rounded border ${
+                                formData[race.raceNumber]?.[i] === num
+                                  ? 'bg-blue-600 border-blue-700 text-white' 
+                                  : 'bg-white border-blue-300 text-blue-600 hover:bg-blue-50'
+                              }`}
+                              style={{
+                                WebkitTapHighlightColor: 'transparent'
+                              }}
+                            >
+                              {num}
+                            </button>
+                          ))}
+                          <input
+                            type="number"
+                            min={1}
+                            value={formData[race.raceNumber]?.[i] || ''}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value);
+                              if (!isNaN(value)) {
+                                handleChange(race.raceNumber, i, value);
+                              }
+                            }}
+                            className="w-14 h-8 text-sm border rounded text-center"
+                            placeholder="..."
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
               {/* Team B Boats */}
               <div className="space-y-2">
-                <h3 className="font-medium text-red-600">{race.teamB}</h3>
-                <div className="space-y-2 bg-red-50 p-3 rounded-md">
-                  {[...Array(3)].map((_, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <label className="text-sm w-16">Boat {i + 1}</label>
-                      <input
-                        type="number"
-                        min={0}
-                        value={formData[race.raceNumber]?.[i + 3] ?? ''}
-                        onChange={(e) =>
-                          handleChange(race.raceNumber, i + 3, Number(e.target.value))
-                        }
-                        className="w-full border rounded px-2 py-1"
-                      />
-                    </div>
-                  ))}
+                <h3 className={`font-medium text-sm md:text-base ${
+                  isTeamBWinning ? 'text-green-600' : 'text-red-600'
+                }`}>{race.teamB}</h3>
+                <div className={`space-y-4 p-3 rounded-md ${
+                  isTeamBWinning ? 'bg-green-50' : 'bg-red-50'
+                }`}>
+                  <div className="bg-white p-2 rounded-md">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="space-y-2 mb-2 last:mb-0">
+                        <div className="flex justify-between text-xs">
+                          <label>Boat {i + 1}</label>
+                          <span className="font-medium">
+                            {formData[race.raceNumber]?.[i + 3] || '-'}
+                          </span>
+                        </div>
+                        <div className="flex gap-1">
+                          {[1, 2, 3, 4, 5, 6].map((num) => (
+                            <button
+                              key={num}
+                              onClick={() => handleChange(race.raceNumber, i + 3, num)}
+                              className={`flex-1 h-8 text-sm rounded border ${
+                                formData[race.raceNumber]?.[i + 3] === num
+                                  ? 'bg-blue-600 border-blue-700 text-white' 
+                                  : 'bg-white border-blue-300 text-blue-600 hover:bg-blue-50'
+                              }`}
+                              style={{
+                                WebkitTapHighlightColor: 'transparent'
+                              }}
+                            >
+                              {num}
+                            </button>
+                          ))}
+                          <input
+                            type="number"
+                            min={1}
+                            value={formData[race.raceNumber]?.[i + 3] || ''}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value);
+                              if (!isNaN(value)) {
+                                handleChange(race.raceNumber, i + 3, value);
+                              }
+                            }}
+                            className="w-14 h-8 text-sm border rounded text-center"
+                            placeholder="..."
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-4">
+            <div className="flex gap-2 mt-4">
               <button
                 onClick={() => handleSubmit(race.raceNumber)}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded text-sm md:text-base hover:bg-blue-700"
               >
                 Save Result
               </button>
               <button
                 onClick={() => handleClear(race.raceNumber)}
-                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                className="flex-1 bg-gray-500 text-white px-4 py-2 rounded text-sm md:text-base hover:bg-gray-600"
               >
                 Clear Results
               </button>
