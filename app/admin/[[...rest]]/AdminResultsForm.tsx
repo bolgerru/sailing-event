@@ -311,11 +311,19 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
         return (
           <div key={race.raceNumber} className="p-3 bg-white border rounded-md">
             <div className="mb-3">
-              <h2 className="text-base md:text-lg font-semibold">
-                Race {race.raceNumber}: {race.teamA} vs {race.teamB}
-              </h2>
-              <div className="text-xs md:text-sm text-gray-600 mt-1">
-                Boats: {race.boats?.[`set-1-team1`]} vs {race.boats?.[`set-1-team2`]}
+              <p className="text-center text-xl md:text-2xl font-bold text-gray-700 mb-3">
+                Race {race.raceNumber}
+              </p>
+              <div className="flex justify-between items-baseline">
+                <div className="text-center flex-1">
+                  <h3 className="text-base md:text-lg font-semibold">{race.teamA}</h3>
+                  <span className="text-xs text-gray-600">({race.boats?.teamA})</span>
+                </div>
+                <span className="text-gray-400 mx-2">vs</span>
+                <div className="text-center flex-1">
+                  <h3 className="text-base md:text-lg font-semibold">{race.teamB}</h3>
+                  <span className="text-xs text-gray-600">({race.boats?.teamB})</span>
+                </div>
               </div>
             </div>
             

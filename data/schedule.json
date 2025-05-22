@@ -93,12 +93,12 @@
       "teamB": "Red"
     },
     "result": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
     ]
   },
   {
@@ -126,14 +126,7 @@
       "teamA": "Black",
       "teamB": "Red"
     },
-    "result": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-    ]
+    "result": null
   },
   {
     "raceNumber": 9,
