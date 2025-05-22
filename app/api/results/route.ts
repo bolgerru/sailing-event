@@ -120,6 +120,11 @@ function getCommonOpponentStats(teamA: string, teamB: string, races: Race[]): nu
 
   console.log(`Common opponents for ${teamA} vs ${teamB}:`, commonOpponents);
 
+  // If no common opponents, return 0 to keep teams tied
+  if (commonOpponents.length === 0) {
+    return 0;
+  }
+
   let teamATotal = 0;
   let teamBTotal = 0;
   let matches = 0;
@@ -132,6 +137,7 @@ function getCommonOpponentStats(teamA: string, teamB: string, races: Race[]): nu
     matches++;
   });
 
+  // Only compare averages if we have matches
   return matches > 0 ? teamATotal / matches - teamBTotal / matches : 0;
 }
 
@@ -298,7 +304,6 @@ function computeLeaderboard(races: Race[]): TeamStats[] {
   sortedTeams.forEach((team, index) => {
     if (index === 0) {
       team.place = currentPlace;
-      samePlace = 1;
       console.log(`First team ${team.team}: place ${currentPlace}`);
     } else {
       const prevTeam = sortedTeams[index - 1];
@@ -308,34 +313,25 @@ function computeLeaderboard(races: Race[]): TeamStats[] {
         const tiedTeams = sortedTeams.filter(t => t.winPercentage === team.winPercentage);
         console.log(`Checking tie between ${tiedTeams.map(t => t.team).join(', ')}`);
         
-        // Resolve the tie and get the new order
-        const resolvedGroup = resolveTeamGroup(tiedTeams, races);
-        
-        // Find positions of current and previous team in resolved group
-        const currentPos = resolvedGroup.findIndex(t => t.team === team.team);
-        const prevPos = resolvedGroup.findIndex(t => t.team === prevTeam.team);
-        
         // Check if teams are actually tied after all tiebreakers
-        const areTied = currentPos === prevPos || 
-                       (resolvedGroup.length > 2 && 
-                        getHeadToHeadRecord(team.team, prevTeam.team, races).avgPoints === 
-                        getHeadToHeadRecord(prevTeam.team, team.team, races).avgPoints);
+        const commonOpponentStats = getCommonOpponentStats(team.team, prevTeam.team, races);
+        const areTied = commonOpponentStats === 0;
         
         if (areTied) {
           team.place = prevTeam.place;
           samePlace++;
-          console.log(`${team.team} tied with ${prevTeam.team}, place ${team.place}`);
+          console.log(`${team.team} tied with ${prevTeam.team}, place: ${team.place}`);
         } else {
           currentPlace += samePlace;
           team.place = currentPlace;
           samePlace = 1;
-          console.log(`${team.team} separated from ${prevTeam.team}, place ${currentPlace}`);
+          console.log(`${team.team} separated from ${prevTeam.team}, place: ${currentPlace}`);
         }
       } else {
         currentPlace += samePlace;
         team.place = currentPlace;
         samePlace = 1;
-        console.log(`${team.team} different win%, place ${currentPlace}`);
+        console.log(`${team.team} different win percentage, place: ${currentPlace}`);
       }
     }
   });
