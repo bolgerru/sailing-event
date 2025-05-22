@@ -290,30 +290,65 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
 
         return (
           <div key={race.raceNumber} className="p-4 bg-white border rounded-md">
-            <h2 className="text-lg font-semibold mb-2">
-              Race {race.raceNumber}: {race.teamA} vs {race.teamB}
-            </h2>
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold">
+                Race {race.raceNumber}: {race.teamA} vs {race.teamB}
+              </h2>
+              <div className="text-sm text-gray-600 mt-1">
+                Boats: {race.boats?.[`set-1-team1`]} vs {race.boats?.[`set-1-team2`]}
+              </div>
+            </div>
+            
             {winner && (
-              <div className="mb-2 text-green-700 font-semibold">
+              <div className="mb-4 text-green-700 font-semibold">
                 Winner: {winner}
               </div>
             )}
-            <div className="grid grid-cols-3 gap-4 mb-2">
-              {[...Array(6)].map((_, i) => (
-                <div key={i}>
-                  <label className="block text-sm mb-1">Boat {i + 1}</label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={formData[race.raceNumber]?.[i] ?? ''}
-                    onChange={(e) =>
-                      handleChange(race.raceNumber, i, Number(e.target.value))
-                    }
-                    className="w-full border rounded px-2 py-1"
-                  />
+
+            <div className="grid grid-cols-2 gap-8 mb-4">
+              {/* Team A Boats */}
+              <div className="space-y-2">
+                <h3 className="font-medium text-blue-600">{race.teamA}</h3>
+                <div className="space-y-2 bg-blue-50 p-3 rounded-md">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <label className="text-sm w-16">Boat {i + 1}</label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={formData[race.raceNumber]?.[i] ?? ''}
+                        onChange={(e) =>
+                          handleChange(race.raceNumber, i, Number(e.target.value))
+                        }
+                        className="w-full border rounded px-2 py-1"
+                      />
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+
+              {/* Team B Boats */}
+              <div className="space-y-2">
+                <h3 className="font-medium text-red-600">{race.teamB}</h3>
+                <div className="space-y-2 bg-red-50 p-3 rounded-md">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <label className="text-sm w-16">Boat {i + 1}</label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={formData[race.raceNumber]?.[i + 3] ?? ''}
+                        onChange={(e) =>
+                          handleChange(race.raceNumber, i + 3, Number(e.target.value))
+                        }
+                        className="w-full border rounded px-2 py-1"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
+
             <div className="flex gap-4">
               <button
                 onClick={() => handleSubmit(race.raceNumber)}
