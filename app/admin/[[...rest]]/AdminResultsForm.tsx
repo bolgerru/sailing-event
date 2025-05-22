@@ -150,10 +150,35 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
   };
 
   const handleShowTeamInput = () => {
+    // Get existing teams
     const existingTeams = Array.from(
       new Set(races.flatMap((race) => [race.teamA, race.teamB]))
     ).join(', ');
     setTeamInput(existingTeams);
+
+    // Get all unique boat sets from races
+    const uniqueBoatSets = new Map<string, BoatSet>();
+    races.forEach((race, index) => {
+      if (race.boats?.teamA && race.boats?.teamB) {
+        const boatKey = `${race.boats.teamA}-${race.boats.teamB}`;
+        if (!uniqueBoatSets.has(boatKey)) {
+          uniqueBoatSets.set(boatKey, {
+            id: `set-${uniqueBoatSets.size + 1}`,
+            team1Color: race.boats.teamA,
+            team2Color: race.boats.teamB
+          });
+        }
+      }
+    });
+
+    // Convert Map to array and set boat sets
+    const loadedBoatSets = Array.from(uniqueBoatSets.values());
+    setBoatSets(loadedBoatSets.length > 0 ? loadedBoatSets : [{
+      id: 'set-1',
+      team1Color: '',
+      team2Color: ''
+    }]);
+
     setShowTeamInput(true);
   };
 
