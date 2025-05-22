@@ -117,6 +117,12 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     }]);
   };
 
+  const handleRemoveBoatSet = (index: number) => {
+    const newBoatSets = [...boatSets];
+    newBoatSets.splice(index, 1);
+    setBoatSets(newBoatSets);
+  };
+
   const handleBoatSetChange = (index: number, field: keyof BoatSet, value: string) => {
     const newBoatSets = [...boatSets];
     newBoatSets[index][field] = value;
@@ -184,7 +190,7 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
             <div className="mb-4">
               <label className="block text-sm mb-2">Boat Sets:</label>
               {boatSets.map((set, index) => (
-                <div key={set.id} className="flex gap-2 mb-2">
+                <div key={set.id} className="flex gap-2 mb-2 items-center">
                   <input
                     type="text"
                     value={set.team1Color}
@@ -200,6 +206,13 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
                     placeholder="Team 2 Color"
                     className="border rounded px-2 py-1"
                   />
+                  <button
+                    onClick={() => handleRemoveBoatSet(index)}
+                    className="text-red-600 hover:text-red-800 px-2"
+                    title="Remove boat set"
+                  >
+                    ×
+                  </button>
                 </div>
               ))}
               <button

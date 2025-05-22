@@ -4,69 +4,8 @@
     "teamA": "TCD 1",
     "teamB": "TCD 2",
     "boats": {
-      "teamA": "Trinity Red",
-      "teamB": "Trinity Black"
-    },
-    "result": [
-      1,
-      2,
-      4,
-      3,
-      5,
-      6
-    ]
-  },
-  {
-    "raceNumber": 2,
-    "teamA": "TCD 1",
-    "teamB": "UCD 1",
-    "boats": {
-      "teamA": "Trinity Red",
-      "teamB": "Trinity Black"
-    },
-    "result": [
-      2,
-      3,
-      4,
-      1,
-      5,
-      6
-    ]
-  },
-  {
-    "raceNumber": 3,
-    "teamA": "TCD 1",
-    "teamB": "QUB",
-    "boats": {
-      "teamA": "Trinity Red",
-      "teamB": "Trinity Black"
-    },
-    "result": [
-      1,
-      4,
-      5,
-      2,
-      3,
-      6
-    ]
-  },
-  {
-    "raceNumber": 4,
-    "teamA": "TCD 2",
-    "teamB": "UCD 1",
-    "boats": {
-      "teamA": "Trinity Red",
-      "teamB": "Trinity Black"
-    },
-    "result": null
-  },
-  {
-    "raceNumber": 5,
-    "teamA": "TCD 2",
-    "teamB": "QUB",
-    "boats": {
-      "teamA": "Trinity Red",
-      "teamB": "Trinity Black"
+      "teamA": "Trinity Black",
+      "teamB": "Trinity Red"
     },
     "result": [
       0,
@@ -78,13 +17,37 @@
     ]
   },
   {
-    "raceNumber": 6,
-    "teamA": "UCD 1",
-    "teamB": "QUB",
+    "raceNumber": 2,
+    "teamA": "TCD 1",
+    "teamB": "UCD",
     "boats": {
-      "teamA": "Trinity Red",
-      "teamB": "Trinity Black"
+      "teamA": "",
+      "teamB": ""
     },
-    "result": null
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "raceNumber": 3,
+    "teamA": "TCD 2",
+    "teamB": "UCD",
+    "boats": {
+      "teamA": "",
+      "teamB": ""
+    },
+    "result": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
   }
 ]
