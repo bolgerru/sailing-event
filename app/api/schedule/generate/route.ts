@@ -74,15 +74,23 @@ export async function POST(req: NextRequest) {
       for (const r of lastTwoSameSet) {
         const raceColors = [r.boats.teamA, r.boats.teamB];
         const boatSetColors = [boatSet.team1Color, boatSet.team2Color];
+
         const sameBoatSet =
           raceColors.includes(boatSetColors[0]) &&
           raceColors.includes(boatSetColors[1]);
+
         const teamInRace = r.teamA === team || r.teamB === team;
+
         if (!(teamInRace && sameBoatSet)) {
           return false;
         }
       }
+
       return true;
+    }
+
+    function totalRacesPlayed(team: string) {
+      return races.filter(r => r.teamA === team || r.teamB === team).length;
     }
 
     let remainingPairings = [...allPairings];
@@ -91,7 +99,8 @@ export async function POST(req: NextRequest) {
       const currentBoatSet = boatSets[races.length % boatSets.length];
       const currentRaceNumber = raceNumber;
 
-      // Filter 1: exclude teams that appeared in last 2 races but NOT using current boat set
+      // --- FILTER 1: exclude teams that appeared in last 2 races but NOT using current boat set ---
+
       const lastTwoRaces = races.slice(-2);
       const recentOtherBoatSetRaces = lastTwoRaces.filter(
         (r) =>
@@ -119,7 +128,8 @@ export async function POST(req: NextRequest) {
         filter1Candidates = [...remainingPairings];
       }
 
-      // Filter 3: Prefer pairings where at least one team appeared in last race of this boat set
+      // --- FILTER 3: Prefer pairings where at least one team appeared in last race of this boat set ---
+
       const lastRaceOfBoatSet = [...races].reverse().find(
         (r) => r.boats.teamA === currentBoatSet.team1Color && r.boats.teamB === currentBoatSet.team2Color
       );
@@ -138,7 +148,8 @@ export async function POST(req: NextRequest) {
 
       const filter3Candidates = candidatesWithLastRaceTeam.length > 0 ? candidatesWithLastRaceTeam : filter1Candidates;
 
-      // Filter 2: Exclude pairings where a team appeared in BOTH last 2 races of this boat set
+      // --- FILTER 2: Prefer pairings where neither team appeared in BOTH last 2 races of this boat set ---
+
       const excludedByFilter2 = filter3Candidates.filter(
         ([teamA, teamB]) =>
           appearedInBothLast2RacesOfSet(teamA, currentBoatSet) ||
@@ -153,26 +164,43 @@ export async function POST(req: NextRequest) {
 
       const finalCandidates = notInBothLast2.length > 0 ? notInBothLast2 : filter3Candidates;
 
-      // Select best candidate with tie-breaker on fewer appearances in last 2 races of current boat set
-      let selectedPairing = finalCandidates[0];
+      // --- Select best candidate with tie-breaker on fewer appearances in last 2 races of current boat set ---
+
+      let bestCount = Infinity;
+      let bestCandidates: [string, string][] = [];
+
       for (const pairing of finalCandidates) {
         const [teamA, teamB] = pairing;
 
         const teamACount = countTeamInLastNRacesOfSet(teamA, currentBoatSet, 2);
         const teamBCount = countTeamInLastNRacesOfSet(teamB, currentBoatSet, 2);
 
-        const selectedCount =
-          countTeamInLastNRacesOfSet(selectedPairing[0], currentBoatSet, 2) +
-          countTeamInLastNRacesOfSet(selectedPairing[1], currentBoatSet, 2);
+        const totalCount = teamACount + teamBCount;
 
-        const currentCount = teamACount + teamBCount;
+        if (totalCount < bestCount) {
+          bestCount = totalCount;
+          bestCandidates = [pairing];
+        } else if (totalCount === bestCount) {
+          bestCandidates.push(pairing);
+        }
+      }
 
-        if (currentCount < selectedCount) {
-          selectedPairing = pairing;
+      // Tie-breaker: among bestCandidates, pick pairing with lowest sum of total races played by both teams
+      let selectedPairing = bestCandidates[0];
+      if (bestCandidates.length > 1) {
+        let lowestSum = Infinity;
+        for (const pairing of bestCandidates) {
+          const sumRaces =
+            totalRacesPlayed(pairing[0]) + totalRacesPlayed(pairing[1]);
+          if (sumRaces < lowestSum) {
+            lowestSum = sumRaces;
+            selectedPairing = pairing;
+          }
         }
       }
 
       // --- Consistent color assignment for consecutive races with the same boat set ---
+
       const lastRace = [...races].reverse().find(
         (r) =>
           r.boats.teamA === currentBoatSet.team1Color &&
@@ -190,7 +218,7 @@ export async function POST(req: NextRequest) {
 
         if (teamAPosition && teamBPosition) {
           if (teamAPosition === 'A' && teamBPosition === 'B') {
-            // positions are correct, no change
+            // positions correct, no change
           } else if (teamAPosition === 'B' && teamBPosition === 'A') {
             [teamA, teamB] = [teamB, teamA];
           }
@@ -202,7 +230,6 @@ export async function POST(req: NextRequest) {
           if (teamBPosition === 'A') {
             [teamA, teamB] = [teamB, teamA];
           }
-          // else teamBPosition === 'B', no swap needed
         }
       }
 
@@ -227,20 +254,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Save schedule to JSON file
-    const dataDir = path.join(process.cwd(), 'data');
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir);
-    }
-    const scheduleFile = path.join(dataDir, 'schedule.json');
-    fs.writeFileSync(scheduleFile, JSON.stringify(races, null, 2));
+    // Write JSON result to file (optional, adjust path if needed)
+    const outputPath = path.join(process.cwd(), 'data', 'schedule.json');
+    fs.writeFileSync(outputPath, JSON.stringify(races, null, 2));
 
     return NextResponse.json({ schedule: races });
   } catch (error) {
     console.error('Error generating schedule:', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
