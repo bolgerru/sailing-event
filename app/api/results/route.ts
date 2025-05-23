@@ -141,6 +141,25 @@ function getCommonOpponentStats(teamA: string, teamB: string, races: Race[]): nu
   return matches > 0 ? teamATotal / matches - teamBTotal / matches : 0;
 }
 
+// Add helper to find common opponents across multiple teams
+function findCommonOpponents(teams: string[], races: Race[]): string[] {
+  // Get opponents for each team
+  const teamOpponents = teams.map(team => {
+    const completedRaces = races.filter(race => 
+      isCompletedRace(race) && (race.teamA === team || race.teamB === team)
+    );
+    return new Set(
+      completedRaces.map(race => race.teamA === team ? race.teamB : race.teamA)
+    );
+  });
+
+  // Find opponents common to all teams
+  return Array.from(teamOpponents[0]).filter(opponent => 
+    !teams.includes(opponent) && // Exclude tied teams
+    teamOpponents.every(opponentSet => opponentSet.has(opponent))
+  );
+}
+
 // Add debug logging for average points
 function resolveTeamGroup(teams: TeamStats[], races: Race[]): TeamStats[] {
   console.log(`\nResolving tie for teams: ${teams.map(t => t.team).join(', ')}`);
@@ -227,8 +246,42 @@ function resolveTeamGroup(teams: TeamStats[], races: Race[]): TeamStats[] {
     }
   }
 
-  // For 3+ team ties or if 2 teams are still tied, use common opponents
-  return teams.sort((a, b) => getCommonOpponentStats(a.team, b.team, races));
+  // For 3+ team ties or if 2 teams are still tied, check common opponents
+  const teamNames = teams.map(t => t.team);
+  const commonOpponents = findCommonOpponents(teamNames, races);
+  console.log('Common opponents across all tied teams:', commonOpponents);
+
+  if (commonOpponents.length === 0) {
+    console.log('No common opponents across all tied teams, keeping original order');
+    return teams;
+  }
+
+  // Calculate average points against common opponents for each team
+  const teamScores = teams.map(team => {
+    let totalPoints = 0;
+    let matches = 0;
+
+    commonOpponents.forEach(opponent => {
+      const stats = getHeadToHeadRecord(team.team, opponent, races);
+      if (stats.avgPoints !== Infinity) {
+        totalPoints += stats.avgPoints;
+        matches++;
+      }
+    });
+
+    return {
+      team: team,
+      avgPoints: matches > 0 ? totalPoints / matches : Infinity
+    };
+  });
+
+  console.log('Team scores vs common opponents:', 
+    teamScores.map(s => `${s.team.team}: ${s.avgPoints}`).join(', '));
+
+  // Sort by average points against common opponents
+  return teamScores
+    .sort((a, b) => a.avgPoints - b.avgPoints)
+    .map(s => s.team);
 }
 
 // Modify the race processing in computeLeaderboard
@@ -313,19 +366,30 @@ function computeLeaderboard(races: Race[]): TeamStats[] {
         const tiedTeams = sortedTeams.filter(t => t.winPercentage === team.winPercentage);
         console.log(`Checking tie between ${tiedTeams.map(t => t.team).join(', ')}`);
         
-        // Check if teams are actually tied after all tiebreakers
-        const commonOpponentStats = getCommonOpponentStats(team.team, prevTeam.team, races);
-        const areTied = commonOpponentStats === 0;
-        
-        if (areTied) {
+        // Get common opponents across ALL tied teams
+        const commonOpponents = findCommonOpponents(tiedTeams.map(t => t.team), races);
+        console.log(`Common opponents across ALL tied teams: ${commonOpponents.join(', ')}`);
+
+        // Only break tie if there are common opponents across all tied teams
+        if (commonOpponents.length > 0) {
+          const commonOpponentStats = getCommonOpponentStats(team.team, prevTeam.team, races);
+          const areTied = commonOpponentStats === 0;
+          
+          if (areTied) {
+            team.place = prevTeam.place;
+            samePlace++;
+            console.log(`${team.team} tied with ${prevTeam.team}, place: ${team.place}`);
+          } else {
+            currentPlace += samePlace;
+            team.place = currentPlace;
+            samePlace = 1;
+            console.log(`${team.team} separated from ${prevTeam.team}, place: ${currentPlace}`);
+          }
+        } else {
+          // Keep teams tied if no common opponents across ALL tied teams
           team.place = prevTeam.place;
           samePlace++;
-          console.log(`${team.team} tied with ${prevTeam.team}, place: ${team.place}`);
-        } else {
-          currentPlace += samePlace;
-          team.place = currentPlace;
-          samePlace = 1;
-          console.log(`${team.team} separated from ${prevTeam.team}, place: ${currentPlace}`);
+          console.log(`${team.team} tied with ${prevTeam.team} (no common opponents across all teams)`);
         }
       } else {
         currentPlace += samePlace;
