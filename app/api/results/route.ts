@@ -349,11 +349,11 @@ function computeLeaderboard(races: Race[]): TeamStats[] {
     .sort((a, b) => b[0] - a[0])
     .flatMap(([_, group]) => resolveTeamGroup(group, races));
 
-  // Replace the place assignment section in computeLeaderboard:
-
-  // Assign places based on final position after tie-breaking
+  // Initialize place tracking variables
   let currentPlace = 1;
   let samePlace = 1;
+
+  // Update the team sorting logic in the place assignment section
   sortedTeams.forEach((team, index) => {
     if (index === 0) {
       team.place = currentPlace;
@@ -370,26 +370,54 @@ function computeLeaderboard(races: Race[]): TeamStats[] {
         const commonOpponents = findCommonOpponents(tiedTeams.map(t => t.team), races);
         console.log(`Common opponents across ALL tied teams: ${commonOpponents.join(', ')}`);
 
-        // Only break tie if there are common opponents across all tied teams
         if (commonOpponents.length > 0) {
-          const commonOpponentStats = getCommonOpponentStats(team.team, prevTeam.team, races);
-          const areTied = commonOpponentStats === 0;
-          
-          if (areTied) {
-            team.place = prevTeam.place;
-            samePlace++;
-            console.log(`${team.team} tied with ${prevTeam.team}, place: ${team.place}`);
-          } else {
-            currentPlace += samePlace;
-            team.place = currentPlace;
-            samePlace = 1;
-            console.log(`${team.team} separated from ${prevTeam.team}, place: ${currentPlace}`);
-          }
+          // Calculate scores for all tied teams at once
+          const teamScores = tiedTeams.map(tiedTeam => {
+            let totalPoints = 0;
+            let matches = 0;
+
+            commonOpponents.forEach(opponent => {
+              const stats = getHeadToHeadRecord(tiedTeam.team, opponent, races);
+              if (stats.avgPoints !== Infinity) {
+                totalPoints += stats.avgPoints;
+                matches++;
+              }
+            });
+
+            return {
+              team: tiedTeam,
+              avgPoints: matches > 0 ? totalPoints / matches : Infinity
+            };
+          });
+
+          console.log('Team scores vs common opponents:', 
+            teamScores.map(s => `${s.team.team}: ${s.avgPoints}`).join(', '));
+
+          // Sort teams by their average points (lower is better)
+          const sortedByCommonOpp = teamScores.sort((a, b) => a.avgPoints - b.avgPoints);
+
+          // Assign places based on sorted order
+          sortedByCommonOpp.forEach((score, i) => {
+            if (i === 0) {
+              score.team.place = currentPlace;
+            } else {
+              const prevScore = sortedByCommonOpp[i - 1];
+              if (score.avgPoints === prevScore.avgPoints) {
+                score.team.place = prevScore.team.place;
+                samePlace++;
+              } else {
+                currentPlace += samePlace;
+                score.team.place = currentPlace;
+                samePlace = 1;
+              }
+            }
+            console.log(`${score.team.team} placed ${score.team.place} (avg points: ${score.avgPoints})`);
+          });
         } else {
-          // Keep teams tied if no common opponents across ALL tied teams
+          // Keep teams tied if no common opponents
           team.place = prevTeam.place;
           samePlace++;
-          console.log(`${team.team} tied with ${prevTeam.team} (no common opponents across all teams)`);
+          console.log(`${team.team} tied with ${prevTeam.team} (no common opponents)`);
         }
       } else {
         currentPlace += samePlace;
