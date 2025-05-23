@@ -9,9 +9,9 @@ interface BoatSet {
   team2Color: string;
 }
 
-// Update TeamBoatState to track colors per boat set
+// Add type for tracking team colors
 interface TeamBoatState {
-  lastColor: { [boatSetId: string]: string };
+  lastColor?: string;
   lastRace: number;
 }
 
@@ -33,13 +33,27 @@ function filterPreviousRaces(
   if (previousRaces.length < 3) return pairings;
   
   const lastThreeRaces = previousRaces.slice(-3);
+  
   return pairings.filter(([teamA, teamB]) => {
-    let teamsInLastThree = 0;
-    for (const race of lastThreeRaces) {
-      if (race.includes(teamA)) teamsInLastThree++;
-      if (race.includes(teamB)) teamsInLastThree++;
-    }
-    return teamsInLastThree < 3;
+    // Check each team's race pattern in last 3 races
+    const teamAPattern = lastThreeRaces.map(race => race.includes(teamA));
+    const teamBPattern = lastThreeRaces.map(race => race.includes(teamB));
+    
+    // Count consecutive races and rest periods
+    const needsMoreRest = (pattern: boolean[]) => {
+      // If team raced in 2 of last 3 races with only 1 race rest, filter out
+      if (pattern[0] && pattern[2]) return true;
+      // If team raced in all 3 races
+      if (pattern.filter(x => x).length === 3) return true;
+      return false;
+    };
+
+    console.log(`Checking rest for possible race ${teamA} vs ${teamB}:`, {
+      [`${teamA} pattern`]: teamAPattern,
+      [`${teamB} pattern`]: teamBPattern
+    });
+
+    return !needsMoreRest(teamAPattern) && !needsMoreRest(teamBPattern);
   });
 }
 
@@ -64,58 +78,76 @@ function generateGoodOrder(teams: string[]): [string, string][] {
   const allRaceCombos = createTeamPairings(teams);
   const finalListOfRaces: [string, string][] = [];
   
-  console.log('\nInitial all possible pairings:', allRaceCombos);
+  console.log('\n=== Initial Setup ===');
+  console.log('All possible pairings:', allRaceCombos.map(r => r.join(' vs ')));
   
   // Add first race
   finalListOfRaces.push(allRaceCombos[0]);
-  console.log(`\nAdding first race: ${allRaceCombos[0].join(' vs ')}`);
+  console.log('\n=== First Race ===');
+  console.log(`Selected: ${allRaceCombos[0].join(' vs ')}`);
   allRaceCombos.splice(0, 1);
 
   for (let i = 0; i < allRaceCombos.length; i++) {
-    console.log(`\n--- Finding race #${i + 2} ---`);
-    console.log(`Last race was: ${finalListOfRaces[i].join(' vs ')}`);
+    console.log('\n================================================');
+    console.log(`=== Finding Race #${i + 2} ===`);
+    console.log('================================================');
+    console.log(`Previous race: ${finalListOfRaces[i].join(' vs ')}`);
     
     // Get possible next races that share a team with current race
     const possibleNextRaces1 = allRaceCombos.filter(race => 
       race.some(team => finalListOfRaces[i].includes(team))
     );
-    console.log('Races sharing a team with last race:', 
-      possibleNextRaces1.map(r => r.join(' vs ')));
+    console.log('\n1. Initial Filter - Races sharing a team with last race:');
+    console.log(possibleNextRaces1.map(r => r.join(' vs ')));
     
-    // Apply filters
+    // Apply 3-race sequence filter
     const possibleNextRaces = filterPreviousRaces(possibleNextRaces1, finalListOfRaces);
-    console.log('After filtering 3-race sequences:', 
-      possibleNextRaces.map(r => r.join(' vs ')));
+    console.log('\n2. Three-Race Filter - Remove teams racing 3 times in a row:');
+    console.log('Races remaining:', possibleNextRaces.map(r => r.join(' vs ')));
     
+    // Apply 2-race sequence filter
     const optimalNextRaces = filterPreviousRacesFurther(possibleNextRaces, finalListOfRaces);
-    console.log('After filtering 2-race sequences:', 
-      optimalNextRaces.map(r => r.join(' vs ')));
+    console.log('\n3. Two-Race Filter - Remove teams racing twice in a row:');
+    console.log('Optimal races:', optimalNextRaces.map(r => r.join(' vs ')));
     
     let selectedRace: [string, string];
     
+    // Race selection logic with detailed logging
+    console.log('\n4. Race Selection:');
     if (optimalNextRaces.length > 0) {
       selectedRace = optimalNextRaces[Math.floor(Math.random() * optimalNextRaces.length)];
-      console.log('Selected from optimal races:', selectedRace.join(' vs '));
+      console.log('✓ Selected from optimal races (no consecutive races)');
     } else if (possibleNextRaces.length > 0) {
       selectedRace = possibleNextRaces[Math.floor(Math.random() * possibleNextRaces.length)];
-      console.log('No optimal races, selected from possible races:', selectedRace.join(' vs '));
+      console.log('⚠ No optimal races available, selected from races without 3 consecutive');
     } else if (allRaceCombos.length > 0) {
       selectedRace = allRaceCombos[Math.floor(Math.random() * allRaceCombos.length)];
-      console.log('No connected races available, selected random race:', selectedRace.join(' vs '));
+      console.log('⚠ No connected races available, selected random remaining race');
     } else {
-      console.log('No more races available, breaking');
+      console.log('❌ No more races available, breaking');
       break;
     }
     
+    console.log(`Selected: ${selectedRace.join(' vs ')}`);
+    
+    // Update race lists
     finalListOfRaces.push(selectedRace);
     const index = allRaceCombos.findIndex(
       race => race[0] === selectedRace[0] && race[1] === selectedRace[1]
     );
     allRaceCombos.splice(index, 1);
+    console.log('\n5. Schedule Update:');
     console.log('Remaining unscheduled pairings:', allRaceCombos.length);
+    console.log('Current schedule:', finalListOfRaces.map((r, idx) => 
+      `Race ${idx + 1}: ${r.join(' vs ')}`
+    ));
   }
   
-  console.log('\nFinal schedule:', finalListOfRaces.map(r => r.join(' vs ')));
+  console.log('\n=== Final Schedule ===');
+  console.log(finalListOfRaces.map((r, idx) => 
+    `Race ${idx + 1}: ${r.join(' vs ')}`
+  ));
+  
   return finalListOfRaces;
 }
 
@@ -149,56 +181,40 @@ export async function POST(req: NextRequest) {
       const teamAState = teamBoatStates.get(teamA);
       const teamBState = teamBoatStates.get(teamB);
       
-      // Check if teams raced in last race using this boat set
-      const lastBoatSetIndex = Math.floor((index - 1) / boatSets.length) * boatSets.length + (index - 1) % boatSets.length;
-      const isTeamAConsecutiveInSet = teamAState && lastBoatSetIndex >= 0 && teamAState.lastRace === lastBoatSetIndex;
-      const isTeamBConsecutiveInSet = teamBState && lastBoatSetIndex >= 0 && teamBState.lastRace === lastBoatSetIndex;
+      // Check if teams raced in last race
+      const isTeamAConsecutive = teamAState && (index - teamAState.lastRace === 1);
+      const isTeamBConsecutive = teamBState && (index - teamBState.lastRace === 1);
 
-      console.log(`Race ${index + 1} using boat set ${boatSet.id}:`, {
-        teamA: `${teamA} (prev color: ${teamAState?.lastColor[boatSet.id]})`,
-        teamB: `${teamB} (prev color: ${teamBState?.lastColor[boatSet.id]})`
-      });
+      // Always assign consistent colors based on position
+      const teamAColor = boatSet.team1Color;  // TeamA always gets team1Color
+      const teamBColor = boatSet.team2Color;  // TeamB always gets team2Color
 
-      // Determine positions based on previous colors in this boat set
-      let finalTeamA = teamA;
-      let finalTeamB = teamB;
-
-      if (isTeamAConsecutiveInSet && teamAState?.lastColor[boatSet.id] === boatSet.team2Color) {
-        // Swap positions if teamA was in team2Color
-        finalTeamA = teamB;
-        finalTeamB = teamA;
-        console.log(`Swapping positions to keep ${teamA} in ${teamAState.lastColor[boatSet.id]}`);
-      } else if (isTeamBConsecutiveInSet && teamBState?.lastColor[boatSet.id] === boatSet.team1Color) {
-        // Swap positions if teamB was in team1Color
-        finalTeamA = teamB;
-        finalTeamB = teamA;
-        console.log(`Swapping positions to keep ${teamB} in ${teamBState.lastColor[boatSet.id]}`);
+      // If teams are racing consecutively, swap their positions if needed
+      if (isTeamAConsecutive && teamAState?.lastColor === boatSet.team2Color) {
+        // Swap positions to maintain color
+        return {
+          raceNumber: index + 1,
+          teamA: teamB,
+          teamB: teamA,
+          boats: {
+            teamA: teamAColor,
+            teamB: teamBColor
+          },
+          result: Array(6).fill(0)
+        };
       }
 
-      // Update states with color per boat set
-      teamBoatStates.set(finalTeamA, {
-        lastColor: {
-          ...teamAState?.lastColor,
-          [boatSet.id]: boatSet.team1Color
-        },
-        lastRace: index
-      });
-      
-      teamBoatStates.set(finalTeamB, {
-        lastColor: {
-          ...teamBState?.lastColor,
-          [boatSet.id]: boatSet.team2Color
-        },
-        lastRace: index
-      });
+      // Update states
+      teamBoatStates.set(teamA, { lastColor: teamAColor, lastRace: index });
+      teamBoatStates.set(teamB, { lastColor: teamBColor, lastRace: index });
 
       return {
         raceNumber: index + 1,
-        teamA: finalTeamA,
-        teamB: finalTeamB,
+        teamA,
+        teamB,
         boats: {
-          teamA: boatSet.team1Color,
-          teamB: boatSet.team2Color
+          teamA: teamAColor,
+          teamB: teamBColor
         },
         result: Array(6).fill(0)
       };
