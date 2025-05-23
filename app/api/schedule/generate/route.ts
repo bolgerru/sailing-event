@@ -26,7 +26,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generate all possible unique pairs (no team vs itself)
     const allPairings: [string, string][] = [];
     for (let i = 0; i < teams.length; i++) {
       for (let j = i + 1; j < teams.length; j++) {
@@ -49,7 +48,6 @@ export async function POST(req: NextRequest) {
 
     let raceNumber = 1;
 
-    // Helper: count how many times team appeared in last N races of the same boat set
     function countTeamInLastNRacesOfSet(team: string, boatSet: BoatSet, n: number) {
       const recentRaces = races.slice(-n);
       return recentRaces.filter(
@@ -60,28 +58,40 @@ export async function POST(req: NextRequest) {
       ).length;
     }
 
-    // Helper: check if team appeared in both last 2 races of boat set
     function appearedInBothLast2RacesOfSet(team: string, boatSet: BoatSet) {
-      const lastTwo = races.slice(-2);
-      if (lastTwo.length < 2) return false;
-      return (
-        lastTwo.every(
-          (r) =>
-            (r.teamA === team || r.teamB === team) &&
-            r.boats.teamA === boatSet.team1Color &&
-            r.boats.teamB === boatSet.team2Color
-        )
+      const racesOfSameSet = races.filter(
+        (r) =>
+          (r.boats.teamA === boatSet.team1Color && r.boats.teamB === boatSet.team2Color) ||
+          (r.boats.teamA === boatSet.team2Color && r.boats.teamB === boatSet.team1Color)
       );
+
+      const lastTwoSameSet = racesOfSameSet.slice(-2);
+
+      if (lastTwoSameSet.length < 2) {
+        return false;
+      }
+
+      for (const r of lastTwoSameSet) {
+        const raceColors = [r.boats.teamA, r.boats.teamB];
+        const boatSetColors = [boatSet.team1Color, boatSet.team2Color];
+        const sameBoatSet =
+          raceColors.includes(boatSetColors[0]) &&
+          raceColors.includes(boatSetColors[1]);
+        const teamInRace = r.teamA === team || r.teamB === team;
+        if (!(teamInRace && sameBoatSet)) {
+          return false;
+        }
+      }
+      return true;
     }
 
-    // MAIN LOOP
     let remainingPairings = [...allPairings];
 
     while (remainingPairings.length > 0) {
       const currentBoatSet = boatSets[races.length % boatSets.length];
+      const currentRaceNumber = raceNumber;
 
-      // --- FILTER 1: exclude teams that appeared in last 2 races but NOT using current boat set ---
-
+      // Filter 1: exclude teams that appeared in last 2 races but NOT using current boat set
       const lastTwoRaces = races.slice(-2);
       const recentOtherBoatSetRaces = lastTwoRaces.filter(
         (r) =>
@@ -95,40 +105,26 @@ export async function POST(req: NextRequest) {
         recentlyRacedTeams.add(r.teamB);
       });
 
-      // Before filter 1:
-      console.log(`\n[Filter 1] Before excluding teams from last 2 races in other boat sets:`);
-      console.log(`- Remaining pairings count: ${remainingPairings.length}`);
-      console.log(`- Remaining pairings: ${remainingPairings.map(p => `${p[0]} vs ${p[1]}`).join(', ')}`);
-
-      // Pairings excluded by filter 1
       const excludedByFilter1 = remainingPairings.filter(
         ([teamA, teamB]) =>
           recentlyRacedTeams.has(teamA) || recentlyRacedTeams.has(teamB)
       );
-      // Pairings remaining after filter 1
-      let candidates = remainingPairings.filter(
+      const candidates = remainingPairings.filter(
         ([teamA, teamB]) =>
           !recentlyRacedTeams.has(teamA) && !recentlyRacedTeams.has(teamB)
       );
 
-      console.log(`- Teams excluded due to recent races in other boat sets (last 2 races): ${Array.from(recentlyRacedTeams).join(', ') || '(none)'}`);
-      console.log(`- Pairings excluded by Filter 1 (${excludedByFilter1.length}): ${excludedByFilter1.map(p => `${p[0]} vs ${p[1]}`).join(', ') || '(none)'}`);
-      console.log(`- Pairings remaining after Filter 1 (${candidates.length}): ${candidates.map(p => `${p[0]} vs ${p[1]}`).join(', ') || '(none)'}`);
-
-      if (candidates.length === 0) {
-        console.log(
-          '- No pairings left after Filter 1, reverting to all remaining pairings.'
-        );
-        candidates = [...remainingPairings];
+      let filter1Candidates = candidates;
+      if (filter1Candidates.length === 0) {
+        filter1Candidates = [...remainingPairings];
       }
 
-      // --- FILTER 3 (moved up): Prefer pairings where at least one team appeared in the last race of this boat set ---
-
+      // Filter 3: Prefer pairings where at least one team appeared in last race of this boat set
       const lastRaceOfBoatSet = [...races].reverse().find(
         (r) => r.boats.teamA === currentBoatSet.team1Color && r.boats.teamB === currentBoatSet.team2Color
       );
 
-      const candidatesWithLastRaceTeam = candidates.filter(
+      const candidatesWithLastRaceTeam = filter1Candidates.filter(
         ([teamA, teamB]) => {
           if (!lastRaceOfBoatSet) return false;
           return (
@@ -140,107 +136,111 @@ export async function POST(req: NextRequest) {
         }
       );
 
-      const excludedByFilter3 = candidates.filter(
-        ([teamA, teamB]) => !candidatesWithLastRaceTeam.includes([teamA, teamB])
-      );
+      const filter3Candidates = candidatesWithLastRaceTeam.length > 0 ? candidatesWithLastRaceTeam : filter1Candidates;
 
-      console.log(`\n[Filter 3] Prefer pairings where at least one team was in last race of this boat set:`);
-      console.log(`- Last race of boat set: ${lastRaceOfBoatSet ? `${lastRaceOfBoatSet.teamA} vs ${lastRaceOfBoatSet.teamB}` : '(none)'}`);
-      console.log(`- Pairings included by Filter 3 (${candidatesWithLastRaceTeam.length}): ${candidatesWithLastRaceTeam.map(p => `${p[0]} vs ${p[1]}`).join(', ') || '(none)'}`);
-      console.log(`- Pairings excluded by Filter 3 (${candidates.length - candidatesWithLastRaceTeam.length}): ${candidates.filter(p => !candidatesWithLastRaceTeam.includes(p)).map(p => `${p[0]} vs ${p[1]}`).join(', ') || '(none)'}`);
-
-      // If no candidates after filter 3, fallback to candidates
-      const filteredCandidates = candidatesWithLastRaceTeam.length > 0 ? candidatesWithLastRaceTeam : candidates;
-
-      // --- FILTER 2 (moved down): Prefer pairings where neither team appeared in BOTH last 2 races of this boat set ---
-
-      const excludedByFilter2 = filteredCandidates.filter(
+      // Filter 2: Exclude pairings where a team appeared in BOTH last 2 races of this boat set
+      const excludedByFilter2 = filter3Candidates.filter(
         ([teamA, teamB]) =>
           appearedInBothLast2RacesOfSet(teamA, currentBoatSet) ||
           appearedInBothLast2RacesOfSet(teamB, currentBoatSet)
       );
 
-      const notInBothLast2 = filteredCandidates.filter(
+      const notInBothLast2 = filter3Candidates.filter(
         ([teamA, teamB]) =>
           !appearedInBothLast2RacesOfSet(teamA, currentBoatSet) &&
           !appearedInBothLast2RacesOfSet(teamB, currentBoatSet)
       );
 
-      console.log(`\n[Filter 2] Filtering out pairings where a team appeared in both last 2 races of current boat set:`);
-      console.log(`- Pairings excluded by Filter 2 (${excludedByFilter2.length}): ${excludedByFilter2.map(p => `${p[0]} vs ${p[1]}`).join(', ') || '(none)'}`);
-      console.log(`- Pairings remaining after Filter 2 (${notInBothLast2.length}): ${notInBothLast2.map(p => `${p[0]} vs ${p[1]}`).join(', ') || '(none)'}`);
+      const finalCandidates = notInBothLast2.length > 0 ? notInBothLast2 : filter3Candidates;
 
-      const finalCandidates = notInBothLast2.length > 0 ? notInBothLast2 : filteredCandidates;
-
-      // Select first candidate
+      // Select best candidate with tie-breaker on fewer appearances in last 2 races of current boat set
       let selectedPairing = finalCandidates[0];
-
-      // Log detailed info about selection
       for (const pairing of finalCandidates) {
         const [teamA, teamB] = pairing;
-        const teamAInLast2 = countTeamInLastNRacesOfSet(teamA, currentBoatSet, 2);
-        const teamBInLast2 = countTeamInLastNRacesOfSet(teamB, currentBoatSet, 2);
-        const teamAInBothLast2 = appearedInBothLast2RacesOfSet(teamA, currentBoatSet);
-        const teamBInBothLast2 = appearedInBothLast2RacesOfSet(teamB, currentBoatSet);
-        const appearedInLastRace =
-          lastRaceOfBoatSet &&
-          (lastRaceOfBoatSet.teamA === teamA ||
-            lastRaceOfBoatSet.teamB === teamA ||
-            lastRaceOfBoatSet.teamA === teamB ||
-            lastRaceOfBoatSet.teamB === teamB);
 
-        console.log(`\nChecking pairing: ${teamA} vs ${teamB}`);
-        console.log(` - Team A appeared in last 2 races of this boat set: ${teamAInLast2}`);
-        console.log(` - Team B appeared in last 2 races of this boat set: ${teamBInLast2}`);
-        console.log(` - Team A in both last 2 races? ${teamAInBothLast2}`);
-        console.log(` - Team B in both last 2 races? ${teamBInBothLast2}`);
-        console.log(` - Appeared in last race? ${appearedInLastRace}`);
-        if (pairing === selectedPairing) {
-          console.log(`--> Selected pairing: ${teamA} vs ${teamB} on boat set ${currentBoatSet.team1Color} vs ${currentBoatSet.team2Color}`);
+        const teamACount = countTeamInLastNRacesOfSet(teamA, currentBoatSet, 2);
+        const teamBCount = countTeamInLastNRacesOfSet(teamB, currentBoatSet, 2);
+
+        const selectedCount =
+          countTeamInLastNRacesOfSet(selectedPairing[0], currentBoatSet, 2) +
+          countTeamInLastNRacesOfSet(selectedPairing[1], currentBoatSet, 2);
+
+        const currentCount = teamACount + teamBCount;
+
+        if (currentCount < selectedCount) {
+          selectedPairing = pairing;
         }
       }
 
-      if (!selectedPairing) {
-        selectedPairing = remainingPairings[0];
-        console.log(`No optimal pairing found, falling back to: ${selectedPairing[0]} vs ${selectedPairing[1]}`);
+      // --- Consistent color assignment for consecutive races with the same boat set ---
+      const lastRace = [...races].reverse().find(
+        (r) =>
+          r.boats.teamA === currentBoatSet.team1Color &&
+          r.boats.teamB === currentBoatSet.team2Color
+      );
+
+      let teamA = selectedPairing[0];
+      let teamB = selectedPairing[1];
+
+      if (lastRace) {
+        const { teamA: lastTeamA, teamB: lastTeamB } = lastRace;
+
+        const teamAPosition = lastTeamA === teamA ? 'A' : lastTeamB === teamA ? 'B' : null;
+        const teamBPosition = lastTeamA === teamB ? 'A' : lastTeamB === teamB ? 'B' : null;
+
+        if (teamAPosition && teamBPosition) {
+          if (teamAPosition === 'A' && teamBPosition === 'B') {
+            // positions are correct, no change
+          } else if (teamAPosition === 'B' && teamBPosition === 'A') {
+            [teamA, teamB] = [teamB, teamA];
+          }
+        } else if (teamAPosition) {
+          if (teamAPosition === 'B') {
+            [teamA, teamB] = [teamB, teamA];
+          }
+        } else if (teamBPosition) {
+          if (teamBPosition === 'A') {
+            [teamA, teamB] = [teamB, teamA];
+          }
+          // else teamBPosition === 'B', no swap needed
+        }
       }
 
-            // Add race to schedule
+      // Add race with consistent assignment
       races.push({
         raceNumber: raceNumber++,
-        teamA: selectedPairing[0],
-        teamB: selectedPairing[1],
+        teamA,
+        teamB,
         boats: {
           teamA: currentBoatSet.team1Color,
           teamB: currentBoatSet.team2Color,
         },
-        result: [],  // <-- initialize as an empty array
       });
 
-      // Remove selected pairing from remaining pairings
+      // Remove selected pairing (order-insensitive)
       remainingPairings = remainingPairings.filter(
-        (p) =>
+        ([a, b]) =>
           !(
-            (p[0] === selectedPairing[0] && p[1] === selectedPairing[1]) ||
-            (p[0] === selectedPairing[1] && p[1] === selectedPairing[0])
+            (a === selectedPairing[0] && b === selectedPairing[1]) ||
+            (a === selectedPairing[1] && b === selectedPairing[0])
           )
       );
     }
 
-    // Save schedule to JSON file (optional)
-    const filePath = path.join(process.cwd(), 'data', 'schedule.json');
-    fs.writeFileSync(filePath, JSON.stringify(races, null, 2));
+    // Save schedule to JSON file
+    const dataDir = path.join(process.cwd(), 'data');
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir);
+    }
+    const scheduleFile = path.join(dataDir, 'schedule.json');
+    fs.writeFileSync(scheduleFile, JSON.stringify(races, null, 2));
 
-    return NextResponse.json({ races });
-  } catch (error: unknown) {
-  // Narrow error to an object with a message property
-  const message =
-    error && typeof error === 'object' && 'message' in error
-      ? (error as { message: string }).message
-      : String(error);
-
-  return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ schedule: races });
+  } catch (error) {
+    console.error('Error generating schedule:', error);
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    );
+  }
 }
-
-}
-
