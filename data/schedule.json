@@ -2,171 +2,451 @@
   {
     "raceNumber": 1,
     "teamA": "a",
+    "teamB": "b",
+    "boats": {
+      "teamA": "blue",
+      "teamB": "white"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 2,
+    "teamA": "c",
+    "teamB": "d",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 3,
+    "teamA": "a",
     "teamB": "e",
     "boats": {
       "teamA": "blue",
       "teamB": "white"
     },
-    "result": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-    ]
-  },
-  {
-    "raceNumber": 2,
-    "teamA": "a",
-    "teamB": "b",
-    "boats": {
-      "teamA": "blue",
-      "teamB": "white"
-    },
-    "result": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-    ]
-  },
-  {
-    "raceNumber": 3,
-    "teamA": "a",
-    "teamB": "d",
-    "boats": {
-      "teamA": "blue",
-      "teamB": "white"
-    },
-    "result": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-    ]
+    "result": []
   },
   {
     "raceNumber": 4,
+    "teamA": "b",
+    "teamB": "c",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 5,
+    "teamA": "a",
+    "teamB": "d",
+    "boats": {
+      "teamA": "blue",
+      "teamB": "white"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 6,
+    "teamA": "b",
+    "teamB": "e",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 7,
     "teamA": "a",
     "teamB": "c",
     "boats": {
       "teamA": "blue",
       "teamB": "white"
     },
-    "result": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-    ]
-  },
-  {
-    "raceNumber": 5,
-    "teamA": "e",
-    "teamB": "b",
-    "boats": {
-      "teamA": "blue",
-      "teamB": "white"
-    },
-    "result": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-    ]
-  },
-  {
-    "raceNumber": 6,
-    "teamA": "e",
-    "teamB": "d",
-    "boats": {
-      "teamA": "blue",
-      "teamB": "white"
-    },
-    "result": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-    ]
-  },
-  {
-    "raceNumber": 7,
-    "teamA": "e",
-    "teamB": "c",
-    "boats": {
-      "teamA": "blue",
-      "teamB": "white"
-    },
-    "result": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-    ]
+    "result": []
   },
   {
     "raceNumber": 8,
     "teamA": "b",
     "teamB": "d",
     "boats": {
-      "teamA": "blue",
-      "teamB": "white"
+      "teamA": "red",
+      "teamB": "black"
     },
-    "result": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-    ]
+    "result": []
   },
   {
     "raceNumber": 9,
-    "teamA": "b",
-    "teamB": "c",
+    "teamA": "a",
+    "teamB": "f",
     "boats": {
       "teamA": "blue",
       "teamB": "white"
     },
-    "result": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-    ]
+    "result": []
   },
   {
     "raceNumber": 10,
-    "teamA": "d",
-    "teamB": "c",
+    "teamA": "b",
+    "teamB": "g",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 11,
+    "teamA": "a",
+    "teamB": "h",
     "boats": {
       "teamA": "blue",
       "teamB": "white"
     },
-    "result": [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0
-    ]
+    "result": []
+  },
+  {
+    "raceNumber": 12,
+    "teamA": "b",
+    "teamB": "f",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 13,
+    "teamA": "a",
+    "teamB": "g",
+    "boats": {
+      "teamA": "blue",
+      "teamB": "white"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 14,
+    "teamA": "b",
+    "teamB": "h",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 15,
+    "teamA": "a",
+    "teamB": "i",
+    "boats": {
+      "teamA": "blue",
+      "teamB": "white"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 16,
+    "teamA": "b",
+    "teamB": "j",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 17,
+    "teamA": "c",
+    "teamB": "i",
+    "boats": {
+      "teamA": "blue",
+      "teamB": "white"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 18,
+    "teamA": "a",
+    "teamB": "j",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 19,
+    "teamA": "b",
+    "teamB": "i",
+    "boats": {
+      "teamA": "blue",
+      "teamB": "white"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 20,
+    "teamA": "c",
+    "teamB": "j",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 21,
+    "teamA": "d",
+    "teamB": "i",
+    "boats": {
+      "teamA": "blue",
+      "teamB": "white"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 22,
+    "teamA": "c",
+    "teamB": "e",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 23,
+    "teamA": "d",
+    "teamB": "f",
+    "boats": {
+      "teamA": "blue",
+      "teamB": "white"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 24,
+    "teamA": "c",
+    "teamB": "g",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 25,
+    "teamA": "d",
+    "teamB": "e",
+    "boats": {
+      "teamA": "blue",
+      "teamB": "white"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 26,
+    "teamA": "c",
+    "teamB": "f",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 27,
+    "teamA": "d",
+    "teamB": "g",
+    "boats": {
+      "teamA": "blue",
+      "teamB": "white"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 28,
+    "teamA": "c",
+    "teamB": "h",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 29,
+    "teamA": "d",
+    "teamB": "j",
+    "boats": {
+      "teamA": "blue",
+      "teamB": "white"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 30,
+    "teamA": "e",
+    "teamB": "h",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 31,
+    "teamA": "f",
+    "teamB": "j",
+    "boats": {
+      "teamA": "blue",
+      "teamB": "white"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 32,
+    "teamA": "d",
+    "teamB": "h",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 33,
+    "teamA": "e",
+    "teamB": "f",
+    "boats": {
+      "teamA": "blue",
+      "teamB": "white"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 34,
+    "teamA": "g",
+    "teamB": "h",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 35,
+    "teamA": "e",
+    "teamB": "i",
+    "boats": {
+      "teamA": "blue",
+      "teamB": "white"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 36,
+    "teamA": "f",
+    "teamB": "g",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 37,
+    "teamA": "e",
+    "teamB": "j",
+    "boats": {
+      "teamA": "blue",
+      "teamB": "white"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 38,
+    "teamA": "f",
+    "teamB": "h",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 39,
+    "teamA": "e",
+    "teamB": "g",
+    "boats": {
+      "teamA": "blue",
+      "teamB": "white"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 40,
+    "teamA": "f",
+    "teamB": "i",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 41,
+    "teamA": "g",
+    "teamB": "j",
+    "boats": {
+      "teamA": "blue",
+      "teamB": "white"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 42,
+    "teamA": "h",
+    "teamB": "i",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 43,
+    "teamA": "g",
+    "teamB": "i",
+    "boats": {
+      "teamA": "blue",
+      "teamB": "white"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 44,
+    "teamA": "h",
+    "teamB": "j",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black"
+    },
+    "result": []
+  },
+  {
+    "raceNumber": 45,
+    "teamA": "i",
+    "teamB": "j",
+    "boats": {
+      "teamA": "blue",
+      "teamB": "white"
+    },
+    "result": []
   }
 ]
