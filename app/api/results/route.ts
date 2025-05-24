@@ -15,9 +15,10 @@ type TeamStats = {
   totalRaces: number;
   points: number;
   winPercentage: number;
-  place: number;  // Add this line
+  place: number;
 };
 
+// Load schedule JSON from disk
 async function loadSchedule(): Promise<Race[]> {
   const filePath = path.join(process.cwd(), 'data', 'schedule.json');
   try {
@@ -29,28 +30,33 @@ async function loadSchedule(): Promise<Race[]> {
   }
 }
 
+// Save schedule JSON to disk
 async function saveSchedule(races: Race[]) {
   const filePath = path.join(process.cwd(), 'data', 'schedule.json');
   await fs.writeFile(filePath, JSON.stringify(races, null, 2));
 }
 
-// Add this helper function at the top level
 function isCompletedRace(race: Race): boolean {
-  return race.result !== null && 
-         race.result !== undefined && 
-         race.result.length === 6 && 
-         !race.result.every(score => score === 0);
+  return (
+    race.result !== null &&
+    race.result !== undefined &&
+    race.result.length === 6 &&
+    !race.result.every(score => score === 0)
+  );
 }
 
-// Modify getHeadToHeadRecord to use this check
-function getHeadToHeadRecord(teamA: string, teamB: string, races: Race[]): {wins: number, avgPoints: number} {
-  const matches = races.filter(race => 
-    (race.teamA === teamA && race.teamB === teamB) || 
-    (race.teamA === teamB && race.teamB === teamA)
-  ).filter(isCompletedRace);
-
-  console.log(`H2H matches between ${teamA} and ${teamB}:`, 
-    matches.map(m => `Race ${m.raceNumber}: ${m.result?.join(',')}`));
+function getHeadToHeadRecord(
+  teamA: string,
+  teamB: string,
+  races: Race[]
+): { wins: number; avgPoints: number } {
+  const matches = races
+    .filter(
+      race =>
+        (race.teamA === teamA && race.teamB === teamB) ||
+        (race.teamA === teamB && race.teamB === teamA)
+    )
+    .filter(isCompletedRace);
 
   let wins = 0;
   let totalPoints = 0;
@@ -60,14 +66,12 @@ function getHeadToHeadRecord(teamA: string, teamB: string, races: Race[]): {wins
     if (!race.result) return;
     matchCount++;
     const isTeamA = race.teamA === teamA;
-    const teamPoints = isTeamA ? 
-      race.result.slice(0, 3).reduce((a, b) => a + b, 0) :
-      race.result.slice(3).reduce((a, b) => a + b, 0);
-    const otherTeamPoints = isTeamA ?
-      race.result.slice(3).reduce((a, b) => a + b, 0) :
-      race.result.slice(0, 3).reduce((a, b) => a + b, 0);
-
-    console.log(`Race ${race.raceNumber}: ${teamA} scored ${teamPoints}, ${teamB} scored ${otherTeamPoints}`);
+    const teamPoints = isTeamA
+      ? race.result.slice(0, 3).reduce((a, b) => a + b, 0)
+      : race.result.slice(3).reduce((a, b) => a + b, 0);
+    const otherTeamPoints = isTeamA
+      ? race.result.slice(3).reduce((a, b) => a + b, 0)
+      : race.result.slice(0, 3).reduce((a, b) => a + b, 0);
 
     if (teamPoints < otherTeamPoints) wins++;
     else if (teamPoints === otherTeamPoints) {
@@ -79,212 +83,349 @@ function getHeadToHeadRecord(teamA: string, teamB: string, races: Race[]): {wins
 
   return {
     wins,
-    avgPoints: matchCount > 0 ? totalPoints / matchCount : Infinity
+    avgPoints: matchCount > 0 ? totalPoints / matchCount : Infinity,
   };
 }
 
-// Modify getLastMatchResult to use this check
 function getLastMatchResult(teamA: string, teamB: string, races: Race[]): number {
   const match = races
-    .filter(race => 
-      (race.teamA === teamA && race.teamB === teamB) || 
-      (race.teamA === teamB && race.teamB === teamA)
+    .filter(
+      race =>
+        (race.teamA === teamA && race.teamB === teamB) ||
+        (race.teamA === teamB && race.teamB === teamA)
     )
     .filter(isCompletedRace)
     .pop();
 
   if (!match || !match.result) return 0;
-  
+
   const isTeamA = match.teamA === teamA;
-  const teamPoints = isTeamA ?
-    match.result.slice(0, 3).reduce((a, b) => a + b, 0) :
-    match.result.slice(3).reduce((a, b) => a + b, 0);
-  const otherTeamPoints = isTeamA ?
-    match.result.slice(3).reduce((a, b) => a + b, 0) :
-    match.result.slice(0, 3).reduce((a, b) => a + b, 0);
+  const teamPoints = isTeamA
+    ? match.result.slice(0, 3).reduce((a, b) => a + b, 0)
+    : match.result.slice(3).reduce((a, b) => a + b, 0);
+  const otherTeamPoints = isTeamA
+    ? match.result.slice(3).reduce((a, b) => a + b, 0)
+    : match.result.slice(0, 3).reduce((a, b) => a + b, 0);
 
-  return teamPoints < otherTeamPoints ? 1 : (teamPoints > otherTeamPoints ? -1 : 0);
+  return teamPoints < otherTeamPoints ? 1 : teamPoints > otherTeamPoints ? -1 : 0;
 }
 
-function getCommonOpponentStats(teamA: string, teamB: string, races: Race[]): number {
-  const allTeams = new Set(races.flatMap(race => [race.teamA, race.teamB]));
-  const commonOpponents = Array.from(allTeams).filter(team => 
-    team !== teamA && team !== teamB &&
-    races.some(race => isCompletedRace(race) && 
-      ((race.teamA === teamA && race.teamB === team) || 
-       (race.teamA === team && race.teamB === teamA))) &&
-    races.some(race => isCompletedRace(race) && 
-      ((race.teamA === teamB && race.teamB === team) || 
-       (race.teamA === team && race.teamB === teamB)))
-  );
-
-  console.log(`Common opponents for ${teamA} vs ${teamB}:`, commonOpponents);
-
-  // If no common opponents, return 0 to keep teams tied
-  if (commonOpponents.length === 0) {
-    return 0;
-  }
-
-  let teamATotal = 0;
-  let teamBTotal = 0;
-  let matches = 0;
-
-  commonOpponents.forEach(opponent => {
-    const teamAStats = getHeadToHeadRecord(teamA, opponent, races);
-    const teamBStats = getHeadToHeadRecord(teamB, opponent, races);
-    teamATotal += teamAStats.avgPoints;
-    teamBTotal += teamBStats.avgPoints;
-    matches++;
-  });
-
-  // Only compare averages if we have matches
-  return matches > 0 ? teamATotal / matches - teamBTotal / matches : 0;
-}
-
-// Add helper to find common opponents across multiple teams
 function findCommonOpponents(teams: string[], races: Race[]): string[] {
-  // Get opponents for each team
   const teamOpponents = teams.map(team => {
-    const completedRaces = races.filter(race => 
-      isCompletedRace(race) && (race.teamA === team || race.teamB === team)
+    const completedRaces = races.filter(
+      race => isCompletedRace(race) && (race.teamA === team || race.teamB === team)
     );
     return new Set(
-      completedRaces.map(race => race.teamA === team ? race.teamB : race.teamA)
+      completedRaces.map(race => (race.teamA === team ? race.teamB : race.teamA))
     );
   });
 
-  // Find opponents common to all teams
-  return Array.from(teamOpponents[0]).filter(opponent => 
-    !teams.includes(opponent) && // Exclude tied teams
-    teamOpponents.every(opponentSet => opponentSet.has(opponent))
+  if (teamOpponents.length === 0) return [];
+
+  return Array.from(teamOpponents[0]).filter(
+    opponent => !teams.includes(opponent) && teamOpponents.every(s => s.has(opponent))
   );
 }
 
-// Add debug logging for average points
-function resolveTeamGroup(teams: TeamStats[], races: Race[]): TeamStats[] {
-  console.log(`\nResolving tie for teams: ${teams.map(t => t.team).join(', ')}`);
-  
-  if (teams.length <= 1) return teams;
-
-  // Try head-to-head records first
-  const h2hGroups = new Map<number, TeamStats[]>();
-  teams.forEach(teamA => {
-    let h2hWins = 0;
-    teams.forEach(teamB => {
-      if (teamA.team === teamB.team) return;
-      const h2h = getHeadToHeadRecord(teamA.team, teamB.team, races);
-      h2hWins += h2h.wins;
-    });
-    if (!h2hGroups.has(h2hWins)) h2hGroups.set(h2hWins, []);
-    h2hGroups.get(h2hWins)!.push(teamA);
-    console.log(`Team ${teamA.team}: ${h2hWins} h2h wins`);
-  });
-
-  // Log h2h groups
-  if (h2hGroups.size > 1) {
-    console.log('H2H groups created:', 
-      Array.from(h2hGroups.entries())
-        .map(([wins, group]) => 
-          `${wins} wins: ${group.map(t => t.team).join(',')}`
-        ).join(' | ')
-    );
-  } else {
-    console.log('No h2h separation, moving to average points');
-  }
-
-  // If head-to-head created groups, resolve each group recursively
-  if (h2hGroups.size > 1) {
-    return Array.from(h2hGroups.entries())
-      .sort((a, b) => b[0] - a[0])
-      .flatMap(([_, group]) => resolveTeamGroup(group, races));
-  }
-
-  // Try average points in matches between tied teams
-  const avgPointsGroups = new Map<number, TeamStats[]>();
-  teams.forEach(teamA => {
-    let totalPoints = 0;
-    let matches = 0;
-    teams.forEach(teamB => {
-      if (teamA.team === teamB.team) return;
-      const h2h = getHeadToHeadRecord(teamA.team, teamB.team, races);
-      if (h2h.avgPoints !== Infinity) {
-        totalPoints += h2h.avgPoints;
-        matches++;
-      }
-    });
-    const avgPoints = matches > 0 ? totalPoints / matches : Infinity;
-    console.log(`Team ${teamA.team} average points: ${avgPoints}`);
-    
-    // Round to 2 decimal places to avoid floating point comparison issues
-    const roundedPoints = Math.round(avgPoints * 100) / 100;
-    if (!avgPointsGroups.has(roundedPoints)) {
-      avgPointsGroups.set(roundedPoints, []);
+function getPointsAgainstOpponents(team: string, opponents: string[], races: Race[]): number {
+  let totalPoints = 0;
+  races.forEach(race => {
+    if (!isCompletedRace(race) || !race.result) return;
+    if (
+      (race.teamA === team && opponents.includes(race.teamB)) ||
+      (race.teamB === team && opponents.includes(race.teamA))
+    ) {
+      const isTeamA = race.teamA === team;
+      const teamPoints = isTeamA
+        ? race.result.slice(0, 3).reduce((a, b) => a + b, 0)
+        : race.result.slice(3).reduce((a, b) => a + b, 0);
+      totalPoints += teamPoints;
     }
-    avgPointsGroups.get(roundedPoints)!.push(teamA);
   });
-
-  if (avgPointsGroups.size > 1) {
-    console.log('Average points groups created:', 
-      Array.from(avgPointsGroups.entries())
-        .map(([points, group]) => 
-          `${points} points: ${group.map(t => t.team).join(',')}`
-        ).join(' | ')
-    );
-    return Array.from(avgPointsGroups.entries())
-      .sort((a, b) => a[0] - b[0])
-      .flatMap(([_, group]) => resolveTeamGroup(group, races));
-  } else {
-    console.log('No separation by average points');
-  }
-
-  // After average points tiebreaker
-  if (teams.length === 2) {
-    // Only use latest head-to-head for 2-team ties
-    const lastMatch = getLastMatchResult(teams[0].team, teams[1].team, races);
-    if (lastMatch !== 0) {
-      return lastMatch > 0 ? teams : [teams[1], teams[0]];
-    }
-  }
-
-  // For 3+ team ties or if 2 teams are still tied, check common opponents
-  const teamNames = teams.map(t => t.team);
-  const commonOpponents = findCommonOpponents(teamNames, races);
-  console.log('Common opponents across all tied teams:', commonOpponents);
-
-  if (commonOpponents.length === 0) {
-    console.log('No common opponents across all tied teams, keeping original order');
-    return teams;
-  }
-
-  // Calculate average points against common opponents for each team
-  const teamScores = teams.map(team => {
-    let totalPoints = 0;
-    let matches = 0;
-
-    commonOpponents.forEach(opponent => {
-      const stats = getHeadToHeadRecord(team.team, opponent, races);
-      if (stats.avgPoints !== Infinity) {
-        totalPoints += stats.avgPoints;
-        matches++;
-      }
-    });
-
-    return {
-      team: team,
-      avgPoints: matches > 0 ? totalPoints / matches : Infinity
-    };
-  });
-
-  console.log('Team scores vs common opponents:', 
-    teamScores.map(s => `${s.team.team}: ${s.avgPoints}`).join(', '));
-
-  // Sort by average points against common opponents
-  return teamScores
-    .sort((a, b) => a.avgPoints - b.avgPoints)
-    .map(s => s.team);
+  return totalPoints;
 }
 
-// Modify the race processing in computeLeaderboard
+function resolveTeamGroup(group: TeamStats[], races: Race[]): TeamStats[] {
+  if (group.length <= 1) return group;
+
+  console.log('\n=================================================================');
+  console.log(`=== Resolving Tie Group with ${group.length} Teams ===`);
+  console.log('=================================================================');
+  console.log(`Teams tied: [${group.map(t => t.team).join(', ')}]`);
+  console.log(`Win percentage: ${group[0].winPercentage.toFixed(2)}%`);
+
+  // Step 1: Check if all teams have raced each other
+  console.log('\n=== Step 1: Checking Complete Round Robin ===');
+  const requiredGamesPerTeam = group.length - 1;
+  const h2hMatrix: { [key: string]: Set<string> } = {};
+  
+  // Initialize matrix
+  group.forEach(team => {
+    h2hMatrix[team.team] = new Set<string>();
+  });
+
+  // Fill matrix with completed head-to-head matches
+  races.filter(isCompletedRace).forEach(race => {
+    if (h2hMatrix[race.teamA] && h2hMatrix[race.teamB]) {
+      h2hMatrix[race.teamA].add(race.teamB);
+      h2hMatrix[race.teamB].add(race.teamA);
+    }
+  });
+
+  // Check if round robin is complete for this group
+  const isCompleteRoundRobin = Object.entries(h2hMatrix).every(([_, opponents]) => 
+    opponents.size === requiredGamesPerTeam
+  );
+
+  console.log('Head-to-head matrix for current group:');
+  Object.entries(h2hMatrix).forEach(([team, opponents]) => {
+    console.log(`${team} has played against: [${Array.from(opponents).join(', ')}] (${opponents.size}/${requiredGamesPerTeam} required)`);
+  });
+  console.log(`Complete round robin? ${isCompleteRoundRobin ? 'Yes' : 'No'}`);
+
+  if (isCompleteRoundRobin) {
+    console.log('\n✓ Complete round robin found - calculating head-to-head records');
+    
+    // Calculate head-to-head stats only against teams in this group
+    const h2hStats = group.map(team => {
+      const stats = {
+        team: team.team,
+        wins: 0,
+        totalGames: 0,
+        totalPoints: 0
+      };
+
+      group.forEach(opponent => {
+        if (opponent.team === team.team) return;
+        
+        const record = getHeadToHeadRecord(team.team, opponent.team, races);
+        stats.wins += record.wins;
+        stats.totalGames++;
+        stats.totalPoints += record.avgPoints;
+      });
+
+      const winPercentage = (stats.wins / stats.totalGames) * 100;
+      const avgPoints = stats.totalPoints / stats.totalGames;
+
+      console.log(`\n${team.team} head-to-head performance in this group:`, {
+        wins: stats.wins,
+        games: stats.totalGames,
+        'win %': winPercentage.toFixed(2) + '%',
+        'avg points': avgPoints.toFixed(2)
+      });
+
+      return {
+        ...stats,
+        team: team.team,
+        winPercentage,
+        avgPoints
+      };
+    });
+
+    // First try to break by win percentage
+    const h2hWinPercentages = new Set(h2hStats.map(s => s.winPercentage));
+    
+    if (h2hWinPercentages.size > 1) {
+      // Teams have different head-to-head win percentages
+      console.log('\n✓ Tie broken by head-to-head win percentage');
+      
+      // Sort by win percentage
+      const sortedByWinPct = h2hStats.sort((a, b) => b.winPercentage - a.winPercentage);
+      console.log('Final order:', sortedByWinPct.map(s => 
+        `${s.team} (${s.winPercentage.toFixed(2)}%)`
+      ).join(' → '));
+
+      let currentPlace = Math.min(...group.map(t => t.place || 1));
+      let lastWinPct = -1;
+      let lastPlace = currentPlace;
+
+      // Assign places based on win percentage
+      const placesMap = new Map<string, number>();
+      sortedByWinPct.forEach(stat => {
+        if (stat.winPercentage !== lastWinPct) {
+          lastPlace = currentPlace;
+          currentPlace++;
+        }
+        placesMap.set(stat.team, lastPlace);
+        lastWinPct = stat.winPercentage;
+      });
+
+      console.log('\nAssigning places based on head-to-head records:');
+      Array.from(placesMap.entries()).forEach(([team, place]) => {
+        console.log(`${team}: place ${place}`);
+      });
+
+      return group.sort((a, b) => {
+        const aStats = sortedByWinPct.find(s => s.team === a.team)!;
+        const bStats = sortedByWinPct.find(s => s.team === b.team)!;
+        
+        // Assign places from our map
+        a.place = placesMap.get(a.team)!;
+        b.place = placesMap.get(b.team)!;
+        
+        return bStats.winPercentage - aStats.winPercentage;
+      });
+    }
+
+    // If we get here, all teams have same win percentage, try average points
+    console.log('\nTied on head-to-head win percentage, checking average points');
+    
+    // Sort by average points
+    const sortedByPoints = h2hStats.sort((a, b) => a.avgPoints - b.avgPoints);
+    const distinctAvgPoints = new Set(sortedByPoints.map(s => s.avgPoints));
+
+    if (distinctAvgPoints.size > 1) {
+      console.log('\n✓ Tie broken by head-to-head average points');
+      console.log('Final order:', sortedByPoints.map(s => 
+        `${s.team} (${s.avgPoints.toFixed(2)} avg pts)`
+      ).join(' → '));
+
+      // Assign sequential places based on average points order
+      const startingPlace = Math.min(...group.map(t => t.place || 1));
+      let currentPlace = startingPlace;
+      
+      // Create a mapping of teams to their places
+      const placesMap = new Map<string, number>();
+      
+      // First pass - assign places and handle ties
+      let lastPoints = -1;
+      let lastPlace = currentPlace;
+      
+      sortedByPoints.forEach(stat => {
+        if (stat.avgPoints !== lastPoints) {
+          // New points value - assign new place
+          lastPlace = currentPlace;
+          currentPlace++;
+        }
+        placesMap.set(stat.team, lastPlace);
+        lastPoints = stat.avgPoints;
+      });
+
+      console.log('\nAssigning places based on average points:');
+      Array.from(placesMap.entries()).forEach(([team, place]) => {
+        console.log(`${team}: place ${place}`);
+      });
+      
+      // Sort and assign places
+      return group.sort((a, b) => {
+        const aStats = sortedByPoints.find(s => s.team === a.team)!;
+        const bStats = sortedByPoints.find(s => s.team === b.team)!;
+        
+        // Assign places from our map
+        a.place = placesMap.get(a.team)!;
+        b.place = placesMap.get(b.team)!;
+        
+        return aStats.avgPoints - bStats.avgPoints;
+      });
+    }
+
+    console.log('\n× Teams also tied on head-to-head average points');
+  }
+
+  // If we reach here, try common opponents for the whole group
+  console.log('\n=== Step 2: Common Opponents Analysis ===');
+  const commonOpponents = findCommonOpponents(group.map(t => t.team), races);
+  
+  if (commonOpponents.length > 0) {
+    console.log('Common opponents found:', commonOpponents.join(', '));
+    
+    const commonOpponentStats = group.map(team => {
+      const points = getPointsAgainstOpponents(team.team, commonOpponents, races);
+      console.log(`${team.team} vs common opponents:`, {
+        'total points': points,
+        'opponents': commonOpponents.join(', ')
+      });
+      return { team: team.team, points };
+    });
+
+    // Sort by points against common opponents
+    const sorted = commonOpponentStats.sort((a, b) => a.points - b.points);
+    const distinctPoints = new Set(sorted.map(s => s.points));
+
+    if (distinctPoints.size > 1) {
+      console.log('\n✓ Tie broken by performance against common opponents');
+      console.log('Initial order:', sorted.map(s => 
+        `${s.team} (${s.points} pts)`
+      ).join(' → '));
+
+      // Group teams by points to handle sub-ties
+      const pointGroups = new Map<number, TeamStats[]>();
+      sorted.forEach(stat => {
+        if (!pointGroups.has(stat.points)) {
+          pointGroups.set(stat.points, []);
+        }
+        pointGroups.get(stat.points)!.push(
+          group.find(t => t.team === stat.team)!
+        );
+      });
+
+      const finalOrder: TeamStats[] = [];
+      let currentPlace = Math.min(...group.map(t => t.place || 2));
+
+      // Process each points group, recursively resolving any ties
+      for (const [points, teams] of Array.from(pointGroups.entries()).sort((a, b) => a[0] - b[0])) {
+        console.log(`\n=== Processing teams with ${points} points ===`);
+        console.log('Teams:', teams.map(t => t.team).join(', '));
+
+        if (teams.length === 1) {
+          // Single team - assign place directly
+          teams[0].place = currentPlace;
+          finalOrder.push(teams[0]);
+          console.log(`Assigned place ${currentPlace} to ${teams[0].team} (no sub-tie)`);
+          currentPlace++;
+        } else {
+          // Multiple teams tied - recursively resolve
+          console.log(`Found sub-tie between: ${teams.map(t => t.team).join(', ')}`);
+          console.log('Starting recursive tiebreak resolution...');
+          
+          // Set initial places for the subgroup
+          teams.forEach(team => {
+            team.place = currentPlace;
+          });
+
+          // Recursively resolve the tie
+          const resolvedSubGroup = resolveTeamGroup(teams, races);
+          finalOrder.push(...resolvedSubGroup);
+          
+          // Update current place based on resolved subgroup
+          const maxPlace = Math.max(...resolvedSubGroup.map(t => t.place));
+          currentPlace = maxPlace + 1;
+          
+          console.log('Sub-tie resolution complete:', resolvedSubGroup.map(t => 
+            `${t.team}: place ${t.place}`
+          ).join(', '));
+        }
+      }
+
+      console.log('\nFinal place assignments:', finalOrder.map(t => 
+        `${t.team}: place ${t.place}`
+      ).join(', '));
+
+      return finalOrder;
+    }
+    
+    console.log('\n× Common opponent analysis did not break tie');
+  } else {
+    console.log('No common opponents found for tied teams');
+  }
+
+  console.log('\n=== Final Result ===');
+  console.log('Unable to break tie - teams will share same place');
+
+  // Start from place 1 if no place is set
+  const sharedPlace = Math.min(...group.map(t => t.place || 1));
+  group.forEach(team => {
+    team.place = sharedPlace;
+  });
+  console.log('\nShared place assigned:', sharedPlace);
+
+  // Next place should skip over all tied teams
+  const nextPlace = sharedPlace + group.length;
+  console.log(`Next available place will be: ${nextPlace} (skipping ${group.length} tied teams)`);
+
+  return group;
+}
+
 function computeLeaderboard(races: Race[]): TeamStats[] {
   const teams = new Set<string>();
   races.forEach(race => {
@@ -292,50 +433,44 @@ function computeLeaderboard(races: Race[]): TeamStats[] {
     teams.add(race.teamB);
   });
 
-  // Initialize stats
-  const stats = Array.from(teams).map(team => ({
+  const stats: TeamStats[] = Array.from(teams).map(team => ({
     team,
     wins: 0,
     totalRaces: 0,
     points: 0,
     winPercentage: 0,
-    place: 0  // Add this line
+    place: 0,
   }));
 
-  // Process each race
   races.forEach(race => {
     if (!isCompletedRace(race) || !race.result) return;
 
-    const teamAStats = stats.find(s => s.team === race.teamA);
-    const teamBStats = stats.find(s => s.team === race.teamB);
-    
-    if (teamAStats && teamBStats) {
-      teamAStats.totalRaces++;
-      teamBStats.totalRaces++;
+    const teamAStats = stats.find(s => s.team === race.teamA)!;
+    const teamBStats = stats.find(s => s.team === race.teamB)!;
 
-      const teamAPoints = race.result.slice(0, 3).reduce((a, b) => a + b, 0);
-      const teamBPoints = race.result.slice(3).reduce((a, b) => a + b, 0);
+    teamAStats.totalRaces++;
+    teamBStats.totalRaces++;
 
-      if (teamAPoints < teamBPoints) {
-        teamAStats.wins++;
-      } else if (teamBPoints < teamAPoints) {
+    const teamAPoints = race.result.slice(0, 3).reduce((a, b) => a + b, 0);
+    const teamBPoints = race.result.slice(3).reduce((a, b) => a + b, 0);
+
+    if (teamAPoints < teamBPoints) {
+      teamAStats.wins++;
+    } else if (teamBPoints < teamAPoints) {
+      teamBStats.wins++;
+    } else {
+      if (race.result.indexOf(1) < 3) {
         teamBStats.wins++;
       } else {
-        if (race.result.indexOf(1) < 3) {
-          teamBStats.wins++;
-        } else {
-          teamAStats.wins++;
-        }
+        teamAStats.wins++;
       }
     }
   });
 
-  // Calculate win percentages
   stats.forEach(team => {
     team.winPercentage = team.totalRaces > 0 ? (team.wins / team.totalRaces) * 100 : 0;
   });
 
-  // Group by win percentage and resolve ties
   const winPercentageGroups = new Map<number, TeamStats[]>();
   stats.forEach(team => {
     if (!winPercentageGroups.has(team.winPercentage)) {
@@ -344,89 +479,38 @@ function computeLeaderboard(races: Race[]): TeamStats[] {
     winPercentageGroups.get(team.winPercentage)!.push(team);
   });
 
-  // After resolving all ties, assign places
-  const sortedTeams = Array.from(winPercentageGroups.entries())
-    .sort((a, b) => b[0] - a[0])
-    .flatMap(([_, group]) => resolveTeamGroup(group, races));
+  const sortedTeams: TeamStats[] = [];
+  let globalPlace = 1;  // Track overall place across all groups
 
-  // Initialize place tracking variables
-  let currentPlace = 1;
-  let samePlace = 1;
+  // Process each win percentage group
+  for (const [winPct, group] of Array.from(winPercentageGroups.entries()).sort((a, b) => b[0] - a[0])) {
+    console.log(`\nProcessing win percentage group: ${winPct.toFixed(2)}%`);
+    console.log('Teams:', group.map(t => t.team).join(', '));
+    console.log('Starting at place:', globalPlace);
 
-  // Update the team sorting logic in the place assignment section
-  sortedTeams.forEach((team, index) => {
-    if (index === 0) {
-      team.place = currentPlace;
-      console.log(`First team ${team.team}: place ${currentPlace}`);
+    if (group.length === 1) {
+      // Single team in group - assign current place
+      group[0].place = globalPlace;
+      sortedTeams.push(group[0]);
+      console.log(`Assigned place ${globalPlace} to ${group[0].team} (no tiebreak needed)`);
+      globalPlace++;
     } else {
-      const prevTeam = sortedTeams[index - 1];
+      // Multiple teams tied - resolve using tiebreakers
+      // Set initial place for the group
+      group.forEach(team => team.place = globalPlace);
       
-      if (team.winPercentage === prevTeam.winPercentage) {
-        // Get all teams with this win percentage
-        const tiedTeams = sortedTeams.filter(t => t.winPercentage === team.winPercentage);
-        console.log(`Checking tie between ${tiedTeams.map(t => t.team).join(', ')}`);
-        
-        // Get common opponents across ALL tied teams
-        const commonOpponents = findCommonOpponents(tiedTeams.map(t => t.team), races);
-        console.log(`Common opponents across ALL tied teams: ${commonOpponents.join(', ')}`);
-
-        if (commonOpponents.length > 0) {
-          // Calculate scores for all tied teams at once
-          const teamScores = tiedTeams.map(tiedTeam => {
-            let totalPoints = 0;
-            let matches = 0;
-
-            commonOpponents.forEach(opponent => {
-              const stats = getHeadToHeadRecord(tiedTeam.team, opponent, races);
-              if (stats.avgPoints !== Infinity) {
-                totalPoints += stats.avgPoints;
-                matches++;
-              }
-            });
-
-            return {
-              team: tiedTeam,
-              avgPoints: matches > 0 ? totalPoints / matches : Infinity
-            };
-          });
-
-          console.log('Team scores vs common opponents:', 
-            teamScores.map(s => `${s.team.team}: ${s.avgPoints}`).join(', '));
-
-          // Sort teams by their average points (lower is better)
-          const sortedByCommonOpp = teamScores.sort((a, b) => a.avgPoints - b.avgPoints);
-
-          // Assign places based on sorted order
-          sortedByCommonOpp.forEach((score, i) => {
-            if (i === 0) {
-              score.team.place = currentPlace;
-            } else {
-              const prevScore = sortedByCommonOpp[i - 1];
-              if (score.avgPoints === prevScore.avgPoints) {
-                score.team.place = prevScore.team.place;
-                samePlace++;
-              } else {
-                currentPlace += samePlace;
-                score.team.place = currentPlace;
-                samePlace = 1;
-              }
-            }
-            console.log(`${score.team.team} placed ${score.team.place} (avg points: ${score.avgPoints})`);
-          });
-        } else {
-          // Keep teams tied if no common opponents
-          team.place = prevTeam.place;
-          samePlace++;
-          console.log(`${team.team} tied with ${prevTeam.team} (no common opponents)`);
-        }
-      } else {
-        currentPlace += samePlace;
-        team.place = currentPlace;
-        samePlace = 1;
-        console.log(`${team.team} different win percentage, place: ${currentPlace}`);
-      }
+      const resolved = resolveTeamGroup(group, races);
+      sortedTeams.push(...resolved);
+      
+      // Update global place to account for all teams in this group
+      globalPlace += group.length;
+      console.log(`Next global place will be: ${globalPlace}`);
     }
-  });
+  }
+
+  console.log('\nFinal leaderboard places:', sortedTeams.map(t => 
+    `${t.team}: ${t.place}`
+  ).join(', '));
 
   return sortedTeams;
 }
@@ -434,44 +518,48 @@ function computeLeaderboard(races: Race[]): TeamStats[] {
 export async function POST(req: Request) {
   try {
     const { raceNumber, result } = await req.json();
-    console.log('Received:', { raceNumber, result });
 
-    if (typeof raceNumber !== 'number' || 
-        (result !== null && (!Array.isArray(result) || result.length !== 6))) {
+    if (
+      typeof raceNumber !== 'number' ||
+      (result !== null &&
+        (!Array.isArray(result) ||
+          result.length !== 6 ||
+          result.some(score => typeof score !== 'number')))
+    ) {
       return NextResponse.json(
-        { error: 'Invalid input: raceNumber must be a number and result must be an array of 6 numbers or null' },
+        {
+          error:
+            'Invalid input: raceNumber must be a number and result must be an array of 6 numbers or null',
+        },
         { status: 400 }
       );
     }
 
     const races = await loadSchedule();
     const raceIndex = races.findIndex(r => r.raceNumber === raceNumber);
-    
+
     if (raceIndex === -1) {
-      return NextResponse.json(
-        { error: `Race ${raceNumber} not found` },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: `Race ${raceNumber} not found` }, { status: 404 });
     }
 
     races[raceIndex].result = result;
     await saveSchedule(races);
-    console.log('Schedule updated');
 
     const leaderboard = computeLeaderboard(races);
     const leaderboardPath = path.join(process.cwd(), 'data', 'leaderboard.json');
     await fs.writeFile(leaderboardPath, JSON.stringify(leaderboard, null, 2));
-    console.log('Leaderboard updated');
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
-      message: 'Results and leaderboard updated successfully'
+      message: 'Results and leaderboard updated successfully',
     });
-
   } catch (error) {
     console.error('Error in POST /api/results:', error);
     return NextResponse.json(
-      { error: 'Internal server error', details: error instanceof Error ? error.message : String(error) },
+      {
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
