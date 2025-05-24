@@ -60,6 +60,7 @@ export default function Navbar() {
             >
               Leaderboard
             </Link>
+            
             <SignedIn>
               {isAdmin && (
                 <Link 
@@ -99,30 +100,30 @@ export default function Navbar() {
           <div className="flex flex-col space-y-2">
             <Link 
               href="/" 
-              className="px-4 py-3 text-gray-700 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-colors"
+              className="px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               Teams
             </Link>
             <Link 
               href="/schedule" 
-              className="px-4 py-3 text-gray-700 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-colors"
+              className="px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
               Schedule
             </Link>
             <Link 
               href="/results" 
-              className="px-4 py-3 text-gray-700 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-colors"
+              className="px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors"
               onClick={() => setIsMenuOpen(false)}
             >
-              Results
+              Leaderboard
             </Link>
             <SignedIn>
               {isAdmin && (
                 <Link 
                   href="/admin" 
-                  className="px-4 py-3 text-gray-700 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                  className="px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Admin

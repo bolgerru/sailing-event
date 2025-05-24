@@ -1,4 +1,6 @@
-import { headers } from 'next/headers';
+"use client";
+
+import { useState, useMemo, useEffect } from 'react';
 
 type Race = {
   raceNumber: number;
@@ -32,18 +34,6 @@ function getWinner(result: number[] | null, teamA: string, teamB: string): strin
   return result!.indexOf(1) < 3 ? teamB : teamA;
 }
 
-async function getRaces() {
-  const headersList = await headers();
-  const host = headersList.get('host');
-  const protocol = process?.env?.NODE_ENV === 'development' ? 'http' : 'https';
-  const res = await fetch(`${protocol}://${host}/api/schedule`, {
-    cache: 'no-store'
-  });
-  if (!res.ok) return [];
-  return res.json() as Promise<Race[]>;
-}
-
-// Add this helper function at the top of the file after the type definitions
 function getLeagueTagColors(league: string): string {
   switch (league.toLowerCase()) {
     case 'gold':
@@ -57,12 +47,82 @@ function getLeagueTagColors(league: string): string {
   }
 }
 
-export default async function SchedulePage() {
-  const races = await getRaces();
-  
-  // Separate races into upcoming and completed
-  const completedRaces = races.filter(race => isValidResult(race.result));
-  const upcomingRaces = races.filter(race => !isValidResult(race.result));
+export default function SchedulePage() {
+  const [races, setRaces] = useState<Race[]>([]);
+  const [filter, setFilter] = useState<string>('all');
+  const [loading, setLoading] = useState(true);
+
+  // Fetch races data
+  useEffect(() => {
+    const fetchRaces = async () => {
+      try {
+        const protocol = process?.env?.NODE_ENV === 'development' ? 'http' : 'https';
+        const host = window.location.host;
+        const res = await fetch(`${protocol}://${host}/api/schedule`, {
+          cache: 'no-store'
+        });
+        if (!res.ok) throw new Error('Failed to fetch races');
+        const data = await res.json();
+        setRaces(data);
+      } catch (error) {
+        console.error('Error fetching races:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRaces();
+  }, []);
+
+  // Get unique filter options combining leagues and teams
+  const filterOptions = useMemo(() => {
+    const options = new Set<string>();
+    options.add('all');
+    
+    // Add leagues
+    races.forEach((race: Race) => {
+      if (race.league) {
+        options.add(`league:${race.league}`);
+      }
+    });
+
+    // Add teams
+    races.forEach((race: Race) => {
+      options.add(`team:${race.teamA}`);
+      options.add(`team:${race.teamB}`);
+    });
+
+    return Array.from(options);
+  }, [races]);
+
+  // Filter races based on selection
+  const filteredRaces = useMemo(() => {
+    if (filter === 'all') return races;
+
+    const [type, value] = filter.split(':');
+    
+    return races.filter((race: Race) => {
+      if (type === 'league') {
+        return race.league === value;
+      }
+      if (type === 'team') {
+        return race.teamA === value || race.teamB === value;
+      }
+      return true;
+    });
+  }, [races, filter]);
+
+  // Separate filtered races into upcoming and completed
+  const completedRaces = filteredRaces.filter(race => isValidResult(race.result));
+  const upcomingRaces = filteredRaces.filter(race => !isValidResult(race.result));
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-pulse text-gray-500">Loading schedule...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-8">
@@ -70,8 +130,45 @@ export default async function SchedulePage() {
         Schedule & Results
       </h1>
 
-      {races.length === 0 && (
-        <p className="text-center text-gray-500">No races scheduled yet.</p>
+      {/* Single Filter */}
+      <div className="bg-white p-4 rounded-lg shadow">
+        <label htmlFor="filter" className="block text-sm font-medium text-gray-700 mb-1">
+          Filter Matches
+        </label>
+        <select
+          id="filter"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="w-full rounded-lg border-gray-200 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+        >
+          <option value="all">All Races</option>
+          
+          {filterOptions
+            .filter(opt => opt.startsWith('league:'))
+            .map(opt => {
+              const league = opt.split(':')[1];
+              return (
+                <option key={opt} value={opt}>
+                  {league === 'main' ? 'Overall League' : `${league} League`}
+                </option>
+              );
+            })}
+          
+          {filterOptions
+            .filter(opt => opt.startsWith('team:'))
+            .map(opt => {
+              const team = opt.split(':')[1];
+              return (
+                <option key={opt} value={opt}>
+                  {team} (Team)
+                </option>
+              );
+            })}
+        </select>
+      </div>
+
+      {filteredRaces.length === 0 && (
+        <p className="text-center text-gray-500">No matches found for the selected filters.</p>
       )}
 
       {/* Upcoming Races Section */}

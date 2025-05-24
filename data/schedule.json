@@ -1,22 +1,632 @@
 [
   {
     "raceNumber": 1,
-    "teamA": "Team",
-    "teamB": "teammmmm",
-    "league": "Hello",
+    "teamA": "TCD 1",
+    "teamB": "TCD 2",
+    "league": "Gold",
+    "boats": {
+      "teamA": "Green",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 2,
+    "teamA": "UCD 2",
+    "teamB": "UCC 2",
+    "league": "Silver",
+    "boats": {
+      "teamA": "Blue",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 3,
+    "teamA": "UG 2",
+    "teamB": "MTU 2",
+    "league": "Bronze",
     "boats": {
       "teamA": "Red",
       "teamB": "Black"
     }
   },
   {
-    "raceNumber": 2,
-    "teamA": "Hello",
-    "teamB": "kachowt",
+    "raceNumber": 4,
+    "teamA": "TCD 1",
+    "teamB": "TCD 3",
     "league": "Gold",
+    "boats": {
+      "teamA": "Green",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 5,
+    "teamA": "UCD 2",
+    "teamB": "DCU 1",
+    "league": "Silver",
     "boats": {
       "teamA": "Blue",
       "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 6,
+    "teamA": "UG 2",
+    "teamB": "UL 1",
+    "league": "Bronze",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    }
+  },
+  {
+    "raceNumber": 7,
+    "teamA": "UCD 1",
+    "teamB": "TCD 3",
+    "league": "Gold",
+    "boats": {
+      "teamA": "Green",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 8,
+    "teamA": "UG 1",
+    "teamB": "DCU 1",
+    "league": "Silver",
+    "boats": {
+      "teamA": "Blue",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 9,
+    "teamA": "UCC 3",
+    "teamB": "UL 1",
+    "league": "Bronze",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    }
+  },
+  {
+    "raceNumber": 10,
+    "teamA": "UCD 1",
+    "teamB": "TCD 4",
+    "league": "Gold",
+    "boats": {
+      "teamA": "Green",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 11,
+    "teamA": "UG 1",
+    "teamB": "UCD 3",
+    "league": "Silver",
+    "boats": {
+      "teamA": "Blue",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 12,
+    "teamA": "UCC 3",
+    "teamB": "QUB 2",
+    "league": "Bronze",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    }
+  },
+  {
+    "raceNumber": 13,
+    "teamA": "UCC 1",
+    "teamB": "TCD 4",
+    "league": "Gold",
+    "boats": {
+      "teamA": "Green",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 14,
+    "teamA": "TUD 1",
+    "teamB": "UCD 3",
+    "league": "Silver",
+    "boats": {
+      "teamA": "Blue",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 15,
+    "teamA": "TCD 5",
+    "teamB": "QUB 2",
+    "league": "Bronze",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    }
+  },
+  {
+    "raceNumber": 16,
+    "teamA": "UCC 1",
+    "teamB": "QUB 1",
+    "league": "Gold",
+    "boats": {
+      "teamA": "Green",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 17,
+    "teamA": "TUD 1",
+    "teamB": "MTU 1",
+    "league": "Silver",
+    "boats": {
+      "teamA": "Blue",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 18,
+    "teamA": "TCD 5",
+    "teamB": "TUD 2",
+    "league": "Bronze",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    }
+  },
+  {
+    "raceNumber": 19,
+    "teamA": "TCD 2",
+    "teamB": "QUB 1",
+    "league": "Gold",
+    "boats": {
+      "teamA": "Green",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 20,
+    "teamA": "UCC 2",
+    "teamB": "MTU 1",
+    "league": "Silver",
+    "boats": {
+      "teamA": "Blue",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 21,
+    "teamA": "MTU 2",
+    "teamB": "TUD 2",
+    "league": "Bronze",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    }
+  },
+  {
+    "raceNumber": 22,
+    "teamA": "TCD 2",
+    "teamB": "TCD 3",
+    "league": "Gold",
+    "boats": {
+      "teamA": "Green",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 23,
+    "teamA": "UCC 2",
+    "teamB": "DCU 1",
+    "league": "Silver",
+    "boats": {
+      "teamA": "Blue",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 24,
+    "teamA": "MTU 2",
+    "teamB": "UL 1",
+    "league": "Bronze",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    }
+  },
+  {
+    "raceNumber": 25,
+    "teamA": "TCD 4",
+    "teamB": "TCD 3",
+    "league": "Gold",
+    "boats": {
+      "teamA": "Green",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 26,
+    "teamA": "UCD 3",
+    "teamB": "DCU 1",
+    "league": "Silver",
+    "boats": {
+      "teamA": "Blue",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 27,
+    "teamA": "QUB 2",
+    "teamB": "UL 1",
+    "league": "Bronze",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    }
+  },
+  {
+    "raceNumber": 28,
+    "teamA": "TCD 4",
+    "teamB": "TCD 1",
+    "league": "Gold",
+    "boats": {
+      "teamA": "Green",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 29,
+    "teamA": "UCD 3",
+    "teamB": "UCD 2",
+    "league": "Silver",
+    "boats": {
+      "teamA": "Blue",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 30,
+    "teamA": "QUB 2",
+    "teamB": "UG 2",
+    "league": "Bronze",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    }
+  },
+  {
+    "raceNumber": 31,
+    "teamA": "UCD 1",
+    "teamB": "TCD 1",
+    "league": "Gold",
+    "boats": {
+      "teamA": "Green",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 32,
+    "teamA": "UG 1",
+    "teamB": "UCD 2",
+    "league": "Silver",
+    "boats": {
+      "teamA": "Blue",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 33,
+    "teamA": "UCC 3",
+    "teamB": "UG 2",
+    "league": "Bronze",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    }
+  },
+  {
+    "raceNumber": 34,
+    "teamA": "UCD 1",
+    "teamB": "UCC 1",
+    "league": "Gold",
+    "boats": {
+      "teamA": "Green",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 35,
+    "teamA": "UG 1",
+    "teamB": "TUD 1",
+    "league": "Silver",
+    "boats": {
+      "teamA": "Blue",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 36,
+    "teamA": "UCC 3",
+    "teamB": "TCD 5",
+    "league": "Bronze",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    }
+  },
+  {
+    "raceNumber": 37,
+    "teamA": "TCD 2",
+    "teamB": "UCC 1",
+    "league": "Gold",
+    "boats": {
+      "teamA": "Green",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 38,
+    "teamA": "UCC 2",
+    "teamB": "TUD 1",
+    "league": "Silver",
+    "boats": {
+      "teamA": "Blue",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 39,
+    "teamA": "MTU 2",
+    "teamB": "TCD 5",
+    "league": "Bronze",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    }
+  },
+  {
+    "raceNumber": 40,
+    "teamA": "TCD 2",
+    "teamB": "TCD 4",
+    "league": "Gold",
+    "boats": {
+      "teamA": "Green",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 41,
+    "teamA": "UCC 2",
+    "teamB": "UCD 3",
+    "league": "Silver",
+    "boats": {
+      "teamA": "Blue",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 42,
+    "teamA": "MTU 2",
+    "teamB": "QUB 2",
+    "league": "Bronze",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    }
+  },
+  {
+    "raceNumber": 43,
+    "teamA": "QUB 1",
+    "teamB": "TCD 4",
+    "league": "Gold",
+    "boats": {
+      "teamA": "Green",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 44,
+    "teamA": "MTU 1",
+    "teamB": "UCD 3",
+    "league": "Silver",
+    "boats": {
+      "teamA": "Blue",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 45,
+    "teamA": "TUD 2",
+    "teamB": "QUB 2",
+    "league": "Bronze",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    }
+  },
+  {
+    "raceNumber": 46,
+    "teamA": "QUB 1",
+    "teamB": "TCD 1",
+    "league": "Gold",
+    "boats": {
+      "teamA": "Green",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 47,
+    "teamA": "MTU 1",
+    "teamB": "UCD 2",
+    "league": "Silver",
+    "boats": {
+      "teamA": "Blue",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 48,
+    "teamA": "TUD 2",
+    "teamB": "UG 2",
+    "league": "Bronze",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    }
+  },
+  {
+    "raceNumber": 49,
+    "teamA": "UCC 1",
+    "teamB": "TCD 1",
+    "league": "Gold",
+    "boats": {
+      "teamA": "Green",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 50,
+    "teamA": "TUD 1",
+    "teamB": "UCD 2",
+    "league": "Silver",
+    "boats": {
+      "teamA": "Blue",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 51,
+    "teamA": "TCD 5",
+    "teamB": "UG 2",
+    "league": "Bronze",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    }
+  },
+  {
+    "raceNumber": 52,
+    "teamA": "UCC 1",
+    "teamB": "TCD 3",
+    "league": "Gold",
+    "boats": {
+      "teamA": "Green",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 53,
+    "teamA": "TUD 1",
+    "teamB": "DCU 1",
+    "league": "Silver",
+    "boats": {
+      "teamA": "Blue",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 54,
+    "teamA": "TCD 5",
+    "teamB": "UL 1",
+    "league": "Bronze",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    }
+  },
+  {
+    "raceNumber": 55,
+    "teamA": "QUB 1",
+    "teamB": "TCD 3",
+    "league": "Gold",
+    "boats": {
+      "teamA": "Green",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 56,
+    "teamA": "MTU 1",
+    "teamB": "DCU 1",
+    "league": "Silver",
+    "boats": {
+      "teamA": "Blue",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 57,
+    "teamA": "TUD 2",
+    "teamB": "UL 1",
+    "league": "Bronze",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    }
+  },
+  {
+    "raceNumber": 58,
+    "teamA": "QUB 1",
+    "teamB": "UCD 1",
+    "league": "Gold",
+    "boats": {
+      "teamA": "Green",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 59,
+    "teamA": "MTU 1",
+    "teamB": "UG 1",
+    "league": "Silver",
+    "boats": {
+      "teamA": "Blue",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 60,
+    "teamA": "TUD 2",
+    "teamB": "UCC 3",
+    "league": "Bronze",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    }
+  },
+  {
+    "raceNumber": 61,
+    "teamA": "TCD 2",
+    "teamB": "UCD 1",
+    "league": "Gold",
+    "boats": {
+      "teamA": "Green",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 62,
+    "teamA": "UCC 2",
+    "teamB": "UG 1",
+    "league": "Silver",
+    "boats": {
+      "teamA": "Blue",
+      "teamB": "White"
+    }
+  },
+  {
+    "raceNumber": 63,
+    "teamA": "MTU 2",
+    "teamB": "UCC 3",
+    "league": "Bronze",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
     }
   }
 ]
