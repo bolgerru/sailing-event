@@ -1,19 +1,12 @@
 [
   {
-    "team": "h",
+    "team": "a",
     "wins": 2,
-    "totalRaces": 2,
+    "totalRaces": 3,
     "points": 0,
-    "winPercentage": 100,
-    "place": 1
-  },
-  {
-    "team": "d",
-    "wins": 5,
-    "totalRaces": 5,
-    "points": 0,
-    "winPercentage": 100,
-    "place": 2
+    "winPercentage": 66.66666666666666,
+    "place": 1,
+    "tiebreakNote": "Won head-to-head vs b"
   },
   {
     "team": "b",
@@ -21,54 +14,25 @@
     "totalRaces": 3,
     "points": 0,
     "winPercentage": 66.66666666666666,
-    "place": 3
-  },
-  {
-    "team": "f",
-    "wins": 2,
-    "totalRaces": 3,
-    "points": 0,
-    "winPercentage": 66.66666666666666,
-    "place": 3
-  },
-  {
-    "team": "e",
-    "wins": 2,
-    "totalRaces": 4,
-    "points": 0,
-    "winPercentage": 50,
-    "place": 5
-  },
-  {
-    "team": "a",
-    "wins": 2,
-    "totalRaces": 4,
-    "points": 0,
-    "winPercentage": 50,
-    "place": 6
+    "place": 2,
+    "tiebreakNote": "Lost head-to-head vs a"
   },
   {
     "team": "c",
-    "wins": 0,
-    "totalRaces": 4,
-    "points": 0,
-    "winPercentage": 0,
-    "place": 7
-  },
-  {
-    "team": "g",
-    "wins": 0,
+    "wins": 1,
     "totalRaces": 3,
     "points": 0,
-    "winPercentage": 0,
-    "place": 7
+    "winPercentage": 33.33333333333333,
+    "place": 3,
+    "tiebreakNote": "Won head-to-head vs d"
   },
   {
-    "team": "i",
-    "wins": 0,
-    "totalRaces": 2,
+    "team": "d",
+    "wins": 1,
+    "totalRaces": 3,
     "points": 0,
-    "winPercentage": 0,
-    "place": 7
+    "winPercentage": 33.33333333333333,
+    "place": 4,
+    "tiebreakNote": "Lost head-to-head vs c"
   }
 ]

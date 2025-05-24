@@ -1,6 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Tooltip } from 'react-tooltip';
+import type { ITooltip } from 'react-tooltip';
+import 'react-tooltip/dist/react-tooltip.css';
 
 type LeaderboardEntry = {
   place: number;
@@ -8,6 +11,7 @@ type LeaderboardEntry = {
   wins: number;
   totalRaces: number;
   winPercentage: number;
+  tiebreakNote?: string;  // Add this field
 };
 
 export default function ResultsPage() {
@@ -56,7 +60,7 @@ export default function ResultsPage() {
       {typeof window !== 'undefined' && window.innerWidth < 768 ? (
         // Mobile view
         <div className="space-y-4">
-          {leaderboard.map(({ place, team, wins, totalRaces, winPercentage }) => (
+          {leaderboard.map(({ place, team, wins, totalRaces, winPercentage, tiebreakNote }) => (
             <div 
               key={team} 
               className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
@@ -66,6 +70,14 @@ export default function ResultsPage() {
                   {place}
                 </span>
                 <h2 className="font-semibold text-gray-800">{team}</h2>
+                {tiebreakNote && (
+                  <button
+                    data-tooltip-id={`tooltip-${team}`}
+                    className="ml-2 px-2 py-1 text-xs bg-blue-50 text-blue-600 rounded hover:bg-blue-100"
+                  >
+                    Tie Info
+                  </button>
+                )}
               </div>
               <div className="grid grid-cols-3 gap-2 text-sm">
                 <div className="text-center p-2 bg-gray-50 rounded">
@@ -81,6 +93,11 @@ export default function ResultsPage() {
                   <div className="font-semibold text-gray-800">{winPercentage.toFixed(1)}%</div>
                 </div>
               </div>
+              {tiebreakNote && (
+                <Tooltip id={`tooltip-${team}`} place="bottom">
+                  {tiebreakNote}
+                </Tooltip>
+              )}
             </div>
           ))}
         </div>
@@ -95,10 +112,11 @@ export default function ResultsPage() {
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Wins</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Total Races</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Win %</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Tie Info</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {leaderboard.map(({ place, team, wins, totalRaces, winPercentage }) => (
+              {leaderboard.map(({ place, team, wins, totalRaces, winPercentage, tiebreakNote }) => (
                 <tr 
                   key={team} 
                   className="bg-white hover:bg-gray-50 transition-colors"
@@ -112,6 +130,19 @@ export default function ResultsPage() {
                   <td className="px-6 py-4 text-gray-600">{wins}</td>
                   <td className="px-6 py-4 text-gray-600">{totalRaces}</td>
                   <td className="px-6 py-4 text-gray-600">{winPercentage.toFixed(1)}%</td>
+                  <td className="px-6 py-4">
+                    {tiebreakNote && (
+                      <button
+                        data-tooltip-id={`tooltip-${team}`}
+                        className="px-3 py-1 text-sm bg-blue-50 text-blue-600 rounded hover:bg-blue-100"
+                      >
+                        View
+                      </button>
+                    )}
+                    <Tooltip id={`tooltip-${team}`} place="left">
+                      {tiebreakNote}
+                    </Tooltip>
+                  </td>
                 </tr>
               ))}
             </tbody>

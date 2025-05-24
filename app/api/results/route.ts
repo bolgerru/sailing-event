@@ -9,6 +9,7 @@ type Race = {
   result?: number[] | null;
 };
 
+// First add tiebreak info to TeamStats type
 type TeamStats = {
   team: string;
   wins: number;
@@ -16,6 +17,24 @@ type TeamStats = {
   points: number;
   winPercentage: number;
   place: number;
+  tiebreakNote?: string;  // Add this field
+};
+
+// Add types for the stats objects
+type H2HStats = {
+  team: string;
+  wins: number;
+  totalGames: number;
+  totalPoints: number;
+  winPercentage: number;
+  avgPoints: number;
+  tiebreakNote?: string;
+};
+
+type CommonOpponentStats = {
+  team: string;
+  points: number;
+  tiebreakNote?: string;
 };
 
 // Load schedule JSON from disk
@@ -187,7 +206,7 @@ function resolveTeamGroup(group: TeamStats[], races: Race[]): TeamStats[] {
     console.log('\n✓ Complete round robin found - calculating head-to-head records');
     
     // Calculate head-to-head stats only against teams in this group
-    const h2hStats = group.map(team => {
+    const h2hStats: H2HStats[] = group.map(team => {
       const stats = {
         team: team.team,
         wins: 0,
@@ -218,7 +237,8 @@ function resolveTeamGroup(group: TeamStats[], races: Race[]): TeamStats[] {
         ...stats,
         team: team.team,
         winPercentage,
-        avgPoints
+        avgPoints,
+        tiebreakNote: undefined // initialize optional property
       };
     });
 
@@ -248,6 +268,18 @@ function resolveTeamGroup(group: TeamStats[], races: Race[]): TeamStats[] {
         }
         placesMap.set(stat.team, lastPlace);
         lastWinPct = stat.winPercentage;
+      });
+
+      // Add tiebreak notes
+      sortedByWinPct.forEach((stat, i) => {
+        const team = group.find(t => t.team === stat.team)!;
+        if (i === 0) {
+          const defeatedTeams = sortedByWinPct.slice(i + 1);
+          team.tiebreakNote = `Won head-to-head vs ${defeatedTeams.map(t => t.team).join(', ')}`;
+        } else {
+          const winningTeams = sortedByWinPct.slice(0, i);
+          team.tiebreakNote = `Lost head-to-head vs ${winningTeams.map(t => t.team).join(', ')}`;
+        }
       });
 
       console.log('\nAssigning places based on head-to-head records:');
@@ -301,6 +333,18 @@ function resolveTeamGroup(group: TeamStats[], races: Race[]): TeamStats[] {
         lastPoints = stat.avgPoints;
       });
 
+      // Add tiebreak notes
+      sortedByPoints.forEach((stat, i) => {
+        const team = group.find(t => t.team === stat.team)!;
+        if (i === 0) {
+          const defeatedTeams = sortedByPoints.slice(i + 1);
+          team.tiebreakNote = `Better head-to-head average points vs ${defeatedTeams.map(t => t.team).join(', ')}`;
+        } else {
+          const betterTeams = sortedByPoints.slice(0, i);
+          team.tiebreakNote = `Lower head-to-head average points vs ${betterTeams.map(t => t.team).join(', ')}`;
+        }
+      });
+
       console.log('\nAssigning places based on average points:');
       Array.from(placesMap.entries()).forEach(([team, place]) => {
         console.log(`${team}: place ${place}`);
@@ -329,13 +373,17 @@ function resolveTeamGroup(group: TeamStats[], races: Race[]): TeamStats[] {
   if (commonOpponents.length > 0) {
     console.log('Common opponents found:', commonOpponents.join(', '));
     
-    const commonOpponentStats = group.map(team => {
+    const commonOpponentStats: CommonOpponentStats[] = group.map(team => {
       const points = getPointsAgainstOpponents(team.team, commonOpponents, races);
       console.log(`${team.team} vs common opponents:`, {
         'total points': points,
         'opponents': commonOpponents.join(', ')
       });
-      return { team: team.team, points };
+      return { 
+        team: team.team, 
+        points,
+        tiebreakNote: undefined // initialize optional property
+      };
     });
 
     // Sort by points against common opponents
@@ -347,6 +395,18 @@ function resolveTeamGroup(group: TeamStats[], races: Race[]): TeamStats[] {
       console.log('Initial order:', sorted.map(s => 
         `${s.team} (${s.points} pts)`
       ).join(' → '));
+
+      // Add tiebreak notes
+      sorted.forEach((stat, i) => {
+        const team = group.find(t => t.team === stat.team)!;
+        if (i === 0) {
+          const defeatedTeams = sorted.slice(i + 1);
+          team.tiebreakNote = `Better vs common opponents than ${defeatedTeams.map(t => t.team).join(', ')}`;
+        } else {
+          const betterTeams = sorted.slice(0, i);
+          team.tiebreakNote = `Worse vs common opponents than ${betterTeams.map(t => t.team).join(', ')}`;
+        }
+      });
 
       // Group teams by points to handle sub-ties
       const pointGroups = new Map<number, TeamStats[]>();
@@ -416,6 +476,10 @@ function resolveTeamGroup(group: TeamStats[], races: Race[]): TeamStats[] {
   const sharedPlace = Math.min(...group.map(t => t.place || 1));
   group.forEach(team => {
     team.place = sharedPlace;
+    const tiedTeams = group.filter(t => t.team !== team.team);
+    team.tiebreakNote = tiedTeams.length > 0 
+      ? `Tied with ${tiedTeams.map(t => t.team).join(', ')}`
+      : undefined;
   });
   console.log('\nShared place assigned:', sharedPlace);
 
