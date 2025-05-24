@@ -6,7 +6,12 @@ type Race = {
   raceNumber: number;
   teamA: string;
   teamB: string;
+  league?: string;  // Add this field
   result?: number[] | null;
+  boats: {
+    teamA: string;
+    teamB: string;
+  };
 };
 
 // First add tiebreak info to TeamStats type
@@ -490,95 +495,182 @@ function resolveTeamGroup(group: TeamStats[], races: Race[]): TeamStats[] {
   return group;
 }
 
-function computeLeaderboard(races: Race[]): TeamStats[] {
-  const teams = new Set<string>();
-  races.forEach(race => {
-    teams.add(race.teamA);
-    teams.add(race.teamB);
-  });
+// Update the ComputeLeaderboard function
+function computeLeaderboard(races: Race[]): { [key: string]: TeamStats[] } {
+  // If no leagues are defined, create a default league with all races
+  if (!races.some(race => race.league)) {
+    console.log('\n=== Computing Single Leaderboard (No Leagues) ===');
+    
+    // Get all teams
+    const teams = new Set<string>();
+    races.forEach(race => {
+      teams.add(race.teamA);
+      teams.add(race.teamB);
+    });
 
-  const stats: TeamStats[] = Array.from(teams).map(team => ({
-    team,
-    wins: 0,
-    totalRaces: 0,
-    points: 0,
-    winPercentage: 0,
-    place: 0,
-  }));
+    const stats: TeamStats[] = Array.from(teams).map(team => ({
+      team,
+      wins: 0,
+      totalRaces: 0,
+      points: 0,
+      winPercentage: 0,
+      place: 0,
+      league: 'main'
+    }));
 
-  races.forEach(race => {
-    if (!isCompletedRace(race) || !race.result) return;
+    // Calculate stats
+    races.forEach(race => {
+      if (!isCompletedRace(race) || !race.result) return;
 
-    const teamAStats = stats.find(s => s.team === race.teamA)!;
-    const teamBStats = stats.find(s => s.team === race.teamB)!;
+      const teamAStats = stats.find(s => s.team === race.teamA)!;
+      const teamBStats = stats.find(s => s.team === race.teamB)!;
 
-    teamAStats.totalRaces++;
-    teamBStats.totalRaces++;
+      teamAStats.totalRaces++;
+      teamBStats.totalRaces++;
 
-    const teamAPoints = race.result.slice(0, 3).reduce((a, b) => a + b, 0);
-    const teamBPoints = race.result.slice(3).reduce((a, b) => a + b, 0);
+      const teamAPoints = race.result.slice(0, 3).reduce((a, b) => a + b, 0);
+      const teamBPoints = race.result.slice(3).reduce((a, b) => a + b, 0);
 
-    if (teamAPoints < teamBPoints) {
-      teamAStats.wins++;
-    } else if (teamBPoints < teamAPoints) {
-      teamBStats.wins++;
-    } else {
-      if (race.result.indexOf(1) < 3) {
+      if (teamAPoints < teamBPoints) {
+        teamAStats.wins++;
+      } else if (teamBPoints < teamAPoints) {
         teamBStats.wins++;
       } else {
-        teamAStats.wins++;
+        if (race.result.indexOf(1) < 3) {
+          teamBStats.wins++;
+        } else {
+          teamAStats.wins++;
+        }
+      }
+    });
+
+    stats.forEach(team => {
+      team.winPercentage = team.totalRaces > 0 ? (team.wins / team.totalRaces) * 100 : 0;
+    });
+
+    // Process win percentage groups
+    const winPercentageGroups = new Map<number, TeamStats[]>();
+    stats.forEach(team => {
+      if (!winPercentageGroups.has(team.winPercentage)) {
+        winPercentageGroups.set(team.winPercentage, []);
+      }
+      winPercentageGroups.get(team.winPercentage)!.push(team);
+    });
+
+    const sortedTeams: TeamStats[] = [];
+    let globalPlace = 1;
+
+    for (const [winPct, group] of Array.from(winPercentageGroups.entries()).sort((a, b) => b[0] - a[0])) {
+      if (group.length === 1) {
+        group[0].place = globalPlace;
+        sortedTeams.push(group[0]);
+        globalPlace++;
+      } else {
+        group.forEach(team => team.place = globalPlace);
+        const resolved = resolveTeamGroup(group, races);
+        sortedTeams.push(...resolved);
+        globalPlace += group.length;
       }
     }
-  });
 
-  stats.forEach(team => {
-    team.winPercentage = team.totalRaces > 0 ? (team.wins / team.totalRaces) * 100 : 0;
-  });
-
-  const winPercentageGroups = new Map<number, TeamStats[]>();
-  stats.forEach(team => {
-    if (!winPercentageGroups.has(team.winPercentage)) {
-      winPercentageGroups.set(team.winPercentage, []);
-    }
-    winPercentageGroups.get(team.winPercentage)!.push(team);
-  });
-
-  const sortedTeams: TeamStats[] = [];
-  let globalPlace = 1;  // Track overall place across all groups
-
-  // Process each win percentage group
-  for (const [winPct, group] of Array.from(winPercentageGroups.entries()).sort((a, b) => b[0] - a[0])) {
-    console.log(`\nProcessing win percentage group: ${winPct.toFixed(2)}%`);
-    console.log('Teams:', group.map(t => t.team).join(', '));
-    console.log('Starting at place:', globalPlace);
-
-    if (group.length === 1) {
-      // Single team in group - assign current place
-      group[0].place = globalPlace;
-      sortedTeams.push(group[0]);
-      console.log(`Assigned place ${globalPlace} to ${group[0].team} (no tiebreak needed)`);
-      globalPlace++;
-    } else {
-      // Multiple teams tied - resolve using tiebreakers
-      // Set initial place for the group
-      group.forEach(team => team.place = globalPlace);
-      
-      const resolved = resolveTeamGroup(group, races);
-      sortedTeams.push(...resolved);
-      
-      // Update global place to account for all teams in this group
-      globalPlace += group.length;
-      console.log(`Next global place will be: ${globalPlace}`);
-    }
+    return { main: sortedTeams };
   }
 
-  console.log('\nFinal leaderboard places:', sortedTeams.map(t => 
-    `${t.team}: ${t.place}`
-  ).join(', '));
+  // Existing league-based logic
+  const leagueRaces = new Map<string, Race[]>();
+  races.forEach(race => {
+    if (!race.league) return;
+    if (!leagueRaces.has(race.league)) {
+      leagueRaces.set(race.league, []);
+    }
+    leagueRaces.get(race.league)!.push(race);
+  });
 
-  return sortedTeams;
+  // Create leaderboard for each league
+  const leagueLeaderboards: { [key: string]: TeamStats[] } = {};
+
+  leagueRaces.forEach((leagueRaces, leagueName) => {
+    console.log(`\n=== Computing Leaderboard for ${leagueName} League ===`);
+    
+    // Get teams in this league
+    const teams = new Set<string>();
+    leagueRaces.forEach(race => {
+      teams.add(race.teamA);
+      teams.add(race.teamB);
+    });
+
+    const stats: TeamStats[] = Array.from(teams).map(team => ({
+      team,
+      wins: 0,
+      totalRaces: 0,
+      points: 0,
+      winPercentage: 0,
+      place: 0,
+      league: leagueName, // Add league to stats
+    }));
+
+    // Calculate stats for this league
+    leagueRaces.forEach(race => {
+      if (!isCompletedRace(race) || !race.result) return;
+
+      const teamAStats = stats.find(s => s.team === race.teamA)!;
+      const teamBStats = stats.find(s => s.team === race.teamB)!;
+
+      teamAStats.totalRaces++;
+      teamBStats.totalRaces++;
+
+      const teamAPoints = race.result.slice(0, 3).reduce((a, b) => a + b, 0);
+      const teamBPoints = race.result.slice(3).reduce((a, b) => a + b, 0);
+
+      if (teamAPoints < teamBPoints) {
+        teamAStats.wins++;
+      } else if (teamBPoints < teamAPoints) {
+        teamBStats.wins++;
+      } else {
+        if (race.result.indexOf(1) < 3) {
+          teamBStats.wins++;
+        } else {
+          teamAStats.wins++;
+        }
+      }
+    });
+
+    stats.forEach(team => {
+      team.winPercentage = team.totalRaces > 0 ? (team.wins / team.totalRaces) * 100 : 0;
+    });
+
+    // Process win percentage groups for this league
+    const winPercentageGroups = new Map<number, TeamStats[]>();
+    stats.forEach(team => {
+      if (!winPercentageGroups.has(team.winPercentage)) {
+        winPercentageGroups.set(team.winPercentage, []);
+      }
+      winPercentageGroups.get(team.winPercentage)!.push(team);
+    });
+
+    const sortedTeams: TeamStats[] = [];
+    let globalPlace = 1;
+
+    for (const [winPct, group] of Array.from(winPercentageGroups.entries()).sort((a, b) => b[0] - a[0])) {
+      if (group.length === 1) {
+        group[0].place = globalPlace;
+        sortedTeams.push(group[0]);
+        globalPlace++;
+      } else {
+        group.forEach(team => team.place = globalPlace);
+        const resolved = resolveTeamGroup(group, leagueRaces);
+        sortedTeams.push(...resolved);
+        globalPlace += group.length;
+      }
+    }
+
+    leagueLeaderboards[leagueName] = sortedTeams;
+  });
+
+  return leagueLeaderboards;
 }
 
+// Update the POST handler
 export async function POST(req: Request) {
   try {
     const { raceNumber, result } = await req.json();
@@ -609,13 +701,13 @@ export async function POST(req: Request) {
     races[raceIndex].result = result;
     await saveSchedule(races);
 
-    const leaderboard = computeLeaderboard(races);
+    const leagueLeaderboards = computeLeaderboard(races);
     const leaderboardPath = path.join(process.cwd(), 'data', 'leaderboard.json');
-    await fs.writeFile(leaderboardPath, JSON.stringify(leaderboard, null, 2));
+    await fs.writeFile(leaderboardPath, JSON.stringify(leagueLeaderboards, null, 2));
 
     return NextResponse.json({
       success: true,
-      message: 'Results and leaderboard updated successfully',
+      message: 'Results and leaderboards updated successfully',
     });
   } catch (error) {
     console.error('Error in POST /api/results:', error);

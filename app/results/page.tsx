@@ -1,154 +1,155 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { Tooltip } from 'react-tooltip';
-import type { ITooltip } from 'react-tooltip';
-import 'react-tooltip/dist/react-tooltip.css';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
-type LeaderboardEntry = {
-  place: number;
+interface TeamStats {
   team: string;
   wins: number;
   totalRaces: number;
+  points: number;
   winPercentage: number;
-  tiebreakNote?: string;  // Add this field
-};
+  place: number;
+  league: string;
+  tiebreakNote?: string;
+}
+
+interface LeagueLeaderboards {
+  [key: string]: TeamStats[];
+}
 
 export default function ResultsPage() {
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [leaderboards, setLeaderboards] = useState<LeagueLeaderboards>({});
+  const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/leaderboard')
-      .then((res) => {
+    const fetchLeaderboard = async () => {
+      try {
+        const res = await fetch('/api/leaderboard');
         if (!res.ok) {
-          throw new Error(`Failed to fetch leaderboard: ${res.status} ${res.statusText}`);
+          throw new Error('Failed to fetch leaderboard');
         }
-        return res.json();
-      })
-      .then((data: LeaderboardEntry[]) => {
-        setLeaderboard(data);
-      })
-      .catch((err: Error) => {
-        setError(err.message);
-      });
+        const data = await res.json();
+        setLeaderboards(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load leaderboard');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLeaderboard();
   }, []);
 
-  if (error) {
+  if (loading) {
     return (
-      <div className="p-4 mx-4 bg-red-50 rounded-lg text-red-600 text-center shadow-sm">
-        Error: {error}
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-pulse text-gray-500">Loading leaderboards...</div>
       </div>
     );
   }
 
-  if (!leaderboard) {
+  if (error) {
     return (
-      <div className="p-4 text-center text-gray-600 animate-pulse">
-        Loading leaderboard...
+      <div className="flex justify-center items-center h-64">
+        <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg shadow">
+          {error}
+        </div>
+      </div>
+    );
+  }
+
+  if (Object.keys(leaderboards).length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <div className="text-xl font-semibold text-gray-600">No Results Yet</div>
+        <p className="text-gray-500 text-center max-w-md">
+          Leaderboards will appear here once races have been completed and scored.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="p-4 max-w-3xl mx-auto">
-      <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center text-gray-800">
-        Leaderboard
-      </h1>
-      
-      {/* Only show one view based on screen size */}
-      {typeof window !== 'undefined' && window.innerWidth < 768 ? (
-        // Mobile view
-        <div className="space-y-4">
-          {leaderboard.map(({ place, team, wins, totalRaces, winPercentage, tiebreakNote }) => (
-            <div 
-              key={team} 
-              className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <span className="flex-none w-8 h-8 bg-blue-50 rounded-full flex items-center justify-center text-blue-600 font-semibold">
-                  {place}
-                </span>
-                <h2 className="font-semibold text-gray-800">{team}</h2>
-                {tiebreakNote && (
-                  <button
-                    data-tooltip-id={`tooltip-${team}`}
-                    className="ml-2 px-2 py-1 text-xs bg-blue-50 text-blue-600 rounded hover:bg-blue-100"
-                  >
-                    Tie Info
-                  </button>
-                )}
-              </div>
-              <div className="grid grid-cols-3 gap-2 text-sm">
-                <div className="text-center p-2 bg-gray-50 rounded">
-                  <div className="text-gray-600">Wins</div>
-                  <div className="font-semibold text-gray-800">{wins}</div>
-                </div>
-                <div className="text-center p-2 bg-gray-50 rounded">
-                  <div className="text-gray-600">Races</div>
-                  <div className="font-semibold text-gray-800">{totalRaces}</div>
-                </div>
-                <div className="text-center p-2 bg-gray-50 rounded">
-                  <div className="text-gray-600">Win %</div>
-                  <div className="font-semibold text-gray-800">{winPercentage.toFixed(1)}%</div>
-                </div>
-              </div>
-              {tiebreakNote && (
-                <Tooltip id={`tooltip-${team}`} place="bottom">
-                  {tiebreakNote}
-                </Tooltip>
-              )}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      {Object.entries(leaderboards).map(([leagueName, teams]) => (
+        <div key={leagueName} className="bg-white shadow-lg rounded-xl overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+            <h2 className="text-2xl font-bold text-white capitalize">
+              {leagueName === 'main' ? 'Overall' : `${leagueName} League`}
+            </h2>
+          </div>
+          <div className="p-6">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead>
+                  <tr>
+                    <th className="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Place
+                    </th>
+                    <th className="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Team
+                    </th>
+                    <th className="px-4 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Wins
+                    </th>
+                    <th className="px-4 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Races
+                    </th>
+                    <th className="px-4 py-3 bg-gray-50 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Win %
+                    </th>
+                    <th className="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Notes
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {teams.map((team, idx) => (
+                    <tr 
+                      key={team.team}
+                      className={`
+                        hover:bg-blue-50 transition-colors
+                        ${team.place === 1 ? 'bg-yellow-50' : ''}
+                        ${team.place === 2 ? 'bg-gray-50' : ''}
+                        ${team.place === 3 ? 'bg-orange-50' : ''}
+                      `}
+                    >
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <span className={`
+                          inline-flex items-center justify-center w-8 h-8 rounded-full 
+                          ${team.place === 1 ? 'bg-yellow-100 text-yellow-800' : ''}
+                          ${team.place === 2 ? 'bg-gray-100 text-gray-800' : ''}
+                          ${team.place === 3 ? 'bg-orange-100 text-orange-800' : ''}
+                          ${team.place > 3 ? 'bg-blue-50 text-blue-800' : ''}
+                        `}>
+                          {team.place}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900">
+                        {team.team}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-right">
+                        {team.wins}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-right">
+                        {team.totalRaces}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-right font-medium">
+                        {team.winPercentage.toFixed(1)}%
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-500">
+                        {team.tiebreakNote}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          ))}
+          </div>
         </div>
-      ) : (
-        // Desktop view
-        <div className="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-50">
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Place</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Team</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Wins</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Total Races</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Win %</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Tie Info</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {leaderboard.map(({ place, team, wins, totalRaces, winPercentage, tiebreakNote }) => (
-                <tr 
-                  key={team} 
-                  className="bg-white hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center justify-center w-8 h-8 bg-blue-50 text-blue-600 rounded-full font-semibold">
-                      {place}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 font-medium text-gray-800">{team}</td>
-                  <td className="px-6 py-4 text-gray-600">{wins}</td>
-                  <td className="px-6 py-4 text-gray-600">{totalRaces}</td>
-                  <td className="px-6 py-4 text-gray-600">{winPercentage.toFixed(1)}%</td>
-                  <td className="px-6 py-4">
-                    {tiebreakNote && (
-                      <button
-                        data-tooltip-id={`tooltip-${team}`}
-                        className="px-3 py-1 text-sm bg-blue-50 text-blue-600 rounded hover:bg-blue-100"
-                      >
-                        View
-                      </button>
-                    )}
-                    <Tooltip id={`tooltip-${team}`} place="left">
-                      {tiebreakNote}
-                    </Tooltip>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      ))}
     </div>
   );
 }

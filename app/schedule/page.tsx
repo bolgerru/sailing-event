@@ -4,6 +4,7 @@ type Race = {
   raceNumber: number;
   teamA: string;
   teamB: string;
+  league?: string;
   result: number[] | null;
   boats: {
     teamA: string;
@@ -40,6 +41,20 @@ async function getRaces() {
   });
   if (!res.ok) return [];
   return res.json() as Promise<Race[]>;
+}
+
+// Add this helper function at the top of the file after the type definitions
+function getLeagueTagColors(league: string): string {
+  switch (league.toLowerCase()) {
+    case 'gold':
+      return 'bg-yellow-100 text-yellow-800';
+    case 'silver':
+      return 'bg-gray-100 text-gray-800';
+    case 'bronze':
+      return 'bg-orange-100 text-orange-800';
+    default:
+      return 'bg-blue-100 text-blue-800';
+  }
 }
 
 export default async function SchedulePage() {
@@ -85,6 +100,16 @@ export default async function SchedulePage() {
                     <div className="text-xs md:text-sm text-gray-500 text-center mt-1">
                       ({race.boats.teamA}) vs ({race.boats.teamB})
                     </div>
+                    {race.league && (
+                      <div className="mt-2 flex justify-center">
+                        <span className={`
+                          inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
+                          ${getLeagueTagColors(race.league)}
+                        `}>
+                          {race.league === 'main' ? 'Overall' : `${race.league} League`}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -125,6 +150,16 @@ export default async function SchedulePage() {
                     <div className="text-xs md:text-sm text-gray-500 text-center mt-1">
                       ({race.boats.teamA}) vs ({race.boats.teamB})
                     </div>
+                    {race.league && (
+                      <div className="mt-2 flex justify-center">
+                        <span className={`
+                          inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
+                          ${getLeagueTagColors(race.league)}
+                        `}>
+                          {race.league === 'main' ? 'Overall' : `${race.league} League`}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 

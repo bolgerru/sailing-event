@@ -19,12 +19,21 @@ interface BoatSet {
   team2Color: string;
 }
 
+interface League {
+  id: string;
+  name: string;
+  teams: string[];
+  boatSets: BoatSet[];
+}
+
 export default function AdminResultsForm({ races: initialRaces }: { races: Race[] }) {
   const [races, setRaces] = useState<Race[]>(initialRaces);
   const [formData, setFormData] = useState<{ [key: number]: (number | '')[] }>({});
   const [teamInput, setTeamInput] = useState<string>('');
   const [showTeamInput, setShowTeamInput] = useState(false);
   const [boatSets, setBoatSets] = useState<BoatSet[]>([]);
+  const [leagues, setLeagues] = useState<League[]>([]);
+  const [useLeagues, setUseLeagues] = useState(false);
 
   useEffect(() => {
     // Load initial form data - set empty strings instead of zeros
@@ -198,47 +207,130 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     setBoatSets(newBoatSets);
   };
 
+  const handleAddLeague = () => {
+    setLeagues([
+      ...leagues,
+      {
+        id: `league-${leagues.length + 1}`,
+        name: `League ${leagues.length + 1}`,
+        teams: [],
+        boatSets: [{
+          id: `set-1`,
+          team1Color: '',
+          team2Color: ''
+        }]
+      }
+    ]);
+  };
+
+  const handleRemoveLeague = (index: number) => {
+    const newLeagues = [...leagues];
+    newLeagues.splice(index, 1);
+    setLeagues(newLeagues);
+  };
+
+  const handleLeagueChange = (index: number, field: keyof League, value: any) => {
+    const newLeagues = [...leagues];
+    newLeagues[index][field] = value;
+    setLeagues(newLeagues);
+  };
+
+  const handleAddBoatSetToLeague = (leagueIndex: number) => {
+    const newLeagues = [...leagues];
+    const league = newLeagues[leagueIndex];
+    league.boatSets.push({
+      id: `set-${league.boatSets.length + 1}`,
+      team1Color: '',
+      team2Color: ''
+    });
+    setLeagues(newLeagues);
+  };
+
   const handleGenerateSchedule = async () => {
-    if (boatSets.length === 0) {
-      alert('Please add at least one boat set');
-      return;
+    if (useLeagues) {
+      // Validate leagues
+      if (leagues.length === 0) {
+        alert('Please add at least one league');
+        return;
+      }
+
+      for (const league of leagues) {
+        if (league.teams.length < 2) {
+          alert(`${league.name} needs at least 2 teams`);
+          return;
+        }
+        if (league.boatSets.length === 0) {
+          alert(`${league.name} needs at least one boat set`);
+          return;
+        }
+      }
+
+      // Generate schedule with leagues
+      const scheduleRes = await fetch('/api/schedule/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ leagues }),
+      });
+
+      const scheduleData = await scheduleRes.json();
+      if (!scheduleRes.ok) {
+        alert(`Error generating schedule: ${scheduleData.error || 'Unknown error'}`);
+        return;
+      }
+
+      const leaderboardRes = await fetch('/api/results/reset', {
+        method: 'POST',
+      });
+
+      if (!leaderboardRes.ok) {
+        alert('Warning: Failed to reset leaderboard');
+      }
+
+      alert('Schedule generated and leaderboard reset successfully');
+      setShowTeamInput(false);
+      await fetchRaces();
+    } else {
+      if (boatSets.length === 0) {
+        alert('Please add at least one boat set');
+        return;
+      }
+
+      const teams = teamInput.split(',').map((t) => t.trim()).filter(Boolean);
+      if (teams.length < 2) {
+        alert('Please enter at least 2 teams');
+        return;
+      }
+
+      const scheduleRes = await fetch('/api/schedule/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          teams,
+          boatSets: boatSets.map((set) => ({
+            ...set,
+            id: set.id.replace('set-', '')
+          })),
+        }),
+      });
+
+      const scheduleData = await scheduleRes.json();
+      if (!scheduleRes.ok) {
+        alert(`Error generating schedule: ${scheduleData.error || 'Unknown error'}`);
+        return;
+      }
+
+      const leaderboardRes = await fetch('/api/results/reset', {
+        method: 'POST',
+      });
+
+      if (!leaderboardRes.ok) {
+        alert('Warning: Failed to reset leaderboard');
+      }
+
+      alert('Schedule generated and leaderboard reset successfully');
+      setShowTeamInput(false);
+      await fetchRaces();
     }
-
-    const teams = teamInput.split(',').map((t) => t.trim()).filter(Boolean);
-    if (teams.length < 2) {
-      alert('Please enter at least 2 teams');
-      return;
-    }
-
-    const scheduleRes = await fetch('/api/schedule/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        teams,
-        boatSets: boatSets.map((set) => ({
-          ...set,
-          id: set.id.replace('set-', '')
-        })),
-      }),
-    });
-
-    const scheduleData = await scheduleRes.json();
-    if (!scheduleRes.ok) {
-      alert(`Error generating schedule: ${scheduleData.error || 'Unknown error'}`);
-      return;
-    }
-
-    const leaderboardRes = await fetch('/api/results/reset', {
-      method: 'POST',
-    });
-
-    if (!leaderboardRes.ok) {
-      alert('Warning: Failed to reset leaderboard');
-    }
-
-    alert('Schedule generated and leaderboard reset successfully');
-    setShowTeamInput(false);
-    await fetchRaces();
   };
 
   // Helper function to determine if team is winning (add this before the return statement)
@@ -255,74 +347,212 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 mb-6">
-        {showTeamInput ? (
-          <div className="bg-white p-4 border rounded-md">
-            <label className="block text-sm mb-2">Enter team names (separated by commas):</label>
-            <textarea
-              value={teamInput}
-              onChange={(e) => setTeamInput(e.target.value)}
-              className="w-full border rounded px-2 py-1 mb-4 h-24"
-            />
-            <div className="mb-4">
-              <label className="block text-sm mb-2">Boat Sets:</label>
-              {boatSets.map((set, index) => (
-                <div key={set.id} className="flex gap-2 mb-2 items-center">
-                  <input
-                    type="text"
-                    value={set.team1Color}
-                    onChange={(e) => handleBoatSetChange(index, 'team1Color', e.target.value)}
-                    placeholder="Team 1 Color"
-                    className="border rounded px-2 py-1"
-                  />
-                  <span>vs</span>
-                  <input
-                    type="text"
-                    value={set.team2Color}
-                    onChange={(e) => handleBoatSetChange(index, 'team2Color', e.target.value)}
-                    placeholder="Team 2 Color"
-                    className="border rounded px-2 py-1"
-                  />
-                  <button
-                    onClick={() => handleRemoveBoatSet(index)}
-                    className="text-red-600 hover:text-red-800 px-2"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-              <button
-                onClick={handleAddBoatSet}
-                className="text-blue-600 hover:text-blue-800"
-              >
-                + Add Boat Set
-              </button>
-            </div>
-            <div className="flex gap-4">
-              <button
-                onClick={handleGenerateSchedule}
-                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-              >
-                Generate Schedule
-              </button>
-              <button
-                onClick={() => setShowTeamInput(false)}
-                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        ) : (
+      {/* Add Generate Schedule button at the top */}
+      {!showTeamInput && (
+        <div className="flex justify-end">
           <button
             onClick={handleShowTeamInput}
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 self-end"
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
           >
             Generate New Schedule
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
+      {showTeamInput && (
+        <div className="bg-white p-4 border rounded-md">
+          <div className="mb-4">
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={useLeagues}
+                onChange={(e) => setUseLeagues(e.target.checked)}
+                className="rounded text-blue-600"
+              />
+              <span>Use Multiple Leagues</span>
+            </label>
+          </div>
+
+          {useLeagues ? (
+            <div className="space-y-6">
+              {leagues.map((league, leagueIndex) => (
+                <div key={league.id} className="border p-4 rounded-lg">
+                  <div className="flex justify-between items-center mb-4">
+                    <input
+                      type="text"
+                      value={league.name}
+                      onChange={(e) => handleLeagueChange(leagueIndex, 'name', e.target.value)}
+                      className="font-bold text-lg border-b w-full mr-4"
+                      placeholder="League Name"
+                    />
+                    <button
+                      onClick={() => handleRemoveLeague(leagueIndex)}
+                      className="text-red-600 hover:text-red-800 px-2"
+                    >
+                      ×
+                    </button>
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="block text-sm mb-2">Teams:</label>
+                    <textarea
+                      value={typeof league.teams === 'string' ? league.teams : league.teams.join(', ')}
+                      onChange={(e) => {
+                        const inputValue = e.target.value;
+                        handleLeagueChange(leagueIndex, 'teams', inputValue);
+                      }}
+                      onBlur={(e) => {
+                        // Convert to array when focus is lost
+                        const teams = e.target.value
+                          .split(',')
+                          .map(team => team.trim())
+                          .filter(team => team.length > 0);
+                        handleLeagueChange(leagueIndex, 'teams', teams);
+                      }}
+                      className="w-full border rounded px-2 py-1 h-24"
+                      placeholder="Enter team names, separated by commas"
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="block text-sm mb-2">Boat Sets:</label>
+                    {league.boatSets.map((set, setIndex) => (
+                      <div key={set.id} className="flex gap-2 mb-2">
+                        <input
+                          type="text"
+                          value={set.team1Color}
+                          onChange={(e) => {
+                            const newLeagues = [...leagues];
+                            newLeagues[leagueIndex].boatSets[setIndex].team1Color = e.target.value;
+                            setLeagues(newLeagues);
+                          }}
+                          className="border rounded px-2 py-1"
+                          placeholder="Team 1 Color"
+                        />
+                        <span>vs</span>
+                        <input
+                          type="text"
+                          value={set.team2Color}
+                          onChange={(e) => {
+                            const newLeagues = [...leagues];
+                            newLeagues[leagueIndex].boatSets[setIndex].team2Color = e.target.value;
+                            setLeagues(newLeagues);
+                          }}
+                          className="border rounded px-2 py-1"
+                          placeholder="Team 2 Color"
+                        />
+                        {/* Add remove button */}
+                        {league.boatSets.length > 1 && (
+                          <button
+                            onClick={() => {
+                              const newLeagues = [...leagues];
+                              newLeagues[leagueIndex].boatSets.splice(setIndex, 1);
+                              setLeagues(newLeagues);
+                            }}
+                            className="text-red-600 hover:text-red-800 px-2"
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    <button
+                      onClick={() => handleAddBoatSetToLeague(leagueIndex)}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      + Add Boat Set
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              <button
+                onClick={handleAddLeague}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                Add League
+              </button>
+
+              {/* Add Generate Schedule button */}
+              <div className="flex gap-4 mt-6">
+                <button
+                  onClick={handleGenerateSchedule}
+                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                >
+                  Generate Schedule
+                </button>
+                <button
+                  onClick={() => setShowTeamInput(false)}
+                  className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="bg-white p-4 border rounded-md">
+                <label className="block text-sm mb-2">Enter team names (separated by commas):</label>
+                <textarea
+                  value={teamInput}
+                  onChange={(e) => setTeamInput(e.target.value)}
+                  className="w-full border rounded px-2 py-1 mb-4 h-24"
+                  placeholder="Enter team names (separated by commas)"
+                />
+                <div className="mb-4">
+                  <label className="block text-sm mb-2">Boat Sets:</label>
+                  {boatSets.map((set, index) => (
+                    <div key={set.id} className="flex gap-2 mb-2 items-center">
+                      <input
+                        type="text"
+                        value={set.team1Color}
+                        onChange={(e) => handleBoatSetChange(index, 'team1Color', e.target.value)}
+                        placeholder="Team 1 Color"
+                        className="border rounded px-2 py-1"
+                      />
+                      <span>vs</span>
+                      <input
+                        type="text"
+                        value={set.team2Color}
+                        onChange={(e) => handleBoatSetChange(index, 'team2Color', e.target.value)}
+                        placeholder="Team 2 Color"
+                        className="border rounded px-2 py-1"
+                      />
+                      <button
+                        onClick={() => handleRemoveBoatSet(index)}
+                        className="text-red-600 hover:text-red-800 px-2"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    onClick={handleAddBoatSet}
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    + Add Boat Set
+                  </button>
+                </div>
+                <div className="flex gap-4">
+                  <button
+                    onClick={handleGenerateSchedule}
+                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                  >
+                    Generate Schedule
+                  </button>
+                  <button
+                    onClick={() => setShowTeamInput(false)}
+                    className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      
       {races.map((race) => {
         const result = formData[race.raceNumber];
         const teamAScore = getTeamScore(result, 0);
