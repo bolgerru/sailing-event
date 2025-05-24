@@ -19,6 +19,19 @@ interface LeagueLeaderboards {
   [key: string]: TeamStats[];
 }
 
+function getPlaceStyles(place: number): { bg: string; text: string } {
+  switch (place) {
+    case 1:
+      return { bg: 'bg-yellow-50', text: 'text-yellow-800' };
+    case 2:
+      return { bg: 'bg-gray-50', text: 'text-gray-800' };
+    case 3:
+      return { bg: 'bg-orange-50', text: 'text-orange-800' };
+    default:
+      return { bg: 'bg-blue-50', text: 'text-blue-600' };
+  }
+}
+
 export default function ResultsPage() {
   const [leaderboards, setLeaderboards] = useState<LeagueLeaderboards>({});
   const [error, setError] = useState<string>("");
@@ -80,10 +93,10 @@ export default function ResultsPage() {
             {teams.map((team) => (
               <div 
                 key={team.team} 
-                className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
+                className={`${getPlaceStyles(team.place).bg} rounded-xl p-4 shadow-sm border border-gray-100`}
               >
                 <div className="flex items-center gap-3 mb-2">
-                  <span className="flex-none w-8 h-8 bg-blue-50 rounded-full flex items-center justify-center text-blue-600 font-semibold">
+                  <span className={`flex-none w-8 h-8 ${getPlaceStyles(team.place).bg} ${getPlaceStyles(team.place).text} rounded-full flex items-center justify-center font-semibold`}>
                     {team.place}
                   </span>
                   <h2 className="font-semibold text-gray-800">{team.team}</h2>
@@ -136,10 +149,10 @@ export default function ResultsPage() {
                 {teams.map((team) => (
                   <tr 
                     key={team.team} 
-                    className="bg-white hover:bg-gray-50 transition-colors"
+                    className={`${getPlaceStyles(team.place).bg} hover:bg-opacity-75 transition-colors`}
                   >
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center justify-center w-8 h-8 bg-blue-50 text-blue-600 rounded-full font-semibold">
+                      <span className={`inline-flex items-center justify-center w-8 h-8 ${getPlaceStyles(team.place).bg} ${getPlaceStyles(team.place).text} rounded-full font-semibold`}>
                         {team.place}
                       </span>
                     </td>
