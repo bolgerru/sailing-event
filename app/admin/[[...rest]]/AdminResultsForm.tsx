@@ -382,6 +382,7 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
         return;
       }
 
+      // Generate schedule
       const scheduleRes = await fetch('/api/schedule/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -391,6 +392,15 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
       });
 
       if (scheduleRes.ok) {
+        // Reset leaderboard
+        const leaderboardRes = await fetch('/api/results/reset', {
+          method: 'POST',
+        });
+
+        if (!leaderboardRes.ok) {
+          alert('Warning: Failed to reset leaderboard');
+        }
+
         // Save current settings with leagues
         await fetch('/api/settings', {
           method: 'POST',
