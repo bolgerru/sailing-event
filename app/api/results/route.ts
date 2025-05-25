@@ -720,23 +720,16 @@ function computeLeaderboard(races: Race[]): { [key: string]: TeamStats[] } {
   return leagueLeaderboards;
 }
 
-// Update the POST handler
+// Update the POST handler to handle race status updates
 export async function POST(req: Request) {
   try {
-    const { raceNumber, result } = await req.json();
+    const body = await req.json();
+    const { raceNumber, result, status, startTime, endTime } = body;
 
-    if (
-      typeof raceNumber !== 'number' ||
-      (result !== null &&
-        (!Array.isArray(result) ||
-          result.length !== 6 ||
-          result.some(score => typeof score !== 'number')))
-    ) {
+    // Validate raceNumber
+    if (typeof raceNumber !== 'number') {
       return NextResponse.json(
-        {
-          error:
-            'Invalid input: raceNumber must be a number and result must be an array of 6 numbers or null',
-        },
+        { error: 'raceNumber must be a number' },
         { status: 400 }
       );
     }
@@ -745,27 +738,38 @@ export async function POST(req: Request) {
     const raceIndex = races.findIndex(r => r.raceNumber === raceNumber);
 
     if (raceIndex === -1) {
-      return NextResponse.json({ error: `Race ${raceNumber} not found` }, { status: 404 });
+      return NextResponse.json(
+        { error: `Race ${raceNumber} not found` },
+        { status: 404 }
+      );
     }
 
-    races[raceIndex].result = result;
+    // Update race data
+    races[raceIndex] = {
+      ...races[raceIndex],
+      ...(status && { status }),
+      ...(startTime && { startTime }),
+      ...(endTime && { endTime }),
+      ...(result !== undefined && { result })
+    };
+
     await saveSchedule(races);
 
-    const leagueLeaderboards = computeLeaderboard(races);
-    const leaderboardPath = path.join(process.cwd(), 'data', 'leaderboard.json');
-    await fs.writeFile(leaderboardPath, JSON.stringify(leagueLeaderboards, null, 2));
+    // Only compute leaderboard if results were updated
+    if (result !== undefined) {
+      const leagueLeaderboards = computeLeaderboard(races);
+      const leaderboardPath = path.join(process.cwd(), 'data', 'leaderboard.json');
+      await fs.writeFile(leaderboardPath, JSON.stringify(leagueLeaderboards, null, 2));
+    }
 
     return NextResponse.json({
       success: true,
-      message: 'Results and leaderboards updated successfully',
+      message: 'Race updated successfully'
     });
   } catch (error) {
     console.error('Error in POST /api/results:', error);
     return NextResponse.json(
-      {
-        error: 'Internal server error',
-        details: error instanceof Error ? error.message : String(error),
-      },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

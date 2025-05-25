@@ -9,8 +9,11 @@ type Race = {
   result?: number[] | null;
   winner?: string | null;
   boats?: {
-    [key: string]: string;  // Format: "set-1-team1": "blue", "set-1-team2": "red"
+    [key: string]: string;
   };
+  status?: 'not_started' | 'in_progress' | 'finished';
+  startTime?: string;
+  endTime?: string;
 };
 
 interface BoatSet {
@@ -102,6 +105,25 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     setFormData({ ...formData, [raceNumber]: updated });
   };
 
+  const handleStartRace = async (raceNumber: number) => {
+    try {
+      const res = await fetch('/api/results', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          raceNumber,
+          status: 'in_progress',
+          startTime: new Date().toISOString()
+        }),
+      });
+
+      if (!res.ok) throw new Error('Failed to start race');
+      await fetchRaces(); // Refresh races
+    } catch (error) {
+      alert('Error starting race: ' + (error as Error).message);
+    }
+  };
+
   const handleSubmit = async (raceNumber: number) => {
     const result = formData[raceNumber];
     if (
@@ -111,15 +133,15 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
         typeof pos === 'number' && pos >= 1
       )
     ) {
-      const race = races.find((r) => r.raceNumber === raceNumber);
-      if (!race) return alert('Race not found');
-
-      const winner = determineWinner(race, result);
-
       const res = await fetch('/api/results', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ raceNumber, result }),
+        body: JSON.stringify({ 
+          raceNumber, 
+          result,
+          status: 'finished',
+          endTime: new Date().toISOString()
+        }),
       });
 
       let data: any = {};
@@ -566,6 +588,28 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
 
         return (
           <div key={race.raceNumber} className="p-3 bg-white border rounded-md">
+            <div className="flex justify-between items-center mb-3">
+              <p className="text-xl md:text-2xl font-bold text-gray-700">
+                Race {race.raceNumber}
+              </p>
+              {(!race.status || race.status === 'not_started') ? (
+                <button
+                  onClick={() => handleStartRace(race.raceNumber)}
+                  className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700"
+                >
+                  Start Race
+                </button>
+              ) : race.status === 'in_progress' ? (
+                <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm">
+                  In Progress
+                </span>
+              ) : (
+                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
+                  Finished
+                </span>
+              )}
+            </div>
+
             <div className="mb-3">
               <p className="text-center text-xl md:text-2xl font-bold text-gray-700 mb-3">
                 Race {race.raceNumber}

@@ -1,213 +1,214 @@
 {
-  "Gold": [
-    {
-      "team": "TCD 2",
-      "wins": 4,
-      "totalRaces": 6,
-      "points": 0,
-      "winPercentage": 66.66666666666666,
-      "place": 1,
-      "league": "Gold",
-      "tiebreakNote": "Beat UCD 1, UCC 1, QUB 1 in head-to-head matches"
-    },
-    {
-      "team": "QUB 1",
-      "wins": 4,
-      "totalRaces": 6,
-      "points": 0,
-      "winPercentage": 66.66666666666666,
-      "place": 2,
-      "league": "Gold",
-      "tiebreakNote": "Beat UCD 1 in head-to-head matches"
-    },
-    {
-      "team": "UCD 1",
-      "wins": 4,
-      "totalRaces": 6,
-      "points": 0,
-      "winPercentage": 66.66666666666666,
-      "place": 3,
-      "league": "Gold",
-      "tiebreakNote": "Lost to QUB 1 in head-to-head matches"
-    },
-    {
-      "team": "UCC 1",
-      "wins": 4,
-      "totalRaces": 6,
-      "points": 0,
-      "winPercentage": 66.66666666666666,
-      "place": 4,
-      "league": "Gold",
-      "tiebreakNote": "Lost to UCD 1, QUB 1 against common opponents (TCD 3, TCD 4, TCD 1, TCD 2)"
-    },
-    {
-      "team": "TCD 4",
-      "wins": 2,
-      "totalRaces": 6,
-      "points": 0,
-      "winPercentage": 33.33333333333333,
-      "place": 5,
-      "league": "Gold",
-      "tiebreakNote": "Beat TCD 1 in head-to-head matches"
-    },
+  "main": [
     {
       "team": "TCD 1",
       "wins": 2,
-      "totalRaces": 6,
+      "totalRaces": 2,
       "points": 0,
-      "winPercentage": 33.33333333333333,
-      "place": 6,
-      "league": "Gold",
-      "tiebreakNote": "Lost to TCD 4 in head-to-head matches"
-    },
-    {
-      "team": "TCD 3",
-      "wins": 1,
-      "totalRaces": 6,
-      "points": 0,
-      "winPercentage": 16.666666666666664,
-      "place": 7,
-      "league": "Gold"
-    }
-  ],
-  "Silver": [
-    {
-      "team": "UCC 2",
-      "wins": 5,
-      "totalRaces": 6,
-      "points": 0,
-      "winPercentage": 83.33333333333334,
+      "winPercentage": 100,
       "place": 1,
-      "league": "Silver"
-    },
-    {
-      "team": "UG 1",
-      "wins": 4,
-      "totalRaces": 6,
-      "points": 0,
-      "winPercentage": 66.66666666666666,
-      "place": 2,
-      "league": "Silver",
-      "tiebreakNote": "Beat TUD 1, MTU 1 against common opponents (DCU 1, UCD 3, UCD 2, UCC 2)"
-    },
-    {
-      "team": "TUD 1",
-      "wins": 4,
-      "totalRaces": 6,
-      "points": 0,
-      "winPercentage": 66.66666666666666,
-      "place": 3,
-      "league": "Silver",
-      "tiebreakNote": "Beat MTU 1. Lost to UG 1 against common opponents (DCU 1, UCD 3, UCD 2, UCC 2)"
-    },
-    {
-      "team": "MTU 1",
-      "wins": 4,
-      "totalRaces": 6,
-      "points": 0,
-      "winPercentage": 66.66666666666666,
-      "place": 4,
-      "league": "Silver",
-      "tiebreakNote": "Lost to UG 1, TUD 1 against common opponents (DCU 1, UCD 3, UCD 2, UCC 2)"
+      "league": "main",
+      "tiebreakNote": "Tied with UCD 2, UG 2, UCD 1, UG 1, UCC 3, UCC 1, TUD 1"
     },
     {
       "team": "UCD 2",
       "wins": 2,
-      "totalRaces": 6,
+      "totalRaces": 2,
       "points": 0,
-      "winPercentage": 33.33333333333333,
-      "place": 5,
-      "league": "Silver"
-    },
-    {
-      "team": "DCU 1",
-      "wins": 1,
-      "totalRaces": 6,
-      "points": 0,
-      "winPercentage": 16.666666666666664,
-      "place": 6,
-      "league": "Silver",
-      "tiebreakNote": "Beat UCD 3 in head-to-head matches"
-    },
-    {
-      "team": "UCD 3",
-      "wins": 1,
-      "totalRaces": 6,
-      "points": 0,
-      "winPercentage": 16.666666666666664,
-      "place": 7,
-      "league": "Silver",
-      "tiebreakNote": "Lost to DCU 1 in head-to-head matches"
-    }
-  ],
-  "Bronze": [
-    {
-      "team": "MTU 2",
-      "wins": 5,
-      "totalRaces": 6,
-      "points": 0,
-      "winPercentage": 83.33333333333334,
+      "winPercentage": 100,
       "place": 1,
-      "league": "Bronze"
-    },
-    {
-      "team": "TUD 2",
-      "wins": 4,
-      "totalRaces": 6,
-      "points": 0,
-      "winPercentage": 66.66666666666666,
-      "place": 2,
-      "league": "Bronze",
-      "tiebreakNote": "Beat UCC 3 in head-to-head matches"
-    },
-    {
-      "team": "UCC 3",
-      "wins": 4,
-      "totalRaces": 6,
-      "points": 0,
-      "winPercentage": 66.66666666666666,
-      "place": 3,
-      "league": "Bronze",
-      "tiebreakNote": "Lost to TUD 2 in head-to-head matches"
-    },
-    {
-      "team": "TCD 5",
-      "wins": 4,
-      "totalRaces": 6,
-      "points": 0,
-      "winPercentage": 66.66666666666666,
-      "place": 4,
-      "league": "Bronze",
-      "tiebreakNote": "Lost to UCC 3, TUD 2 against common opponents (UL 1, QUB 2, UG 2, MTU 2)"
-    },
-    {
-      "team": "QUB 2",
-      "wins": 2,
-      "totalRaces": 6,
-      "points": 0,
-      "winPercentage": 33.33333333333333,
-      "place": 5,
-      "league": "Bronze",
-      "tiebreakNote": "Beat UG 2 in head-to-head matches"
+      "league": "main",
+      "tiebreakNote": "Tied with TCD 1, UG 2, UCD 1, UG 1, UCC 3, UCC 1, TUD 1"
     },
     {
       "team": "UG 2",
       "wins": 2,
-      "totalRaces": 6,
+      "totalRaces": 2,
       "points": 0,
-      "winPercentage": 33.33333333333333,
-      "place": 6,
-      "league": "Bronze",
-      "tiebreakNote": "Lost to QUB 2 in head-to-head matches"
+      "winPercentage": 100,
+      "place": 1,
+      "league": "main",
+      "tiebreakNote": "Tied with TCD 1, UCD 2, UCD 1, UG 1, UCC 3, UCC 1, TUD 1"
+    },
+    {
+      "team": "UCD 1",
+      "wins": 2,
+      "totalRaces": 2,
+      "points": 0,
+      "winPercentage": 100,
+      "place": 1,
+      "league": "main",
+      "tiebreakNote": "Tied with TCD 1, UCD 2, UG 2, UG 1, UCC 3, UCC 1, TUD 1"
+    },
+    {
+      "team": "UG 1",
+      "wins": 2,
+      "totalRaces": 2,
+      "points": 0,
+      "winPercentage": 100,
+      "place": 1,
+      "league": "main",
+      "tiebreakNote": "Tied with TCD 1, UCD 2, UG 2, UCD 1, UCC 3, UCC 1, TUD 1"
+    },
+    {
+      "team": "UCC 3",
+      "wins": 2,
+      "totalRaces": 2,
+      "points": 0,
+      "winPercentage": 100,
+      "place": 1,
+      "league": "main",
+      "tiebreakNote": "Tied with TCD 1, UCD 2, UG 2, UCD 1, UG 1, UCC 1, TUD 1"
+    },
+    {
+      "team": "UCC 1",
+      "wins": 2,
+      "totalRaces": 2,
+      "points": 0,
+      "winPercentage": 100,
+      "place": 1,
+      "league": "main",
+      "tiebreakNote": "Tied with TCD 1, UCD 2, UG 2, UCD 1, UG 1, UCC 3, TUD 1"
+    },
+    {
+      "team": "TUD 1",
+      "wins": 1,
+      "totalRaces": 1,
+      "points": 0,
+      "winPercentage": 100,
+      "place": 1,
+      "league": "main",
+      "tiebreakNote": "Tied with TCD 1, UCD 2, UG 2, UCD 1, UG 1, UCC 3, UCC 1"
+    },
+    {
+      "team": "TCD 2",
+      "wins": 0,
+      "totalRaces": 1,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 9,
+      "league": "main",
+      "tiebreakNote": "Tied with UCC 2, MTU 2, TCD 3, DCU 1, UL 1, TCD 4, UCD 3, QUB 2, TCD 5, QUB 1, MTU 1, TUD 2"
+    },
+    {
+      "team": "UCC 2",
+      "wins": 0,
+      "totalRaces": 1,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 9,
+      "league": "main",
+      "tiebreakNote": "Tied with TCD 2, MTU 2, TCD 3, DCU 1, UL 1, TCD 4, UCD 3, QUB 2, TCD 5, QUB 1, MTU 1, TUD 2"
+    },
+    {
+      "team": "MTU 2",
+      "wins": 0,
+      "totalRaces": 1,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 9,
+      "league": "main",
+      "tiebreakNote": "Tied with TCD 2, UCC 2, TCD 3, DCU 1, UL 1, TCD 4, UCD 3, QUB 2, TCD 5, QUB 1, MTU 1, TUD 2"
+    },
+    {
+      "team": "TCD 3",
+      "wins": 0,
+      "totalRaces": 2,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 9,
+      "league": "main",
+      "tiebreakNote": "Tied with TCD 2, UCC 2, MTU 2, DCU 1, UL 1, TCD 4, UCD 3, QUB 2, TCD 5, QUB 1, MTU 1, TUD 2"
+    },
+    {
+      "team": "DCU 1",
+      "wins": 0,
+      "totalRaces": 2,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 9,
+      "league": "main",
+      "tiebreakNote": "Tied with TCD 2, UCC 2, MTU 2, TCD 3, UL 1, TCD 4, UCD 3, QUB 2, TCD 5, QUB 1, MTU 1, TUD 2"
     },
     {
       "team": "UL 1",
       "wins": 0,
-      "totalRaces": 6,
+      "totalRaces": 2,
       "points": 0,
       "winPercentage": 0,
-      "place": 7,
-      "league": "Bronze"
+      "place": 9,
+      "league": "main",
+      "tiebreakNote": "Tied with TCD 2, UCC 2, MTU 2, TCD 3, DCU 1, TCD 4, UCD 3, QUB 2, TCD 5, QUB 1, MTU 1, TUD 2"
+    },
+    {
+      "team": "TCD 4",
+      "wins": 0,
+      "totalRaces": 2,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 9,
+      "league": "main",
+      "tiebreakNote": "Tied with TCD 2, UCC 2, MTU 2, TCD 3, DCU 1, UL 1, UCD 3, QUB 2, TCD 5, QUB 1, MTU 1, TUD 2"
+    },
+    {
+      "team": "UCD 3",
+      "wins": 0,
+      "totalRaces": 2,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 9,
+      "league": "main",
+      "tiebreakNote": "Tied with TCD 2, UCC 2, MTU 2, TCD 3, DCU 1, UL 1, TCD 4, QUB 2, TCD 5, QUB 1, MTU 1, TUD 2"
+    },
+    {
+      "team": "QUB 2",
+      "wins": 0,
+      "totalRaces": 1,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 9,
+      "league": "main",
+      "tiebreakNote": "Tied with TCD 2, UCC 2, MTU 2, TCD 3, DCU 1, UL 1, TCD 4, UCD 3, TCD 5, QUB 1, MTU 1, TUD 2"
+    },
+    {
+      "team": "TCD 5",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 9,
+      "league": "main",
+      "tiebreakNote": "Tied with TCD 2, UCC 2, MTU 2, TCD 3, DCU 1, UL 1, TCD 4, UCD 3, QUB 2, QUB 1, MTU 1, TUD 2"
+    },
+    {
+      "team": "QUB 1",
+      "wins": 0,
+      "totalRaces": 1,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 9,
+      "league": "main",
+      "tiebreakNote": "Tied with TCD 2, UCC 2, MTU 2, TCD 3, DCU 1, UL 1, TCD 4, UCD 3, QUB 2, TCD 5, MTU 1, TUD 2"
+    },
+    {
+      "team": "MTU 1",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 9,
+      "league": "main",
+      "tiebreakNote": "Tied with TCD 2, UCC 2, MTU 2, TCD 3, DCU 1, UL 1, TCD 4, UCD 3, QUB 2, TCD 5, QUB 1, TUD 2"
+    },
+    {
+      "team": "TUD 2",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 9,
+      "league": "main",
+      "tiebreakNote": "Tied with TCD 2, UCC 2, MTU 2, TCD 3, DCU 1, UL 1, TCD 4, UCD 3, QUB 2, TCD 5, QUB 1, MTU 1"
     }
   ]
 }
