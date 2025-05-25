@@ -489,7 +489,7 @@ export default function SchedulePage() {
       )}
 
       {/* Fixed "Jump to Results" Button - now centered */}
-      <div className="fixed bottom-16 left-1/2 transform -translate-x-1/2 z-50">
+      <div className="fixed bottom-1 left-1/2 transform -translate-x-1/2 z-50">
         <button
           onClick={scrollToResults}
           className="bg-blue-600 text-white px-6 py-2 rounded-full shadow hover:bg-blue-700 transition-colors flex items-center gap-2"

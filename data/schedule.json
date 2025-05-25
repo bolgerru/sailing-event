@@ -197,7 +197,9 @@
       "teamB": "Green"
     },
     "isLaunching": false,
-    "goToChangeover": true
+    "goToChangeover": true,
+    "status": "in_progress",
+    "startTime": "2025-05-25T22:15:19.041Z"
   },
   {
     "raceNumber": 11,
