@@ -52,7 +52,17 @@
       "teamB": "Black"
     },
     "goToChangeover": false,
-    "isLaunching": false
+    "isLaunching": false,
+    "status": "finished",
+    "endTime": "2025-05-25T19:56:39.892Z",
+    "result": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
   },
   {
     "raceNumber": 4,
@@ -63,7 +73,9 @@
       "teamB": "White"
     },
     "goToChangeover": true,
-    "isLaunching": false
+    "isLaunching": false,
+    "status": "in_progress",
+    "startTime": "2025-05-25T19:56:43.675Z"
   },
   {
     "raceNumber": 5,

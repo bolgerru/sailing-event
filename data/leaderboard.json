@@ -8,7 +8,7 @@
       "winPercentage": 100,
       "place": 1,
       "league": "main",
-      "tiebreakNote": "Tied with UCC 2"
+      "tiebreakNote": "Tied with UCC 2, UG 2"
     },
     {
       "team": "UCC 2",
@@ -18,7 +18,17 @@
       "winPercentage": 100,
       "place": 1,
       "league": "main",
-      "tiebreakNote": "Tied with TCD 1"
+      "tiebreakNote": "Tied with TCD 1, UG 2"
+    },
+    {
+      "team": "UG 2",
+      "wins": 1,
+      "totalRaces": 1,
+      "points": 0,
+      "winPercentage": 100,
+      "place": 1,
+      "league": "main",
+      "tiebreakNote": "Tied with TCD 1, UCC 2"
     },
     {
       "team": "TCD 2",
@@ -26,9 +36,9 @@
       "totalRaces": 1,
       "points": 0,
       "winPercentage": 0,
-      "place": 3,
+      "place": 4,
       "league": "main",
-      "tiebreakNote": "Tied with UCD 2, UG 2, MTU 2, TCD 3"
+      "tiebreakNote": "Tied with UCD 2, MTU 2, TCD 3"
     },
     {
       "team": "UCD 2",
@@ -36,29 +46,19 @@
       "totalRaces": 1,
       "points": 0,
       "winPercentage": 0,
-      "place": 3,
+      "place": 4,
       "league": "main",
-      "tiebreakNote": "Tied with TCD 2, UG 2, MTU 2, TCD 3"
-    },
-    {
-      "team": "UG 2",
-      "wins": 0,
-      "totalRaces": 0,
-      "points": 0,
-      "winPercentage": 0,
-      "place": 3,
-      "league": "main",
-      "tiebreakNote": "Tied with TCD 2, UCD 2, MTU 2, TCD 3"
+      "tiebreakNote": "Tied with TCD 2, MTU 2, TCD 3"
     },
     {
       "team": "MTU 2",
       "wins": 0,
-      "totalRaces": 0,
+      "totalRaces": 1,
       "points": 0,
       "winPercentage": 0,
-      "place": 3,
+      "place": 4,
       "league": "main",
-      "tiebreakNote": "Tied with TCD 2, UCD 2, UG 2, TCD 3"
+      "tiebreakNote": "Tied with TCD 2, UCD 2, TCD 3"
     },
     {
       "team": "TCD 3",
@@ -66,9 +66,9 @@
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
-      "place": 3,
+      "place": 4,
       "league": "main",
-      "tiebreakNote": "Tied with TCD 2, UCD 2, UG 2, MTU 2"
+      "tiebreakNote": "Tied with TCD 2, UCD 2, MTU 2"
     }
   ]
 }
