@@ -31,10 +31,19 @@
       "teamA": "Blue",
       "teamB": "white"
     },
-    "isLaunching": true,
+    "isLaunching": false,
     "goToChangeover": false,
-    "status": "in_progress",
-    "startTime": "2025-05-25T20:46:54.744Z"
+    "status": "finished",
+    "startTime": "2025-05-25T20:46:54.744Z",
+    "endTime": "2025-05-25T21:00:43.779Z",
+    "result": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
   },
   {
     "raceNumber": 3,
@@ -113,7 +122,7 @@
       "teamB": "white"
     },
     "isLaunching": false,
-    "goToChangeover": false,
+    "goToChangeover": true,
     "status": "in_progress",
     "startTime": "2025-05-25T20:53:16.766Z"
   },
@@ -127,7 +136,9 @@
       "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": true
+    "goToChangeover": true,
+    "status": "in_progress",
+    "startTime": "2025-05-25T21:00:08.111Z"
   },
   {
     "raceNumber": 8,
@@ -139,7 +150,9 @@
       "teamB": "white"
     },
     "isLaunching": false,
-    "goToChangeover": true
+    "goToChangeover": true,
+    "status": "in_progress",
+    "startTime": "2025-05-25T21:00:09.594Z"
   },
   {
     "raceNumber": 9,
@@ -151,7 +164,9 @@
       "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": true
+    "goToChangeover": true,
+    "status": "in_progress",
+    "startTime": "2025-05-25T21:00:10.946Z"
   },
   {
     "raceNumber": 10,
@@ -163,7 +178,9 @@
       "teamB": "white"
     },
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "status": "in_progress",
+    "startTime": "2025-05-25T21:00:11.824Z"
   },
   {
     "raceNumber": 11,
@@ -175,7 +192,9 @@
       "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "status": "in_progress",
+    "startTime": "2025-05-25T21:01:24.561Z"
   },
   {
     "raceNumber": 12,
@@ -187,7 +206,9 @@
       "teamB": "white"
     },
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "status": "in_progress",
+    "startTime": "2025-05-25T21:01:27.139Z"
   },
   {
     "raceNumber": 13,

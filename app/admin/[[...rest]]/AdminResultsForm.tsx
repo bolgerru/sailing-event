@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState, memo } from 'react';
+import Link from 'next/link';
 
 type Race = {
   raceNumber: number;
@@ -456,17 +457,25 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
 
   return (
     <div className="space-y-6">
-      {/* Add Generate Schedule button at the top */}
-      {!showTeamInput && (
-        <div className="flex justify-end">
-          <button
-            onClick={handleShowTeamInput}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
-          >
-            Generate New Schedule
-          </button>
-        </div>
-      )}
+      {/* Add link to Race Control at the top */}
+      <div className="flex justify-between items-center">
+        {!showTeamInput && (
+          <div className="flex gap-4">
+            <Link
+              href="/admin/race-control"
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
+            >
+              Race Control
+            </Link>
+            <button
+              onClick={handleShowTeamInput}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+            >
+              Generate New Schedule
+            </button>
+          </div>
+        )}
+      </div>
 
       {showTeamInput && (
         <div className="bg-white p-4 border rounded-md">
@@ -669,20 +678,17 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
             <p className="text-xl md:text-2xl font-bold text-gray-700">
               Race {race.raceNumber}
             </p>
-            {(!race.status || race.status === 'not_started') ? (
-              <button
-                onClick={() => handleStartRace(race.raceNumber)}
-                className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700"
-              >
-                Start Race
-              </button>
-            ) : race.status === 'in_progress' ? (
+            {race.status === 'in_progress' ? (
               <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm">
                 In Progress
               </span>
-            ) : (
+            ) : race.status === 'finished' ? (
               <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
                 Finished
+              </span>
+            ) : (
+              <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
+                Not Started
               </span>
             )}
           </div>

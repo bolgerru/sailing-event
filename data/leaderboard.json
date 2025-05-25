@@ -52,8 +52,8 @@
   "Silver": [
     {
       "team": "ucd 1",
-      "wins": 1,
-      "totalRaces": 1,
+      "wins": 2,
+      "totalRaces": 2,
       "points": 0,
       "winPercentage": 100,
       "place": 1,
@@ -62,7 +62,7 @@
     {
       "team": "ucd 2",
       "wins": 0,
-      "totalRaces": 0,
+      "totalRaces": 1,
       "points": 0,
       "winPercentage": 0,
       "place": 2,
