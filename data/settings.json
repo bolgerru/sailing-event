@@ -1,0 +1,37 @@
+{
+  "useLeagues": true,
+  "leagues": [
+    {
+      "id": "league-1",
+      "name": "Gold",
+      "teams": [
+        "tcd 1",
+        "ucd 1"
+      ],
+      "boatSets": [
+        {
+          "id": "set-1",
+          "team1Color": "red",
+          "team2Color": "black"
+        }
+      ]
+    },
+    {
+      "id": "league-2",
+      "name": "Silver",
+      "teams": [
+        "ucd 2",
+        "tcd 2"
+      ],
+      "boatSets": [
+        {
+          "id": "set-1",
+          "team1Color": "Yellow",
+          "team2Color": "Green"
+        }
+      ]
+    }
+  ],
+  "teamInput": "",
+  "boatSets": []
+}

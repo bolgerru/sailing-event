@@ -99,6 +99,55 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
   const [leagues, setLeagues] = useState<League[]>([]);
   const [useLeagues, setUseLeagues] = useState(false);
 
+  // Load saved settings from localStorage on component mount
+  useEffect(() => {
+    const loadSavedSettings = async () => {
+      try {
+        const response = await fetch('/api/settings');
+        if (response.ok) {
+          const settings = await response.json();
+          setUseLeagues(settings.useLeagues || false);
+          if (settings.useLeagues) {
+            setLeagues(settings.leagues || []);
+          } else {
+            setTeamInput(settings.teamInput || '');
+            setBoatSets(settings.boatSets || [{
+              id: 'set-1',
+              team1Color: '',
+              team2Color: ''
+            }]);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading settings:', error);
+      }
+    };
+
+    loadSavedSettings();
+  }, []);
+
+  // Save settings to API
+  useEffect(() => {
+    const saveSettings = async () => {
+      try {
+        await fetch('/api/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            useLeagues,
+            leagues,
+            teamInput,
+            boatSets
+          })
+        });
+      } catch (error) {
+        console.error('Error saving settings:', error);
+      }
+    };
+
+    saveSettings();
+  }, [useLeagues, leagues, teamInput, boatSets]);
+
   useEffect(() => {
     // Load initial form data - set empty strings instead of zeros
     const initialData: { [key: number]: (number | '')[] } = {};
@@ -243,37 +292,32 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     }
   };
 
-  const handleShowTeamInput = () => {
-    // Get existing teams
-    const existingTeams = Array.from(
-      new Set(races.flatMap((race) => [race.teamA, race.teamB]))
-    ).join(', ');
-    setTeamInput(existingTeams);
-
-    // Get all unique boat sets from races
-    const uniqueBoatSets = new Map<string, BoatSet>();
-    races.forEach((race, index) => {
-      if (race.boats?.teamA && race.boats?.teamB) {
-        const boatKey = `${race.boats.teamA}-${race.boats.teamB}`;
-        if (!uniqueBoatSets.has(boatKey)) {
-          uniqueBoatSets.set(boatKey, {
-            id: `set-${uniqueBoatSets.size + 1}`,
-            team1Color: race.boats.teamA,
-            team2Color: race.boats.teamB
-          });
+  // Modify handleShowTeamInput to use saved settings
+  const handleShowTeamInput = async () => {
+    try {
+      const response = await fetch('/api/settings');
+      if (response.ok) {
+        const settings = await response.json();
+        setUseLeagues(settings.useLeagues);
+        if (settings.useLeagues) {
+          setLeagues(settings.leagues || []);
+        } else {
+          // Get existing teams if no saved team input
+          const existingTeams = Array.from(
+            new Set(races.flatMap((race) => [race.teamA, race.teamB]))
+          ).join(', ');
+          setTeamInput(settings.teamInput || existingTeams);
+          setBoatSets(settings.boatSets || [{
+            id: 'set-1',
+            team1Color: '',
+            team2Color: ''
+          }]);
         }
       }
-    });
-
-    // Convert Map to array and set boat sets
-    const loadedBoatSets = Array.from(uniqueBoatSets.values());
-    setBoatSets(loadedBoatSets.length > 0 ? loadedBoatSets : [{
-      id: 'set-1',
-      team1Color: '',
-      team2Color: ''
-    }]);
-
-    setShowTeamInput(true);
+      setShowTeamInput(true);
+    } catch (error) {
+      console.error('Error loading settings:', error);
+    }
   };
 
   const handleAddBoatSet = () => {
@@ -333,47 +377,35 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
 
   const handleGenerateSchedule = async () => {
     if (useLeagues) {
-      // Validate leagues
       if (leagues.length === 0) {
         alert('Please add at least one league');
         return;
       }
 
-      for (const league of leagues) {
-        if (league.teams.length < 2) {
-          alert(`${league.name} needs at least 2 teams`);
-          return;
-        }
-        if (league.boatSets.length === 0) {
-          alert(`${league.name} needs at least one boat set`);
-          return;
-        }
-      }
-
-      // Generate schedule with leagues
       const scheduleRes = await fetch('/api/schedule/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ leagues }),
+        body: JSON.stringify({ 
+          leagues: leagues
+        })
       });
 
-      const scheduleData = await scheduleRes.json();
-      if (!scheduleRes.ok) {
-        alert(`Error generating schedule: ${scheduleData.error || 'Unknown error'}`);
-        return;
+      if (scheduleRes.ok) {
+        // Save current settings with leagues
+        await fetch('/api/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            useLeagues: true,
+            leagues: leagues,
+            teamInput: '',
+            boatSets: []
+          })
+        });
+        
+        setShowTeamInput(false);
+        await fetchRaces();
       }
-
-      const leaderboardRes = await fetch('/api/results/reset', {
-        method: 'POST',
-      });
-
-      if (!leaderboardRes.ok) {
-        alert('Warning: Failed to reset leaderboard');
-      }
-
-      alert('Schedule generated and leaderboard reset successfully');
-      setShowTeamInput(false);
-      await fetchRaces();
     } else {
       if (boatSets.length === 0) {
         alert('Please add at least one boat set');
@@ -413,6 +445,21 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
       }
 
       alert('Schedule generated and leaderboard reset successfully');
+      // Clear settings by posting empty default values
+      await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          useLeagues: false,
+          leagues: [],
+          teamInput: '',
+          boatSets: [{
+            id: 'set-1',
+            team1Color: '',
+            team2Color: ''
+          }]
+        })
+      });
       setShowTeamInput(false);
       await fetchRaces();
     }
