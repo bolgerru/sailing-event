@@ -90,6 +90,13 @@ const BoatInputs = memo(({
 });
 BoatInputs.displayName = 'BoatInputs';
 
+const scrollToElement = (id: string) => {
+  const element = document.getElementById(id);
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+};
+
 export default function AdminResultsForm({ races: initialRaces }: { races: Race[] }) {
   const [races, setRaces] = useState<Race[]>(initialRaces);
   const [formData, setFormData] = useState<{ [key: number]: (number | '')[] }>({});
@@ -98,6 +105,7 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
   const [boatSets, setBoatSets] = useState<BoatSet[]>([]);
   const [leagues, setLeagues] = useState<League[]>([]);
   const [useLeagues, setUseLeagues] = useState(false);
+  const [nextUnfinishedRace, setNextUnfinishedRace] = useState<Race | null>(null);
 
   // Load saved settings from localStorage on component mount
   useEffect(() => {
@@ -512,6 +520,12 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     [races, formData]
   );
 
+  useEffect(() => {
+    // Find first race that has no result, regardless of status
+    const unfinishedRace = races.find(race => !race.result);
+    setNextUnfinishedRace(unfinishedRace || null);
+  }, [races]);
+
   return (
     <div className="space-y-6">
       {/* Add link to Race Control at the top */}
@@ -729,8 +743,27 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
         </div>
       )}
       
+      {/* Floating button for next unfinished race */}
+      {nextUnfinishedRace && (
+        <button
+          onClick={() => scrollToElement(`race-${nextUnfinishedRace.raceNumber}`)}
+          className="fixed bottom-16 right-4 md:bottom-8 md:right-8 bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center gap-2 z-50"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+          <span className="hidden md:inline">Next Unfinished Race</span>
+          <span className="md:hidden">Race</span>
+          {" "}({nextUnfinishedRace.raceNumber})
+        </button>
+      )}
+
       {raceData.map(({ race, result, isTeamAWinning, isTeamBWinning, winner }) => (
-        <div key={race.raceNumber} className="p-3 bg-white border rounded-md">
+        <div 
+          key={race.raceNumber} 
+          id={`race-${race.raceNumber}`}
+          className="p-3 bg-white border rounded-md"
+        >
           <div className="flex justify-between items-center mb-3">
             <p className="text-xl md:text-2xl font-bold text-gray-700">
               Race {race.raceNumber}

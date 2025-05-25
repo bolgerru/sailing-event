@@ -12,8 +12,8 @@
     },
     {
       "team": "UCC 2",
-      "wins": 1,
-      "totalRaces": 1,
+      "wins": 2,
+      "totalRaces": 2,
       "points": 0,
       "winPercentage": 100,
       "place": 1,
@@ -43,7 +43,7 @@
     {
       "team": "UG 2",
       "wins": 0,
-      "totalRaces": 0,
+      "totalRaces": 1,
       "points": 0,
       "winPercentage": 0,
       "place": 3,
@@ -79,7 +79,18 @@
       "points": 0,
       "winPercentage": 100,
       "place": 1,
-      "league": "Silver"
+      "league": "Silver",
+      "tiebreakNote": "Tied with UCD 1"
+    },
+    {
+      "team": "UCD 1",
+      "wins": 1,
+      "totalRaces": 1,
+      "points": 0,
+      "winPercentage": 100,
+      "place": 1,
+      "league": "Silver",
+      "tiebreakNote": "Tied with TCD 3"
     },
     {
       "team": "DCU 1",
@@ -87,29 +98,19 @@
       "totalRaces": 1,
       "points": 0,
       "winPercentage": 0,
-      "place": 2,
+      "place": 3,
       "league": "Silver",
-      "tiebreakNote": "Tied with UL 1, UCD 1, UG 1, UCC 3, TCD 4"
+      "tiebreakNote": "Tied with UL 1, UG 1, UCC 3, TCD 4"
     },
     {
       "team": "UL 1",
       "wins": 0,
-      "totalRaces": 1,
+      "totalRaces": 2,
       "points": 0,
       "winPercentage": 0,
-      "place": 2,
+      "place": 3,
       "league": "Silver",
-      "tiebreakNote": "Tied with DCU 1, UCD 1, UG 1, UCC 3, TCD 4"
-    },
-    {
-      "team": "UCD 1",
-      "wins": 0,
-      "totalRaces": 0,
-      "points": 0,
-      "winPercentage": 0,
-      "place": 2,
-      "league": "Silver",
-      "tiebreakNote": "Tied with DCU 1, UL 1, UG 1, UCC 3, TCD 4"
+      "tiebreakNote": "Tied with DCU 1, UG 1, UCC 3, TCD 4"
     },
     {
       "team": "UG 1",
@@ -117,9 +118,9 @@
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
-      "place": 2,
+      "place": 3,
       "league": "Silver",
-      "tiebreakNote": "Tied with DCU 1, UL 1, UCD 1, UCC 3, TCD 4"
+      "tiebreakNote": "Tied with DCU 1, UL 1, UCC 3, TCD 4"
     },
     {
       "team": "UCC 3",
@@ -127,9 +128,9 @@
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
-      "place": 2,
+      "place": 3,
       "league": "Silver",
-      "tiebreakNote": "Tied with DCU 1, UL 1, UCD 1, UG 1, TCD 4"
+      "tiebreakNote": "Tied with DCU 1, UL 1, UG 1, TCD 4"
     },
     {
       "team": "TCD 4",
@@ -137,9 +138,9 @@
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
-      "place": 2,
+      "place": 3,
       "league": "Silver",
-      "tiebreakNote": "Tied with DCU 1, UL 1, UCD 1, UG 1, UCC 3"
+      "tiebreakNote": "Tied with DCU 1, UL 1, UG 1, UCC 3"
     }
   ]
 }

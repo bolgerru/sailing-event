@@ -2,11 +2,5 @@
   "useLeagues": false,
   "leagues": [],
   "teamInput": "",
-  "boatSets": [
-    {
-      "id": "set-1",
-      "team1Color": "",
-      "team2Color": ""
-    }
-  ]
+  "boatSets": []
 }
