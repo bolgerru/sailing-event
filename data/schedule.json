@@ -10,7 +10,7 @@
     "isLaunching": false,
     "goToChangeover": false,
     "status": "finished",
-    "endTime": "2025-05-25T20:31:04.398Z",
+    "endTime": "2025-05-25T20:40:34.231Z",
     "result": [
       1,
       2,
@@ -31,7 +31,7 @@
     "isLaunching": false,
     "goToChangeover": false,
     "status": "finished",
-    "endTime": "2025-05-25T20:31:31.176Z",
+    "endTime": "2025-05-25T20:40:50.496Z",
     "result": [
       1,
       2,
@@ -49,18 +49,8 @@
       "teamA": "Red",
       "teamB": "Black"
     },
-    "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "endTime": "2025-05-25T20:31:48.483Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "isLaunching": true,
+    "goToChangeover": false
   },
   {
     "raceNumber": 4,
@@ -71,17 +61,7 @@
       "teamB": "White"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "endTime": "2025-05-25T20:31:57.792Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": true
   },
   {
     "raceNumber": 5,
@@ -92,17 +72,7 @@
       "teamB": "White"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "endTime": "2025-05-25T20:32:02.056Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": true
   },
   {
     "raceNumber": 6,
@@ -113,17 +83,7 @@
       "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "endTime": "2025-05-25T20:32:05.975Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": true
   },
   {
     "raceNumber": 7,
@@ -134,9 +94,7 @@
       "teamB": "White"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "in_progress",
-    "startTime": "2025-05-25T20:32:16.402Z"
+    "goToChangeover": true
   },
   {
     "raceNumber": 8,

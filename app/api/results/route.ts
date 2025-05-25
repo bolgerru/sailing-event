@@ -557,26 +557,13 @@ function resolveTeamGroup(group: TeamStats[], races: Race[]): TeamStats[] {
 
 // Update the metrics check in updateChangeoverFlags
 function updateChangeoverFlags(races: Race[]): void {
+  console.log('\n=== Updating Changeover Flags ===');
+  
   // Reset all flags first
   races.forEach(race => {
     race.goToChangeover = false;
     race.isLaunching = false;
   });
-
-  // Check if this is a fresh schedule or stale metrics
-  const hasStartedRaces = races.some(race => race.status === 'in_progress' || race.status === 'finished');
-  const metricsPath = path.join(process.cwd(), 'data', 'metrics.json');
-  let isStaleMetrics = false;
-
-  try {
-    const metricsData = JSON.parse(readFileSync(metricsPath, 'utf-8'));
-    const lastUpdate = new Date(metricsData.lastUpdated);
-    isStaleMetrics = Date.now() - lastUpdate.getTime() > 3 * 60 * 60 * 1000;
-  } catch (error) {
-    isStaleMetrics = true;
-  }
-
-  const isFreshStart = !hasStartedRaces || isStaleMetrics;
 
   // Group races by boat combinations
   const boatSets = new Map<string, Race[]>();
@@ -590,35 +577,54 @@ function updateChangeoverFlags(races: Race[]): void {
   });
 
   // Process each boat set
-  boatSets.forEach((setRaces) => {
+  boatSets.forEach((setRaces, boatKey) => {
+    console.log(`\nProcessing boat set: ${boatKey}`);
+    
     // Sort races in this set by race number
     const orderedRaces = setRaces.sort((a, b) => a.raceNumber - b.raceNumber);
     
     orderedRaces.forEach((race, index) => {
-      // Skip if race has started
-      if (race.status === 'in_progress' || race.status === 'finished') return;
+      // Skip if race is already finished
+      if (race.status === 'finished') {
+        console.log(`Race ${race.raceNumber}: Skipped (${race.status})`);
+        return;
+      }
 
+      // First race in each boat set should get isLaunching
       if (index === 0) {
-        // First race in set
-        if (isFreshStart) {
-          race.isLaunching = true;
-          race.goToChangeover = false;
-        }
-      } else if (index === 1) {
-        // Second race in set
-        if (isFreshStart) {
+        race.isLaunching = true;
+        console.log(`Race ${race.raceNumber}: First in set - Setting isLaunching = true`);
+      } 
+      // For every other race in the set
+      else {
+        // Find the race that finished 2 races before the previous race in this set
+        const previousRace = orderedRaces[index - 1];
+        const triggerRaceNumber = previousRace.raceNumber - 2;
+        
+        console.log(`Race ${race.raceNumber}: Looking for trigger race ${triggerRaceNumber}`);
+
+        // Check all races, not just this set's races
+        const triggerRace = races.find(r => r.raceNumber === triggerRaceNumber);
+
+        if (triggerRaceNumber < 1) {
           race.goToChangeover = true;
-          race.isLaunching = false;
+          console.log(`Race ${race.raceNumber}: No trigger race (number < 1) - Setting goToChangeover = true`);
+        } else if (!triggerRace) {
+          console.log(`Race ${race.raceNumber}: Trigger race ${triggerRaceNumber} not found`);
         } else {
-          // Check if two races before previous race is finished
-          const triggerRaceNumber = orderedRaces[0].raceNumber - 2;
-          const triggerRace = races.find(r => r.raceNumber === triggerRaceNumber);
-          if (!triggerRace || triggerRace.status === 'finished') {
+          console.log(`Race ${race.raceNumber}: Trigger race ${triggerRaceNumber} status = ${triggerRace.status || 'not started'}`);
+          if (triggerRace.status === 'finished') {
             race.goToChangeover = true;
-            race.isLaunching = false;
+            console.log(`Race ${race.raceNumber}: Trigger race finished - Setting goToChangeover = true`);
           }
         }
       }
+    });
+
+    // Log final state for this boat set
+    console.log('\nFinal flags for this boat set:');
+    orderedRaces.forEach(race => {
+      console.log(`Race ${race.raceNumber}: isLaunching=${!!race.isLaunching}, goToChangeover=${!!race.goToChangeover}`);
     });
   });
 }
