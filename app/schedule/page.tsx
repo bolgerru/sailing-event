@@ -341,35 +341,37 @@ export default function SchedulePage() {
                 className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
                 onClick={() => setExpandedRace(expandedRace === race.raceNumber ? null : race.raceNumber)}
               >
+                {/* Update the race card header structure */}
                 <div className="flex items-center border-b border-gray-100">
                   <div className="w-16 md:w-24 h-16 md:h-24 flex items-center justify-center bg-blue-500 text-white">
                     <span className="text-2xl md:text-4xl font-bold">
                       {race.raceNumber}
                     </span>
                   </div>
-                  
                   <div className="flex-1 p-3">
-                    <div className="flex justify-between items-start">
-                      <div className="text-base md:text-lg font-semibold text-center flex-1">
+                    <div className="flex flex-col items-center">
+                      <div className="text-base md:text-lg font-semibold text-center w-full">
                         <span className="text-blue-600">{race.teamA}</span>
                         <span className="mx-1 md:mx-2 text-gray-400">vs</span>
                         <span className="text-blue-600">{race.teamB}</span>
                       </div>
-                      <StatusTag status={race.status} />
-                    </div>
-                    <div className="text-xs md:text-sm text-gray-500 text-center mt-1">
-                      ({race.boats.teamA}) vs ({race.boats.teamB})
-                    </div>
-                    {race.league && (
-                      <div className="mt-2 flex justify-center">
-                        <span className={`
-                          inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                          ${getLeagueTagColors(race.league)}
-                        `}>
-                          {race.league === 'main' ? 'Overall' : `${race.league} League`}
-                        </span>
+                      <div className="text-xs md:text-sm text-gray-500 text-center mt-1">
+                        ({race.boats.teamA}) vs ({race.boats.teamB})
                       </div>
-                    )}
+                      {race.league && (
+                        <div className="mt-2">
+                          <span className={`
+                            inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
+                            ${getLeagueTagColors(race.league)}
+                          `}>
+                            {race.league === 'main' ? 'Overall' : `${race.league} League`}
+                          </span>
+                        </div>
+                      )}
+                      <div className="mt-2">
+                        <StatusTag status={race.status} />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -486,11 +488,11 @@ export default function SchedulePage() {
         </div>
       )}
 
-      {/* Fixed "Jump to Results" Button */}
-      <div className="fixed bottom-16 right-4 z-50">
+      {/* Fixed "Jump to Results" Button - now centered */}
+      <div className="fixed bottom-16 left-1/2 transform -translate-x-1/2 z-50">
         <button
           onClick={scrollToResults}
-          className="bg-blue-600 text-white px-4 py-2 rounded-full shadow hover:bg-blue-700 transition-colors flex items-center gap-2"
+          className="bg-blue-600 text-white px-6 py-2 rounded-full shadow hover:bg-blue-700 transition-colors flex items-center gap-2"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -518,7 +520,7 @@ export default function SchedulePage() {
                   className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
                   onClick={() => setExpandedRace(expandedRace === race.raceNumber ? null : race.raceNumber)}
                 >
-                  {/* Race Header */}
+                  {/* Race Header - updated structure */}
                   <div className="flex items-center border-b border-gray-100">
                     <div className="w-16 md:w-24 h-16 md:h-24 flex items-center justify-center bg-blue-500 text-white">
                       <span className="text-2xl md:text-4xl font-bold">
@@ -526,16 +528,28 @@ export default function SchedulePage() {
                       </span>
                     </div>
                     <div className="flex-1 p-3">
-                      <div className="flex justify-between items-start">
-                        <div className="text-base md:text-lg font-semibold text-center flex-1">
+                      <div className="flex flex-col items-center">
+                        <div className="text-base md:text-lg font-semibold text-center w-full">
                           <span className="text-blue-600">{race.teamA}</span>
                           <span className="mx-1 md:mx-2 text-gray-400">vs</span>
                           <span className="text-blue-600">{race.teamB}</span>
                         </div>
-                        <StatusTag status={race.status} />
-                      </div>
-                      <div className="text-xs md:text-sm text-gray-500 text-center mt-1">
-                        ({race.boats.teamA}) vs ({race.boats.teamB})
+                        <div className="text-xs md:text-sm text-gray-500 text-center mt-1">
+                          ({race.boats.teamA}) vs ({race.boats.teamB})
+                        </div>
+                        {race.league && (
+                          <div className="mt-2">
+                            <span className={`
+                              inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
+                              ${getLeagueTagColors(race.league)}
+                            `}>
+                              {race.league === 'main' ? 'Overall' : `${race.league} League`}
+                            </span>
+                          </div>
+                        )}
+                        <div className="mt-2">
+                          <StatusTag status={race.status} />
+                        </div>
                       </div>
                     </div>
                   </div>
