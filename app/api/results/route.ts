@@ -1,19 +1,28 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
+import { readFileSync } from 'fs'; // Add this for sync operations
 import path from 'path';
 import { updateMetrics } from '@/app/lib/metrics';
 
+// Update Race type
 type Race = {
   raceNumber: number;
   teamA: string;
   teamB: string;
-  league?: string;  // Add this field
+  league?: string;
   result?: number[] | null;
   boats: {
     teamA: string;
     teamB: string;
   };
+  status?: 'not_started' | 'in_progress' | 'finished';
+  startTime?: string;
+  endTime?: string;
+  goToChangeover?: boolean;
+  isLaunching?: boolean; // Add this property
 };
+
+type RaceWithChangeover = Race & { goToChangeover: boolean };
 
 // First add tiebreak info to TeamStats type
 type TeamStats = {
@@ -546,6 +555,74 @@ function resolveTeamGroup(group: TeamStats[], races: Race[]): TeamStats[] {
   return group;
 }
 
+// Update the metrics check in updateChangeoverFlags
+function updateChangeoverFlags(races: Race[]): void {
+  // Reset all flags first
+  races.forEach(race => {
+    race.goToChangeover = false;
+    race.isLaunching = false;
+  });
+
+  // Check if this is a fresh schedule or stale metrics
+  const hasStartedRaces = races.some(race => race.status === 'in_progress' || race.status === 'finished');
+  const metricsPath = path.join(process.cwd(), 'data', 'metrics.json');
+  let isStaleMetrics = false;
+
+  try {
+    const metricsData = JSON.parse(readFileSync(metricsPath, 'utf-8'));
+    const lastUpdate = new Date(metricsData.lastUpdated);
+    isStaleMetrics = Date.now() - lastUpdate.getTime() > 3 * 60 * 60 * 1000;
+  } catch (error) {
+    isStaleMetrics = true;
+  }
+
+  const isFreshStart = !hasStartedRaces || isStaleMetrics;
+
+  // Group races by boat combinations
+  const boatSets = new Map<string, Race[]>();
+  races.forEach(race => {
+    if (!race.boats) return;
+    const boatKey = JSON.stringify([race.boats.teamA, race.boats.teamB].sort());
+    if (!boatSets.has(boatKey)) {
+      boatSets.set(boatKey, []);
+    }
+    boatSets.get(boatKey)!.push(race);
+  });
+
+  // Process each boat set
+  boatSets.forEach((setRaces) => {
+    // Sort races in this set by race number
+    const orderedRaces = setRaces.sort((a, b) => a.raceNumber - b.raceNumber);
+    
+    orderedRaces.forEach((race, index) => {
+      // Skip if race has started
+      if (race.status === 'in_progress' || race.status === 'finished') return;
+
+      if (index === 0) {
+        // First race in set
+        if (isFreshStart) {
+          race.isLaunching = true;
+          race.goToChangeover = false;
+        }
+      } else if (index === 1) {
+        // Second race in set
+        if (isFreshStart) {
+          race.goToChangeover = true;
+          race.isLaunching = false;
+        } else {
+          // Check if two races before previous race is finished
+          const triggerRaceNumber = orderedRaces[0].raceNumber - 2;
+          const triggerRace = races.find(r => r.raceNumber === triggerRaceNumber);
+          if (!triggerRace || triggerRace.status === 'finished') {
+            race.goToChangeover = true;
+            race.isLaunching = false;
+          }
+        }
+      }
+    });
+  });
+}
+
 // Update the ComputeLeaderboard function
 function computeLeaderboard(races: Race[]): { [key: string]: TeamStats[] } {
   // If no leagues are defined, create a default league with all races
@@ -753,6 +830,11 @@ export async function POST(req: Request) {
       ...(endTime && { endTime }),
       ...(result !== undefined && { result })
     };
+
+    // Update changeover status whenever a race is finished
+    if (status === 'finished') {
+      updateChangeoverFlags(races);
+    }
 
     await saveSchedule(races);
 

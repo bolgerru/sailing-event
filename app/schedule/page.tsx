@@ -16,6 +16,8 @@ type Race = {
   status?: 'not_started' | 'in_progress' | 'finished';
   startTime?: string;
   endTime?: string;
+  goToChangeover?: boolean;
+  isLaunching?: boolean;
 };
 
 function isValidResult(result: number[] | null): boolean {
@@ -51,7 +53,6 @@ function getLeagueTagColors(league: string): string {
   }
 }
 
-// Add a new component for the status tag
 function StatusTag({ status }: { status?: string }) {
   if (!status || status === 'not_started') return null;
   
@@ -66,7 +67,6 @@ function StatusTag({ status }: { status?: string }) {
   );
 }
 
-// Add a new component for the live duration
 function LiveDuration({ startTime }: { startTime: string }) {
   const [duration, setDuration] = useState<string>('');
 
@@ -82,24 +82,18 @@ function LiveDuration({ startTime }: { startTime: string }) {
       setDuration(`${minutes}m ${seconds}s`);
     }
 
-    // Initial update
     updateDuration();
-
-    // Update every second
     const interval = setInterval(updateDuration, 1000);
-
-    // Cleanup interval on unmount
     return () => clearInterval(interval);
   }, [startTime]);
 
   return <span>{duration}</span>;
 }
 
-// Update the Metrics type
 type Metrics = {
   averageRaceLength: string;
   timeBetweenRaces: string;
-  timeBetweenRacesMs: number; // Add this property
+  timeBetweenRacesMs: number;
   lastUpdated: string;
 };
 
@@ -157,22 +151,17 @@ export default function SchedulePage() {
   const [races, setRaces] = useState<Race[]>([]);
   const [filter, setFilter] = useState<string>('all');
   const [loading, setLoading] = useState(true);
-  // Add state for expanded race details
   const [expandedRace, setExpandedRace] = useState<number | null>(null);
-  // Add these new states near your other state declarations
   const [showBackToTop, setShowBackToTop] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
-  // Add metrics state
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   
-  // Find the last started race
   const lastStartedRace = useMemo(() => {
     return races
       .filter(r => r.startTime)
       .sort((a, b) => new Date(b.startTime!).getTime() - new Date(a.startTime!).getTime())[0];
   }, [races]);
 
-  // Fetch races data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -197,23 +186,20 @@ export default function SchedulePage() {
     };
 
     fetchData();
-    const interval = setInterval(fetchData, 60000); // Refresh every minute
+    const interval = setInterval(fetchData, 60000);
     return () => clearInterval(interval);
   }, []);
 
-  // Get unique filter options combining leagues and teams
   const filterOptions = useMemo(() => {
     const options = new Set<string>();
     options.add('all');
     
-    // Add leagues
     races.forEach((race: Race) => {
       if (race.league) {
         options.add(`league:${race.league}`);
       }
     });
 
-    // Add teams
     races.forEach((race: Race) => {
       options.add(`team:${race.teamA}`);
       options.add(`team:${race.teamB}`);
@@ -222,7 +208,6 @@ export default function SchedulePage() {
     return Array.from(options);
   }, [races]);
 
-  // Filter races based on selection
   const filteredRaces = useMemo(() => {
     if (filter === 'all') return races;
 
@@ -239,11 +224,9 @@ export default function SchedulePage() {
     });
   }, [races, filter]);
 
-  // Separate filtered races into upcoming and completed
   const completedRaces = filteredRaces.filter(race => isValidResult(race.result));
   const upcomingRaces = filteredRaces.filter(race => !isValidResult(race.result));
 
-  // Add scroll handler to show/hide back to top button
   useEffect(() => {
     const handleScroll = () => {
       setShowBackToTop(window.scrollY > 300);
@@ -253,15 +236,12 @@ export default function SchedulePage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Helper function to format duration
   function formatDuration(time: number | string | Date): string {
     let duration: number;
     
     if (typeof time === 'number') {
-      // For completed races (passed duration in milliseconds)
       duration = time;
     } else {
-      // For ongoing races (passed start time)
       const startTime = new Date(time).getTime();
       duration = Date.now() - startTime;
     }
@@ -272,7 +252,6 @@ export default function SchedulePage() {
     return `${minutes}m ${seconds}s`;
   }
 
-  // Add these helper functions
   const scrollToResults = () => {
     resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -295,7 +274,6 @@ export default function SchedulePage() {
         Schedule & Results
       </h1>
 
-      {/* Add metrics display */}
       {metrics && (
         <div className="bg-white rounded-lg shadow-lg p-4 mb-6">
           <div className="grid grid-cols-2 gap-4">
@@ -314,7 +292,6 @@ export default function SchedulePage() {
         </div>
       )}
 
-      {/* Single Filter */}
       <div className="bg-white p-4 rounded-lg shadow">
         <label htmlFor="filter" className="block text-sm font-medium text-gray-700 mb-1">
           Filter Matches
@@ -355,14 +332,12 @@ export default function SchedulePage() {
         <p className="text-center text-gray-500">No matches found for the selected filters.</p>
       )}
 
-      {/* Upcoming Races Section */}
       {upcomingRaces.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-gray-700">Next Races</h2>
           <div className="grid gap-4">
             {upcomingRaces.map((race) => (
-              <div 
-                key={race.raceNumber}
+              <div key={race.raceNumber} 
                 className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
                 onClick={() => setExpandedRace(expandedRace === race.raceNumber ? null : race.raceNumber)}
               >
@@ -398,7 +373,6 @@ export default function SchedulePage() {
                   </div>
                 </div>
 
-                {/* Expanded race details */}
                 {expandedRace === race.raceNumber && (
                   <div className="p-4 bg-gray-50 border-t border-gray-100">
                     <div className="space-y-2 text-sm">
@@ -455,7 +429,6 @@ export default function SchedulePage() {
                   )}
                 </div>
 
-                {/* Show estimated start time if no start time and no status */}
                 {!race.startTime && !race.status && lastStartedRace && (
                   <div className="p-3 border-t border-gray-100">
                     <EstimatedStartTime 
@@ -465,165 +438,194 @@ export default function SchedulePage() {
                     />
                   </div>
                 )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
-      {/* Completed Races Section */}
-      {completedRaces.length > 0 && (
-        <div 
-          ref={resultsRef}
-          className="space-y-4 mt-8 pt-8 border-t border-gray-200"
-        >
-          <h2 className="text-xl font-semibold text-gray-700">Race Results</h2>
-          <div className="grid gap-4">
-            {completedRaces.map((race) => (
-              <div 
-                key={race.raceNumber}
-                className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
-                onClick={() => setExpandedRace(expandedRace === race.raceNumber ? null : race.raceNumber)}
-              >
-                <div className="flex items-center border-b border-gray-100">
-                  <div className="w-16 md:w-24 h-16 md:h-24 flex items-center justify-center bg-blue-500 text-white">
-                    <span className="text-2xl md:text-4xl font-bold">
-                      {race.raceNumber}
-                    </span>
-                  </div>
-                  
-                  <div className="flex-1 p-3">
-                    <div className="text-base md:text-lg font-semibold text-center">
-                      <span className="text-blue-600">{race.teamA}</span>
-                      <span className="mx-1 md:mx-2 text-gray-400">vs</span>
-                      <span className="text-blue-600">{race.teamB}</span>
-                    </div>
-                    <div className="text-xs md:text-sm text-gray-500 text-center mt-1">
-                      ({race.boats.teamA}) vs ({race.boats.teamB})
-                    </div>
-                    {race.league && (
-                      <div className="mt-2 flex justify-center">
-                        <span className={`
-                          inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                          ${getLeagueTagColors(race.league)}
-                        `}>
-                          {race.league === 'main' ? 'Overall' : `${race.league} League`}
-                        </span>
+                {!race.startTime && race.goToChangeover && !race.isLaunching && (
+                  <div className="p-3 bg-yellow-50 border-t border-yellow-100">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                          <path 
+                            fillRule="evenodd" 
+                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" 
+                            clipRule="evenodd" 
+                          />
+                        </svg>
                       </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Add expanded race details */}
-                {expandedRace === race.raceNumber && (
-                  <div className="p-4 bg-gray-50 border-t border-gray-100">
-                    <div className="space-y-2 text-sm">
-                      {race.startTime && (
-                        <p className="text-gray-600">
-                          Started: {new Date(race.startTime).toLocaleString()}
+                      <div className="ml-3">
+                        <p className="text-sm font-medium text-yellow-800">
+                          Go to Changeover Area
                         </p>
-                      )}
-                      {race.endTime && (
-                        <p className="text-gray-600">
-                          Finished: {new Date(race.endTime).toLocaleString()}
-                        </p>
-                      )}
-                      {race.status === 'finished' && race.startTime && race.endTime && (
-                        <p className="text-gray-600">
-                          Duration: {formatDuration(
-                            new Date(race.endTime).getTime() - new Date(race.startTime).getTime()
-                          )}
-                        </p>
-                      )}
+                      </div>
                     </div>
                   </div>
                 )}
 
-                <div className="p-3 bg-gray-50">
-                  {isValidResult(race.result) ? (
-                    <div className="text-center space-y-2">
-                      <div className="flex justify-center items-center gap-2 md:gap-8">
-                        <div className={`flex-1 ${getWinner(race.result, race.teamA, race.teamB) === race.teamA ? 'text-green-600' : 'text-red-600'}`}>
-                          <p className="font-semibold mb-1 text-sm md:text-base">{race.teamA}</p>
-                          <div className="flex justify-center gap-1 md:gap-3">
-                            {race.result!.slice(0, 3).map((pos, i) => (
-                              <span key={i} className="bg-gray-100 rounded-full w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-sm">
-                                {pos}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="text-gray-400 font-bold px-1 md:px-2">VS</div>
-                        <div className={`flex-1 ${getWinner(race.result, race.teamA, race.teamB) === race.teamB ? 'text-green-600' : 'text-red-600'}`}>
-                          <p className="font-semibold mb-1 text-sm md:text-base">{race.teamB}</p>
-                          <div className="flex justify-center gap-1 md:gap-3">
-                            {race.result!.slice(3).map((pos, i) => (
-                              <span key={i} className="bg-gray-100 rounded-full w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-sm">
-                                {pos}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
+                {!race.startTime && race.isLaunching && (
+                  <div className="p-3 bg-blue-50 border-t border-blue-100">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0">
+                        <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                          <path 
+                            fillRule="evenodd" 
+                            d="M6.672 1.911a1 1 0 10-1.932.518l.259.966a1 1 0 001.932-.518l-.26-.966zM2.429 4.74a1 1 0 10-.517 1.932l.966.259a1 1 0 00.517-1.932l-.966-.26zm8.814-.569a1 1 0 00-1.415-1.414l-.707.707a1 1 0 101.415 1.415l.707-.708zm-7.071 7.072l.707-.707A1 1 0 003.465 9.12l-.708.707a1 1 0 001.415 1.415zm3.2-5.171a1 1 0 00-1.3 1.3l4 10a1 1 0 001.823.075l1.38-2.759 3.018 3.02a1 1 0 001.414-1.415l-3.019-3.02 2.76-1.379a1 1 0 00-.076-1.822l-10-4z" 
+                            clipRule="evenodd" 
+                          />
+                        </svg>
+                      </div>
+                      <div className="ml-3">
+                        <p className="text-sm font-medium text-blue-800">
+                          You are launching
+                        </p>
                       </div>
                     </div>
-                  ) : (
-                    <p className="text-center text-gray-500 italic text-sm">
-                      No result yet
-                    </p>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Jump to Results button */}
-      {completedRaces.length > 0 && (
+      {/* Fixed "Jump to Results" Button */}
+      <div className="fixed bottom-16 right-4 z-50">
         <button
           onClick={scrollToResults}
-          className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center gap-2 group z-10"
+          className="bg-blue-600 text-white px-4 py-2 rounded-full shadow hover:bg-blue-700 transition-colors flex items-center gap-2"
         >
-          <span>View Race Results</span>
-          <svg 
-            className="w-4 h-4 transition-transform group-hover:translate-y-1" 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
-          >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M19 14l-7 7m0 0l-7-7m7 7V3" 
-            />
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
+          Jump to Results
         </button>
-      )}
+      </div>
 
-      {/* Add Back to Top button */}
+      {/* Results Section */}
+      <div ref={resultsRef} className="pt-24">
+        <h2 className="text-xl font-semibold text-gray-700 mb-4">
+          Race Results
+        </h2>
+        {completedRaces.length === 0 && (
+          <p className="text-center text-gray-500">No results available.</p>
+        )}
+        {completedRaces.length > 0 && (
+          <div className="grid gap-4">
+            {completedRaces.map((race) => {
+              const winner = getWinner(race.result, race.teamA, race.teamB);
+
+              return (
+                <div
+                  key={race.raceNumber}
+                  className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
+                  onClick={() => setExpandedRace(expandedRace === race.raceNumber ? null : race.raceNumber)}
+                >
+                  {/* Race Header */}
+                  <div className="flex items-center border-b border-gray-100">
+                    <div className="w-16 md:w-24 h-16 md:h-24 flex items-center justify-center bg-blue-500 text-white">
+                      <span className="text-2xl md:text-4xl font-bold">
+                        {race.raceNumber}
+                      </span>
+                    </div>
+                    <div className="flex-1 p-3">
+                      <div className="flex justify-between items-start">
+                        <div className="text-base md:text-lg font-semibold text-center flex-1">
+                          <span className="text-blue-600">{race.teamA}</span>
+                          <span className="mx-1 md:mx-2 text-gray-400">vs</span>
+                          <span className="text-blue-600">{race.teamB}</span>
+                        </div>
+                        <StatusTag status={race.status} />
+                      </div>
+                      <div className="text-xs md:text-sm text-gray-500 text-center mt-1">
+                        ({race.boats.teamA}) vs ({race.boats.teamB})
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Expandable Timing Info */}
+                  {expandedRace === race.raceNumber && (
+                    <div className="p-4 bg-gray-50 border-t border-gray-100">
+                      <div className="space-y-2 text-sm">
+                        {race.startTime && (
+                          <p className="text-gray-600">
+                            Started: {new Date(race.startTime).toLocaleString()}
+                          </p>
+                        )}
+                        {race.endTime && (
+                          <p className="text-gray-600">
+                            Finished: {new Date(race.endTime).toLocaleString()}
+                          </p>
+                        )}
+                        {race.startTime && race.endTime && (
+                          <p className="text-gray-600">
+                            Duration: {formatDuration(new Date(race.endTime).getTime() - new Date(race.startTime).getTime())}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Winner and Positions */}
+                  <div className="p-4 bg-gray-50">
+                    <div className="text-center mb-4">
+                      <h3 className="text-lg font-semibold text-green-600">
+                        Winner: {winner}
+                      </h3>
+                    </div>
+                    <div className="flex justify-around">
+                      {/* Team A Positions */}
+                      <div className="flex-1 text-center">
+                        <h4 className="font-semibold text-blue-600">{race.teamA}</h4>
+                        <div className="flex justify-center gap-2 mt-2">
+                          {race.result!.slice(0, 3).map((pos, i) => (
+                            <div
+                              key={i}
+                              className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-sm md:text-lg font-bold ${
+                                winner === race.teamA ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                              }`}
+                            >
+                              {pos}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Team B Positions */}
+                      <div className="flex-1 text-center">
+                        <h4 className="font-semibold text-blue-600">{race.teamB}</h4>
+                        <div className="flex justify-center gap-2 mt-2">
+                          {race.result!.slice(3).map((pos, i) => (
+                            <div
+                              key={i}
+                              className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-sm md:text-lg font-bold ${
+                                winner === race.teamB ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                              }`}
+                            >
+                              {pos}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Back to Top Button */}
       {showBackToTop && (
-        <button
-          onClick={scrollToTop}
-          className="fixed right-4 bottom-4 bg-gray-600 text-white w-12 h-12 rounded-full shadow-lg hover:bg-gray-700 transition-colors z-10 flex items-center justify-center"
-          aria-label="Back to top"
-        >
-          <svg 
-            className="w-6 h-6" 
-            fill="none" 
-            stroke="currentColor" 
-            viewBox="0 0 24 24"
+        <div className="fixed bottom-4 right-4">
+          <button
+            onClick={scrollToTop}
+            className="bg-blue-600 text-white rounded-full p-3 shadow-md hover:bg-blue-700 transition-colors"
           >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M5 10l7-7m0 0l7 7m-7-7v18" 
-            />
-          </svg>
-        </button>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15V9m0 0L9 12m3-3l3 3" />
+            </svg>
+          </button>
+        </div>
       )}
     </div>
   );
 }
-
