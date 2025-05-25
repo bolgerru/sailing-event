@@ -18,6 +18,11 @@ interface Race {
     teamB: string;
   };
   result?: number[];
+  isLaunching?: boolean;    // Added property
+  goToChangeover?: boolean; // Added property
+  startTime?: string;       // Optional: add if you track timing
+  endTime?: string;         // Optional: add if you track timing
+  status?: string;         // Optional: add if you track status
 }
 
 interface League {
@@ -211,9 +216,27 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Write schedule to file
+    // After schedule is generated, before writing to file, add launching/changeover tags
+    const processedRaces = allRaces.map((race, index, array) => {
+      // Get all races that use this boat set
+      const boatSetRaces = array.filter(r => 
+        r.boats.teamA === race.boats.teamA && 
+        r.boats.teamB === race.boats.teamB
+      );
+      
+      // Find position of current race within its boat set
+      const positionInSet = boatSetRaces.findIndex(r => r.raceNumber === race.raceNumber);
+
+      return {
+        ...race,
+        isLaunching: positionInSet === 0,     // First race of the set
+        goToChangeover: positionInSet === 1    // Second race of the set
+      };
+    });
+
+    // Write processed schedule to file
     const outputPath = path.join(process.cwd(), 'data', 'schedule.json');
-    await fs.writeFile(outputPath, JSON.stringify(allRaces, null, 2));
+    await fs.writeFile(outputPath, JSON.stringify(processedRaces, null, 2));
 
     // Reset metrics
     const metricsPath = path.join(process.cwd(), 'data', 'metrics.json');
@@ -224,7 +247,7 @@ export async function POST(req: NextRequest) {
     };
     await fs.writeFile(metricsPath, JSON.stringify(initialMetrics, null, 2));
 
-    return NextResponse.json({ schedule: allRaces });
+    return NextResponse.json({ schedule: processedRaces });
   } catch (error) {
     console.error('Error generating schedule:', error);
     return NextResponse.json(
