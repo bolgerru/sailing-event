@@ -417,7 +417,7 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
                   <div className="mb-4">
                     <label className="block text-sm mb-2">Boat Sets:</label>
                     {league.boatSets.map((set, setIndex) => (
-                      <div key={set.id} className="flex gap-2 mb-2">
+                      <div key={set.id} className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
                         <input
                           type="text"
                           value={set.team1Color}
@@ -426,34 +426,34 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
                             newLeagues[leagueIndex].boatSets[setIndex].team1Color = e.target.value;
                             setLeagues(newLeagues);
                           }}
-                          className="border rounded px-2 py-1"
+                          className="w-full border rounded px-2 py-1"
                           placeholder="Team 1 Color"
                         />
-                        <span>vs</span>
-                        <input
-                          type="text"
-                          value={set.team2Color}
-                          onChange={(e) => {
-                            const newLeagues = [...leagues];
-                            newLeagues[leagueIndex].boatSets[setIndex].team2Color = e.target.value;
-                            setLeagues(newLeagues);
-                          }}
-                          className="border rounded px-2 py-1"
-                          placeholder="Team 2 Color"
-                        />
-                        {/* Add remove button */}
-                        {league.boatSets.length > 1 && (
-                          <button
-                            onClick={() => {
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={set.team2Color}
+                            onChange={(e) => {
                               const newLeagues = [...leagues];
-                              newLeagues[leagueIndex].boatSets.splice(setIndex, 1);
+                              newLeagues[leagueIndex].boatSets[setIndex].team2Color = e.target.value;
                               setLeagues(newLeagues);
                             }}
-                            className="text-red-600 hover:text-red-800 px-2"
-                          >
-                            ×
-                          </button>
-                        )}
+                            className="flex-1 border rounded px-2 py-1"
+                            placeholder="Team 2 Color"
+                          />
+                          {league.boatSets.length > 1 && (
+                            <button
+                              onClick={() => {
+                                const newLeagues = [...leagues];
+                                newLeagues[leagueIndex].boatSets.splice(setIndex, 1);
+                                setLeagues(newLeagues);
+                              }}
+                              className="text-red-600 hover:text-red-800 px-2"
+                            >
+                              ×
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))}
                     <button
@@ -502,28 +502,29 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
                 <div className="mb-4">
                   <label className="block text-sm mb-2">Boat Sets:</label>
                   {boatSets.map((set, index) => (
-                    <div key={set.id} className="flex gap-2 mb-2 items-center">
+                    <div key={set.id} className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
                       <input
                         type="text"
                         value={set.team1Color}
                         onChange={(e) => handleBoatSetChange(index, 'team1Color', e.target.value)}
                         placeholder="Team 1 Color"
-                        className="border rounded px-2 py-1"
+                        className="w-full border rounded px-2 py-1"
                       />
-                      <span>vs</span>
-                      <input
-                        type="text"
-                        value={set.team2Color}
-                        onChange={(e) => handleBoatSetChange(index, 'team2Color', e.target.value)}
-                        placeholder="Team 2 Color"
-                        className="border rounded px-2 py-1"
-                      />
-                      <button
-                        onClick={() => handleRemoveBoatSet(index)}
-                        className="text-red-600 hover:text-red-800 px-2"
-                      >
-                        ×
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={set.team2Color}
+                          onChange={(e) => handleBoatSetChange(index, 'team2Color', e.target.value)}
+                          placeholder="Team 2 Color"
+                          className="flex-1 border rounded px-2 py-1"
+                        />
+                        <button
+                          onClick={() => handleRemoveBoatSet(index)}
+                          className="text-red-600 hover:text-red-800 px-2"
+                        >
+                          ×
+                        </button>
+                      </div>
                     </div>
                   ))}
                   <button
