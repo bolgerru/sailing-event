@@ -2,11 +2,20 @@
   "Gold": [
     {
       "team": "tcd 1",
-      "wins": 1,
-      "totalRaces": 1,
+      "wins": 2,
+      "totalRaces": 2,
       "points": 0,
       "winPercentage": 100,
       "place": 1,
+      "league": "Gold"
+    },
+    {
+      "team": "tcd 3",
+      "wins": 1,
+      "totalRaces": 2,
+      "points": 0,
+      "winPercentage": 50,
+      "place": 2,
       "league": "Gold"
     },
     {
@@ -15,29 +24,19 @@
       "totalRaces": 1,
       "points": 0,
       "winPercentage": 0,
-      "place": 2,
+      "place": 3,
       "league": "Gold",
-      "tiebreakNote": "Tied with tcd 3, tcd 4, tcd 5"
-    },
-    {
-      "team": "tcd 3",
-      "wins": 0,
-      "totalRaces": 0,
-      "points": 0,
-      "winPercentage": 0,
-      "place": 2,
-      "league": "Gold",
-      "tiebreakNote": "Tied with tcd 2, tcd 4, tcd 5"
+      "tiebreakNote": "Tied with tcd 4, tcd 5"
     },
     {
       "team": "tcd 4",
       "wins": 0,
-      "totalRaces": 0,
+      "totalRaces": 1,
       "points": 0,
       "winPercentage": 0,
-      "place": 2,
+      "place": 3,
       "league": "Gold",
-      "tiebreakNote": "Tied with tcd 2, tcd 3, tcd 5"
+      "tiebreakNote": "Tied with tcd 2, tcd 5"
     },
     {
       "team": "tcd 5",
@@ -45,21 +44,20 @@
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
-      "place": 2,
+      "place": 3,
       "league": "Gold",
-      "tiebreakNote": "Tied with tcd 2, tcd 3, tcd 4"
+      "tiebreakNote": "Tied with tcd 2, tcd 4"
     }
   ],
   "Silver": [
     {
       "team": "ucd 1",
-      "wins": 0,
-      "totalRaces": 0,
+      "wins": 1,
+      "totalRaces": 1,
       "points": 0,
-      "winPercentage": 0,
+      "winPercentage": 100,
       "place": 1,
-      "league": "Silver",
-      "tiebreakNote": "Tied with ucd 2, ucd 3, ucd 4, ucd 5"
+      "league": "Silver"
     },
     {
       "team": "ucd 2",
@@ -67,19 +65,19 @@
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
-      "place": 1,
+      "place": 2,
       "league": "Silver",
-      "tiebreakNote": "Tied with ucd 1, ucd 3, ucd 4, ucd 5"
+      "tiebreakNote": "Tied with ucd 3, ucd 4, ucd 5"
     },
     {
       "team": "ucd 3",
       "wins": 0,
-      "totalRaces": 0,
+      "totalRaces": 1,
       "points": 0,
       "winPercentage": 0,
-      "place": 1,
+      "place": 2,
       "league": "Silver",
-      "tiebreakNote": "Tied with ucd 1, ucd 2, ucd 4, ucd 5"
+      "tiebreakNote": "Tied with ucd 2, ucd 4, ucd 5"
     },
     {
       "team": "ucd 4",
@@ -87,9 +85,9 @@
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
-      "place": 1,
+      "place": 2,
       "league": "Silver",
-      "tiebreakNote": "Tied with ucd 1, ucd 2, ucd 3, ucd 5"
+      "tiebreakNote": "Tied with ucd 2, ucd 3, ucd 5"
     },
     {
       "team": "ucd 5",
@@ -97,9 +95,9 @@
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
-      "place": 1,
+      "place": 2,
       "league": "Silver",
-      "tiebreakNote": "Tied with ucd 1, ucd 2, ucd 3, ucd 4"
+      "tiebreakNote": "Tied with ucd 2, ucd 3, ucd 4"
     }
   ]
 }

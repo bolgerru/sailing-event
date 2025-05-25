@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, memo } from 'react';
 
 type Race = {
   raceNumber: number;
@@ -28,6 +28,66 @@ interface League {
   teams: string[];
   boatSets: BoatSet[];
 }
+
+const NUMBERS = [1, 2, 3, 4, 5, 6];
+const BOAT_INDICES = [0, 1, 2];
+
+// Memoized components
+const BoatInputs = memo(({ 
+  raceNumber, 
+  startIndex, 
+  formData, 
+  onchange 
+}: { 
+  raceNumber: number;
+  startIndex: number;
+  formData: { [key: number]: (number | '')[] };
+  onchange: (raceNumber: number, index: number, value: number) => void;
+}) => {
+  return (
+    <>
+      {BOAT_INDICES.map((i) => (
+        <div key={i} className="space-y-2 mb-2 last:mb-0">
+          <div className="flex justify-between text-xs">
+            <label>Boat {i + 1}</label>
+            <span className="font-medium">
+              {formData[raceNumber]?.[i + startIndex] || '-'}
+            </span>
+          </div>
+          <div className="flex gap-1">
+            {NUMBERS.map((num) => (
+              <button
+                key={num}
+                onClick={() => onchange(raceNumber, i + startIndex, num)}
+                className={`flex-1 h-8 text-sm rounded border ${
+                  formData[raceNumber]?.[i + startIndex] === num
+                    ? 'bg-blue-600 border-blue-700 text-white' 
+                    : 'bg-white border-blue-300 text-blue-600 hover:bg-blue-50'
+                }`}
+              >
+                {num}
+              </button>
+            ))}
+            <input
+              type="number"
+              min={1}
+              value={formData[raceNumber]?.[i + startIndex] || ''}
+              onChange={(e) => {
+                const value = parseInt(e.target.value);
+                if (!isNaN(value)) {
+                  onchange(raceNumber, i + startIndex, value);
+                }
+              }}
+              className="w-14 h-8 text-sm border rounded text-center"
+              placeholder="..."
+            />
+          </div>
+        </div>
+      ))}
+    </>
+  );
+});
+BoatInputs.displayName = 'BoatInputs';
 
 export default function AdminResultsForm({ races: initialRaces }: { races: Race[] }) {
   const [races, setRaces] = useState<Race[]>(initialRaces);
@@ -98,14 +158,16 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     return firstPlaceIndex < 3 ? race.teamB : race.teamA; // 1st was on teamA, they lose tie
   };
 
-  const handleChange = (raceNumber: number, index: number, value: number) => {
-    const current = formData[raceNumber] || Array(6).fill('');  // Changed from fill(0) to fill('')
-    const updated = [...current];
-    updated[index] = value || '';  // Use empty string if value is 0 or empty
-    setFormData({ ...formData, [raceNumber]: updated });
-  };
+  const handleChange = useCallback((raceNumber: number, index: number, value: number) => {
+    setFormData(prev => {
+      const current = prev[raceNumber] || Array(6).fill('');
+      const updated = [...current];
+      updated[index] = value || '';
+      return { ...prev, [raceNumber]: updated };
+    });
+  }, []);
 
-  const handleStartRace = async (raceNumber: number) => {
+  const handleStartRace = useCallback(async (raceNumber: number) => {
     try {
       const res = await fetch('/api/results', {
         method: 'POST',
@@ -118,11 +180,11 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
       });
 
       if (!res.ok) throw new Error('Failed to start race');
-      await fetchRaces(); // Refresh races
+      await fetchRaces();
     } catch (error) {
       alert('Error starting race: ' + (error as Error).message);
     }
-  };
+  }, [fetchRaces]);
 
   const handleSubmit = async (raceNumber: number) => {
     const result = formData[raceNumber];
@@ -367,6 +429,31 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
       }, 0);
   };
 
+  // Memoize race calculations
+  const raceData = useMemo(() => 
+    races.map(race => {
+      const result = formData[race.raceNumber];
+      const teamAScore = getTeamScore(result, 0);
+      const teamBScore = getTeamScore(result, 3);
+      const isTeamAWinning = teamAScore < teamBScore;
+      const isTeamBWinning = teamBScore < teamAScore;
+      const winner = result && result.every((n) => 
+        typeof n === 'number' && n >= 1
+      ) ? determineWinner(race, result) : null;
+
+      return {
+        race,
+        result,
+        teamAScore,
+        teamBScore,
+        isTeamAWinning,
+        isTeamBWinning,
+        winner
+      };
+    }),
+    [races, formData]
+  );
+
   return (
     <div className="space-y-6">
       {/* Add Generate Schedule button at the top */}
@@ -576,190 +663,109 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
         </div>
       )}
       
-      {races.map((race) => {
-        const result = formData[race.raceNumber];
-        const teamAScore = getTeamScore(result, 0);
-        const teamBScore = getTeamScore(result, 3);
-        const isTeamAWinning = teamAScore < teamBScore;
-        const isTeamBWinning = teamBScore < teamAScore;
-        const winner = result && result.every((n) => 
-          typeof n === 'number' && n >= 1
-        ) ? determineWinner(race, result) : null;
-
-        return (
-          <div key={race.raceNumber} className="p-3 bg-white border rounded-md">
-            <div className="flex justify-between items-center mb-3">
-              <p className="text-xl md:text-2xl font-bold text-gray-700">
-                Race {race.raceNumber}
-              </p>
-              {(!race.status || race.status === 'not_started') ? (
-                <button
-                  onClick={() => handleStartRace(race.raceNumber)}
-                  className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700"
-                >
-                  Start Race
-                </button>
-              ) : race.status === 'in_progress' ? (
-                <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm">
-                  In Progress
-                </span>
-              ) : (
-                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                  Finished
-                </span>
-              )}
-            </div>
-
-            <div className="mb-3">
-              <p className="text-center text-xl md:text-2xl font-bold text-gray-700 mb-3">
-                Race {race.raceNumber}
-              </p>
-              <div className="flex justify-between items-baseline">
-                <div className="text-center flex-1">
-                  <h3 className="text-base md:text-lg font-semibold">{race.teamA}</h3>
-                  <span className="text-xs text-gray-600">({race.boats?.teamA})</span>
-                </div>
-                <span className="text-gray-400 mx-2">vs</span>
-                <div className="text-center flex-1">
-                  <h3 className="text-base md:text-lg font-semibold">{race.teamB}</h3>
-                  <span className="text-xs text-gray-600">({race.boats?.teamB})</span>
-                </div>
-              </div>
-            </div>
-            
-            {winner && (
-              <div className="mb-3 text-green-700 font-semibold text-sm md:text-base">
-                Winner: {winner}
-              </div>
+      {raceData.map(({ race, result, isTeamAWinning, isTeamBWinning, winner }) => (
+        <div key={race.raceNumber} className="p-3 bg-white border rounded-md">
+          <div className="flex justify-between items-center mb-3">
+            <p className="text-xl md:text-2xl font-bold text-gray-700">
+              Race {race.raceNumber}
+            </p>
+            {(!race.status || race.status === 'not_started') ? (
+              <button
+                onClick={() => handleStartRace(race.raceNumber)}
+                className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700"
+              >
+                Start Race
+              </button>
+            ) : race.status === 'in_progress' ? (
+              <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm">
+                In Progress
+              </span>
+            ) : (
+              <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
+                Finished
+              </span>
             )}
+          </div>
 
-            <div className="space-y-4 md:grid md:grid-cols-2 md:gap-4 md:space-y-0">
-              {/* Team A Boats */}
-              <div className="space-y-2">
-                <h3 className={`font-medium text-sm md:text-base ${
-                  isTeamAWinning ? 'text-green-600' : 'text-red-600'
-                }`}>{race.teamA}</h3>
-                <div className={`space-y-4 p-3 rounded-md ${
-                  isTeamAWinning ? 'bg-green-50' : 'bg-red-50'
-                }`}>
-                  <div className="bg-white shadow-sm p-2 rounded-md">
-                    {[...Array(3)].map((_, i) => (
-                      <div key={i} className="space-y-2 mb-2 last:mb-0">
-                        <div className="flex justify-between text-xs">
-                          <label>Boat {i + 1}</label>
-                          <span className="font-medium">
-                            {formData[race.raceNumber]?.[i] || '-'}
-                          </span>
-                        </div>
-                        <div className="flex gap-1">
-                          {[1, 2, 3, 4, 5, 6].map((num) => (
-                            <button
-                              key={num}
-                              onClick={() => handleChange(race.raceNumber, i, num)}
-                              className={`flex-1 h-8 text-sm rounded border ${
-                                formData[race.raceNumber]?.[i] === num
-                                  ? 'bg-blue-600 border-blue-700 text-white' 
-                                  : 'bg-white border-blue-300 text-blue-600 hover:bg-blue-50'
-                              }`}
-                              style={{
-                                WebkitTapHighlightColor: 'transparent'
-                              }}
-                            >
-                              {num}
-                            </button>
-                          ))}
-                          <input
-                            type="number"
-                            min={1}
-                            value={formData[race.raceNumber]?.[i] || ''}
-                            onChange={(e) => {
-                              const value = parseInt(e.target.value);
-                              if (!isNaN(value)) {
-                                handleChange(race.raceNumber, i, value);
-                              }
-                            }}
-                            className="w-14 h-8 text-sm border rounded text-center"
-                            placeholder="..."
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+          <div className="mb-3">
+            <p className="text-center text-xl md:text-2xl font-bold text-gray-700 mb-3">
+              Race {race.raceNumber}
+            </p>
+            <div className="flex justify-between items-baseline">
+              <div className="text-center flex-1">
+                <h3 className="text-base md:text-lg font-semibold">{race.teamA}</h3>
+                <span className="text-xs text-gray-600">({race.boats?.teamA})</span>
               </div>
-
-              {/* Team B Boats */}
-              <div className="space-y-2">
-                <h3 className={`font-medium text-sm md:text-base ${
-                  isTeamBWinning ? 'text-green-600' : 'text-red-600'
-                }`}>{race.teamB}</h3>
-                <div className={`space-y-4 p-3 rounded-md ${
-                  isTeamBWinning ? 'bg-green-50' : 'bg-red-50'
-                }`}>
-                  <div className="bg-white p-2 rounded-md">
-                    {[...Array(3)].map((_, i) => (
-                      <div key={i} className="space-y-2 mb-2 last:mb-0">
-                        <div className="flex justify-between text-xs">
-                          <label>Boat {i + 1}</label>
-                          <span className="font-medium">
-                            {formData[race.raceNumber]?.[i + 3] || '-'}
-                          </span>
-                        </div>
-                        <div className="flex gap-1">
-                          {[1, 2, 3, 4, 5, 6].map((num) => (
-                            <button
-                              key={num}
-                              onClick={() => handleChange(race.raceNumber, i + 3, num)}
-                              className={`flex-1 h-8 text-sm rounded border ${
-                                formData[race.raceNumber]?.[i + 3] === num
-                                  ? 'bg-blue-600 border-blue-700 text-white' 
-                                  : 'bg-white border-blue-300 text-blue-600 hover:bg-blue-50'
-                              }`}
-                              style={{
-                                WebkitTapHighlightColor: 'transparent'
-                              }}
-                            >
-                              {num}
-                            </button>
-                          ))}
-                          <input
-                            type="number"
-                            min={1}
-                            value={formData[race.raceNumber]?.[i + 3] || ''}
-                            onChange={(e) => {
-                              const value = parseInt(e.target.value);
-                              if (!isNaN(value)) {
-                                handleChange(race.raceNumber, i + 3, value);
-                              }
-                            }}
-                            className="w-14 h-8 text-sm border rounded text-center"
-                            placeholder="..."
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+              <span className="text-gray-400 mx-2">vs</span>
+              <div className="text-center flex-1">
+                <h3 className="text-base md:text-lg font-semibold">{race.teamB}</h3>
+                <span className="text-xs text-gray-600">({race.boats?.teamB})</span>
               </div>
-            </div>
-
-            <div className="flex gap-2 mt-4">
-              <button
-                onClick={() => handleSubmit(race.raceNumber)}
-                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded text-sm md:text-base hover:bg-blue-700"
-              >
-                Save Result
-              </button>
-              <button
-                onClick={() => handleClear(race.raceNumber)}
-                className="flex-1 bg-gray-500 text-white px-4 py-2 rounded text-sm md:text-base hover:bg-gray-600"
-              >
-                Clear Results
-              </button>
             </div>
           </div>
-        );
-      })}
+          
+          {winner && (
+            <div className="mb-3 text-green-700 font-semibold text-sm md:text-base">
+              Winner: {winner}
+            </div>
+          )}
+
+          <div className="space-y-4 md:grid md:grid-cols-2 md:gap-4 md:space-y-0">
+            {/* Team A Boats */}
+            <div className="space-y-2">
+              <h3 className={`font-medium text-sm md:text-base ${
+                isTeamAWinning ? 'text-green-600' : 'text-red-600'
+              }`}>{race.teamA}</h3>
+              <div className={`space-y-4 p-3 rounded-md ${
+                isTeamAWinning ? 'bg-green-50' : 'bg-red-50'
+              }`}>
+                <div className="bg-white shadow-sm p-2 rounded-md">
+                  <BoatInputs
+                    raceNumber={race.raceNumber}
+                    startIndex={0}
+                    formData={formData}
+                    onchange={handleChange}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Team B Boats */}
+            <div className="space-y-2">
+              <h3 className={`font-medium text-sm md:text-base ${
+                isTeamBWinning ? 'text-green-600' : 'text-red-600'
+              }`}>{race.teamB}</h3>
+              <div className={`space-y-4 p-3 rounded-md ${
+                isTeamBWinning ? 'bg-green-50' : 'bg-red-50'
+              }`}>
+                <div className="bg-white p-2 rounded-md">
+                  <BoatInputs
+                    raceNumber={race.raceNumber}
+                    startIndex={3}
+                    formData={formData}
+                    onchange={handleChange}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={() => handleSubmit(race.raceNumber)}
+              className="flex-1 bg-blue-600 text-white px-4 py-2 rounded text-sm md:text-base hover:bg-blue-700"
+            >
+              Save Result
+            </button>
+            <button
+              onClick={() => handleClear(race.raceNumber)}
+              className="flex-1 bg-gray-500 text-white px-4 py-2 rounded text-sm md:text-base hover:bg-gray-600"
+            >
+              Clear Results
+            </button>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
