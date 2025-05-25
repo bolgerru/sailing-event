@@ -8,8 +8,8 @@
       "teamB": "White"
     },
     "status": "finished",
-    "startTime": "2025-05-25T12:01:07.238Z",
-    "endTime": "2025-05-25T12:01:12.057Z",
+    "startTime": "2025-05-25T16:25:01.745Z",
+    "endTime": "2025-05-25T16:35:20.082Z",
     "result": [
       1,
       2,
@@ -28,7 +28,8 @@
       "teamB": "White"
     },
     "status": "finished",
-    "endTime": "2025-05-25T12:01:18.874Z",
+    "startTime": "2025-05-25T16:28:36.966Z",
+    "endTime": "2025-05-25T16:35:33.504Z",
     "result": [
       1,
       2,
@@ -47,7 +48,7 @@
       "teamB": "Black"
     },
     "status": "finished",
-    "endTime": "2025-05-25T12:01:27.392Z",
+    "endTime": "2025-05-25T16:35:44.142Z",
     "result": [
       1,
       2,
@@ -66,8 +67,8 @@
       "teamB": "White"
     },
     "status": "finished",
-    "startTime": "2025-05-25T12:03:01.624Z",
-    "endTime": "2025-05-25T12:03:07.475Z",
+    "startTime": "2025-05-25T16:38:25.286Z",
+    "endTime": "2025-05-25T16:38:30.762Z",
     "result": [
       1,
       2,
@@ -86,8 +87,8 @@
       "teamB": "White"
     },
     "status": "finished",
-    "startTime": "2025-05-25T12:04:00.085Z",
-    "endTime": "2025-05-25T12:07:07.574Z",
+    "startTime": "2025-05-25T16:38:33.358Z",
+    "endTime": "2025-05-25T16:42:12.248Z",
     "result": [
       1,
       2,
@@ -106,8 +107,8 @@
       "teamB": "Black"
     },
     "status": "finished",
-    "startTime": "2025-05-25T12:08:29.818Z",
-    "endTime": "2025-05-25T12:09:25.750Z",
+    "startTime": "2025-05-25T16:42:04.183Z",
+    "endTime": "2025-05-25T16:44:42.934Z",
     "result": [
       1,
       2,
@@ -126,8 +127,8 @@
       "teamB": "White"
     },
     "status": "finished",
-    "startTime": "2025-05-25T12:08:32.639Z",
-    "endTime": "2025-05-25T12:09:35.180Z",
+    "startTime": "2025-05-25T16:44:35.026Z",
+    "endTime": "2025-05-25T16:45:35.876Z",
     "result": [
       1,
       2,
@@ -144,18 +145,7 @@
     "boats": {
       "teamA": "Blue",
       "teamB": "White"
-    },
-    "status": "finished",
-    "startTime": "2025-05-25T12:10:34.886Z",
-    "endTime": "2025-05-25T12:12:13.676Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    }
   },
   {
     "raceNumber": 9,
@@ -164,18 +154,7 @@
     "boats": {
       "teamA": "Red",
       "teamB": "Black"
-    },
-    "status": "finished",
-    "startTime": "2025-05-25T12:10:37.644Z",
-    "endTime": "2025-05-25T12:12:23.195Z",
-    "result": [
-      1,
-      4,
-      5,
-      2,
-      3,
-      6
-    ]
+    }
   },
   {
     "raceNumber": 10,
@@ -184,18 +163,7 @@
     "boats": {
       "teamA": "Green",
       "teamB": "White"
-    },
-    "status": "finished",
-    "startTime": "2025-05-25T12:18:51.767Z",
-    "endTime": "2025-05-25T12:24:14.098Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    }
   },
   {
     "raceNumber": 11,
@@ -204,18 +172,7 @@
     "boats": {
       "teamA": "Blue",
       "teamB": "White"
-    },
-    "status": "finished",
-    "startTime": "2025-05-25T12:19:29.599Z",
-    "endTime": "2025-05-25T12:25:52.510Z",
-    "result": [
-      1,
-      4,
-      5,
-      2,
-      3,
-      6
-    ]
+    }
   },
   {
     "raceNumber": 12,
@@ -224,18 +181,7 @@
     "boats": {
       "teamA": "Red",
       "teamB": "Black"
-    },
-    "status": "finished",
-    "startTime": "2025-05-25T12:27:06.227Z",
-    "endTime": "2025-05-25T12:57:12.174Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    }
   },
   {
     "raceNumber": 13,
@@ -244,18 +190,7 @@
     "boats": {
       "teamA": "Green",
       "teamB": "White"
-    },
-    "status": "finished",
-    "startTime": "2025-05-25T12:59:47.571Z",
-    "endTime": "2025-05-25T13:00:01.712Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    }
   },
   {
     "raceNumber": 14,
@@ -264,18 +199,7 @@
     "boats": {
       "teamA": "Blue",
       "teamB": "White"
-    },
-    "status": "finished",
-    "startTime": "2025-05-25T12:59:53.788Z",
-    "endTime": "2025-05-25T13:03:45.667Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    }
   },
   {
     "raceNumber": 15,
@@ -284,9 +208,7 @@
     "boats": {
       "teamA": "Red",
       "teamB": "Black"
-    },
-    "status": "in_progress",
-    "startTime": "2025-05-25T13:03:49.443Z"
+    }
   },
   {
     "raceNumber": 16,
@@ -295,17 +217,7 @@
     "boats": {
       "teamA": "Green",
       "teamB": "White"
-    },
-    "status": "finished",
-    "endTime": "2025-05-25T13:06:36.195Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    }
   },
   {
     "raceNumber": 17,

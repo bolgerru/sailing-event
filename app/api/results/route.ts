@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
+import { updateMetrics } from '@/app/lib/metrics';
 
 type Race = {
   raceNumber: number;
@@ -754,6 +755,16 @@ export async function POST(req: Request) {
     };
 
     await saveSchedule(races);
+
+    // Update metrics if race is finished
+    if (status === 'finished' && endTime) {
+      try {
+        const metrics = await updateMetrics(races);
+        console.log('Updated race metrics:', metrics);
+      } catch (error) {
+        console.error('Error updating metrics:', error);
+      }
+    }
 
     // Only compute leaderboard if results were updated
     if (result !== undefined) {

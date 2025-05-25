@@ -95,6 +95,64 @@ function LiveDuration({ startTime }: { startTime: string }) {
   return <span>{duration}</span>;
 }
 
+// Update the Metrics type
+type Metrics = {
+  averageRaceLength: string;
+  timeBetweenRaces: string;
+  timeBetweenRacesMs: number; // Add this property
+  lastUpdated: string;
+};
+
+function EstimatedStartTime({ race, lastStartedRace, timeBetweenRaces }: { 
+  race: Race; 
+  lastStartedRace: Race | null;
+  timeBetweenRaces: number;
+}) {
+  const [timeUntilStart, setTimeUntilStart] = useState<string>('');
+
+  useEffect(() => {
+    function updateCountdown() {
+      if (!lastStartedRace?.startTime) return;
+
+      const lastStartTime = new Date(lastStartedRace.startTime);
+      const racesBetween = race.raceNumber - lastStartedRace.raceNumber;
+      const estimatedStart = new Date(lastStartTime.getTime() + (racesBetween * timeBetweenRaces));
+      
+      const now = new Date();
+      const diff = estimatedStart.getTime() - now.getTime();
+      
+      if (diff < 0) {
+        setTimeUntilStart('Starting soon');
+        return;
+      }
+
+      const minutes = Math.floor(diff / 60000);
+      const seconds = Math.floor((diff % 60000) / 1000);
+      setTimeUntilStart(`~${minutes}m ${seconds}s`);
+    }
+
+    const interval = setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    return () => clearInterval(interval);
+  }, [race, lastStartedRace, timeBetweenRaces]);
+
+  return (
+    <div className="text-gray-500 text-sm">
+      {timeUntilStart ? (
+        <span className="flex items-center gap-1">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          {timeUntilStart}
+        </span>
+      ) : (
+        'Calculating...'
+      )}
+    </div>
+  );
+}
+
 export default function SchedulePage() {
   const [races, setRaces] = useState<Race[]>([]);
   const [filter, setFilter] = useState<string>('all');
@@ -104,29 +162,43 @@ export default function SchedulePage() {
   // Add these new states near your other state declarations
   const [showBackToTop, setShowBackToTop] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
+  // Add metrics state
+  const [metrics, setMetrics] = useState<Metrics | null>(null);
+  
+  // Find the last started race
+  const lastStartedRace = useMemo(() => {
+    return races
+      .filter(r => r.startTime)
+      .sort((a, b) => new Date(b.startTime!).getTime() - new Date(a.startTime!).getTime())[0];
+  }, [races]);
 
   // Fetch races data
   useEffect(() => {
-    const fetchRaces = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch('/api/schedule', {
-          cache: 'no-store',
-          headers: {
-            'Accept': 'application/json',
-          },
-        });
+        const [racesRes, metricsRes] = await Promise.all([
+          fetch('/api/schedule'),
+          fetch('/api/metrics')
+        ]);
         
-        if (!res.ok) throw new Error('Failed to fetch races');
-        const data = await res.json();
-        setRaces(data);
+        if (!racesRes.ok) throw new Error('Failed to fetch races');
+        if (!metricsRes.ok) throw new Error('Failed to fetch metrics');
+        
+        const racesData = await racesRes.json();
+        const metricsData = await metricsRes.json();
+        
+        setRaces(racesData);
+        setMetrics(metricsData);
       } catch (error) {
-        console.error('Error fetching races:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRaces();
+    fetchData();
+    const interval = setInterval(fetchData, 60000); // Refresh every minute
+    return () => clearInterval(interval);
   }, []);
 
   // Get unique filter options combining leagues and teams
@@ -222,6 +294,25 @@ export default function SchedulePage() {
       <h1 className="text-2xl md:text-3xl font-bold text-center mb-6 text-gray-800">
         Schedule & Results
       </h1>
+
+      {/* Add metrics display */}
+      {metrics && (
+        <div className="bg-white rounded-lg shadow-lg p-4 mb-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-4 bg-blue-50 rounded-lg">
+              <h3 className="text-sm font-medium text-blue-800 mb-1">Average Race Length</h3>
+              <p className="text-2xl font-bold text-blue-900">{metrics.averageRaceLength}</p>
+            </div>
+            <div className="p-4 bg-green-50 rounded-lg">
+              <h3 className="text-sm font-medium text-green-800 mb-1">Time Between Races</h3>
+              <p className="text-2xl font-bold text-green-900">{metrics.timeBetweenRaces}</p>
+            </div>
+          </div>
+          <div className="mt-2 text-xs text-gray-500 text-center">
+            Last updated: {new Date(metrics.lastUpdated).toLocaleTimeString()}
+          </div>
+        </div>
+      )}
 
       {/* Single Filter */}
       <div className="bg-white p-4 rounded-lg shadow">
@@ -363,6 +454,17 @@ export default function SchedulePage() {
                     </p>
                   )}
                 </div>
+
+                {/* Show estimated start time if no start time and no status */}
+                {!race.startTime && !race.status && lastStartedRace && (
+                  <div className="p-3 border-t border-gray-100">
+                    <EstimatedStartTime 
+                      race={race}
+                      lastStartedRace={lastStartedRace}
+                      timeBetweenRaces={metrics?.timeBetweenRacesMs || 180000}
+                    />
+                  </div>
+                )}
               </div>
             ))}
           </div>

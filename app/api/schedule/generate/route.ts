@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
+import { promises as fs } from 'fs';
 import path from 'path';
 
 interface BoatSet {
@@ -213,7 +213,16 @@ export async function POST(req: NextRequest) {
 
     // Write schedule to file
     const outputPath = path.join(process.cwd(), 'data', 'schedule.json');
-    fs.writeFileSync(outputPath, JSON.stringify(allRaces, null, 2));
+    await fs.writeFile(outputPath, JSON.stringify(allRaces, null, 2));
+
+    // Reset metrics
+    const metricsPath = path.join(process.cwd(), 'data', 'metrics.json');
+    const initialMetrics = {
+      averageRaceLength: '0m 0s',
+      timeBetweenRaces: '0m 0s',
+      lastUpdated: new Date().toISOString()
+    };
+    await fs.writeFile(metricsPath, JSON.stringify(initialMetrics, null, 2));
 
     return NextResponse.json({ schedule: allRaces });
   } catch (error) {
