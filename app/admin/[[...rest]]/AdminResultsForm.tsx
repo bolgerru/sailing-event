@@ -533,7 +533,7 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
         {!showTeamInput && (
           <div className="flex gap-4">
             <Link
-              href="/admin/race-control"
+              href="/race-control"
               className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
             >
               Race Control
