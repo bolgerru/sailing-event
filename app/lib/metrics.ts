@@ -17,23 +17,26 @@ type Race = {
 };
 
 export async function updateMetrics(races: Race[]): Promise<RaceMetrics> {
-  // Get all completed races for average race length
-  const completedRaces = races
+  const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+
+  // Get completed races from last 2 hours
+  const recentCompletedRaces = races
     .filter(race => 
       race.status === 'finished' &&
       race.startTime &&
-      race.endTime
+      race.endTime &&
+      new Date(race.endTime) > twoHoursAgo
     );
 
-  // Get last 5 finished races for time between races
-  const lastFiveRaces = [...completedRaces]
+  // Get last 5 finished races from the recent races
+  const lastFiveRaces = [...recentCompletedRaces]
     .sort((a, b) => 
       new Date(b.endTime!).getTime() - new Date(a.endTime!).getTime()
     )
     .slice(0, 5);
 
-  // Calculate average race length from all completed races
-  const raceLengths = completedRaces.map(race => 
+  // Calculate average race length from recent completed races
+  const raceLengths = recentCompletedRaces.map(race => 
     new Date(race.endTime!).getTime() - new Date(race.startTime!).getTime()
   );
   
@@ -41,7 +44,7 @@ export async function updateMetrics(races: Race[]): Promise<RaceMetrics> {
     ? raceLengths.reduce((a, b) => a + b, 0) / raceLengths.length
     : 0;
 
-  // Calculate time between races from last 5 races
+  // Calculate time between races from last 5 recent races
   const timeBetween: number[] = [];
   for (let i = 0; i < lastFiveRaces.length - 1; i++) {
     const currentRaceEnd = new Date(lastFiveRaces[i].endTime!).getTime();
