@@ -3,16 +3,15 @@
     "raceNumber": 1,
     "teamA": "TCD 1",
     "teamB": "TCD 2",
-    "league": "Gold",
     "boats": {
-      "teamA": "Blue",
-      "teamB": "White"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
     "goToChangeover": false,
     "status": "finished",
-    "startTime": "2025-05-25T22:05:10.037Z",
-    "endTime": "2025-05-25T22:05:28.283Z",
+    "startTime": "2025-05-26T19:53:12.097Z",
+    "endTime": "2025-05-26T19:54:30.531Z",
     "result": [
       1,
       2,
@@ -24,942 +23,994 @@
   },
   {
     "raceNumber": 2,
-    "teamA": "TCD 3",
-    "teamB": "DCU 1",
-    "league": "Silver",
+    "teamA": "TCD 1",
+    "teamB": "TCD 3",
     "boats": {
-      "teamA": "Yellow",
-      "teamB": "Green"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-25T22:05:17.671Z",
-    "endTime": "2025-05-25T22:06:16.882Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": true,
+    "status": "in_progress",
+    "startTime": "2025-05-26T19:54:46.410Z"
   },
   {
     "raceNumber": 3,
-    "teamA": "TCD 1",
-    "teamB": "UCD 2",
-    "league": "Gold",
+    "teamA": "DCU 1",
+    "teamB": "TCD 3",
     "boats": {
-      "teamA": "Blue",
-      "teamB": "White"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-25T22:06:08.902Z",
-    "endTime": "2025-05-25T22:06:28.232Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": true
   },
   {
     "raceNumber": 4,
-    "teamA": "TCD 3",
-    "teamB": "UL 1",
-    "league": "Silver",
+    "teamA": "DCU 1",
+    "teamB": "UCD 2",
     "boats": {
-      "teamA": "Yellow",
-      "teamB": "Green"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-25T22:06:18.955Z",
-    "endTime": "2025-05-25T22:06:47.200Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": true
   },
   {
     "raceNumber": 5,
-    "teamA": "UCC 2",
+    "teamA": "UL 1",
     "teamB": "UCD 2",
-    "league": "Gold",
     "boats": {
-      "teamA": "Blue",
-      "teamB": "White"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-25T22:06:40.671Z",
-    "endTime": "2025-05-25T22:07:03.902Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 6,
-    "teamA": "UCD 1",
-    "teamB": "UL 1",
-    "league": "Silver",
+    "teamA": "UL 1",
+    "teamB": "UCC 2",
     "boats": {
-      "teamA": "Yellow",
-      "teamB": "Green"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-25T22:06:51.546Z",
-    "endTime": "2025-05-25T22:08:53.539Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 7,
-    "teamA": "UCC 2",
-    "teamB": "UG 2",
-    "league": "Gold",
+    "teamA": "UCD 1",
+    "teamB": "UCC 2",
     "boats": {
-      "teamA": "Blue",
-      "teamB": "White"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "endTime": "2025-05-25T22:10:21.540Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 8,
     "teamA": "UCD 1",
-    "teamB": "UG 1",
-    "league": "Silver",
+    "teamB": "UG 2",
     "boats": {
-      "teamA": "Yellow",
-      "teamB": "Green"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-25T22:10:41.470Z",
-    "endTime": "2025-05-26T09:03:11.680Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 9,
-    "teamA": "MTU 2",
+    "teamA": "UG 1",
     "teamB": "UG 2",
-    "league": "Gold",
     "boats": {
-      "teamA": "Blue",
-      "teamB": "White"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-25T22:10:43.903Z",
-    "endTime": "2025-05-26T09:03:58.874Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 10,
-    "teamA": "UCC 3",
-    "teamB": "UG 1",
-    "league": "Silver",
+    "teamA": "UG 1",
+    "teamB": "MTU 2",
     "boats": {
-      "teamA": "Yellow",
-      "teamB": "Green"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-25T22:15:19.041Z",
-    "endTime": "2025-05-26T09:04:03.395Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 11,
-    "teamA": "MTU 2",
-    "teamB": "TUD 2",
-    "league": "Gold",
+    "teamA": "UCC 3",
+    "teamB": "MTU 2",
     "boats": {
-      "teamA": "Blue",
-      "teamB": "White"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:02:34.221Z",
-    "endTime": "2025-05-26T09:05:40.125Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 12,
     "teamA": "UCC 3",
-    "teamB": "TCD 4",
-    "league": "Silver",
+    "teamB": "TUD 2",
     "boats": {
-      "teamA": "Yellow",
-      "teamB": "Green"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:05:09.566Z",
-    "endTime": "2025-05-26T09:12:09.651Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 13,
-    "teamA": "TCD 2",
+    "teamA": "TCD 4",
     "teamB": "TUD 2",
-    "league": "Gold",
     "boats": {
-      "teamA": "Blue",
-      "teamB": "White"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:11:50.026Z",
-    "endTime": "2025-05-26T09:12:13.969Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 14,
-    "teamA": "DCU 1",
-    "teamB": "TCD 4",
-    "league": "Silver",
+    "teamA": "TCD 4",
+    "teamB": "TCD 2",
     "boats": {
-      "teamA": "Yellow",
-      "teamB": "Green"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:11:54.450Z",
-    "endTime": "2025-05-26T09:12:18.435Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 15,
-    "teamA": "TCD 2",
-    "teamB": "UCD 2",
-    "league": "Gold",
+    "teamA": "TCD 3",
+    "teamB": "TCD 2",
     "boats": {
-      "teamA": "Blue",
-      "teamB": "White"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:11:56.654Z",
-    "endTime": "2025-05-26T09:12:25.928Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 16,
-    "teamA": "DCU 1",
-    "teamB": "UL 1",
-    "league": "Silver",
+    "teamA": "TCD 3",
+    "teamB": "UCD 2",
     "boats": {
-      "teamA": "Yellow",
-      "teamB": "Green"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:11:58.133Z",
-    "endTime": "2025-05-26T09:12:30.727Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 17,
-    "teamA": "UG 2",
+    "teamA": "TCD 1",
     "teamB": "UCD 2",
-    "league": "Gold",
     "boats": {
-      "teamA": "Blue",
-      "teamB": "White"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:11:59.421Z",
-    "endTime": "2025-05-26T09:12:56.549Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 18,
-    "teamA": "UG 1",
-    "teamB": "UL 1",
-    "league": "Silver",
+    "teamA": "TCD 1",
+    "teamB": "DCU 1",
     "boats": {
-      "teamA": "Yellow",
-      "teamB": "Green"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "endTime": "2025-05-26T09:21:53.940Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ],
-    "startTime": "2025-05-26T09:21:38.865Z"
+    "goToChangeover": false
   },
   {
     "raceNumber": 19,
-    "teamA": "UG 2",
-    "teamB": "TCD 1",
-    "league": "Gold",
+    "teamA": "UL 1",
+    "teamB": "DCU 1",
     "boats": {
-      "teamA": "Blue",
-      "teamB": "White"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:21:57.769Z",
-    "endTime": "2025-05-26T09:44:00.672Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 20,
-    "teamA": "UG 1",
-    "teamB": "TCD 3",
-    "league": "Silver",
+    "teamA": "UL 1",
+    "teamB": "UCD 1",
     "boats": {
-      "teamA": "Yellow",
-      "teamB": "Green"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "endTime": "2025-05-26T09:22:12.564Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 21,
-    "teamA": "UCC 2",
-    "teamB": "TCD 1",
-    "league": "Gold",
+    "teamA": "UG 1",
+    "teamB": "UCD 1",
     "boats": {
-      "teamA": "Blue",
-      "teamB": "White"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "endTime": "2025-05-26T09:22:19.256Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 22,
-    "teamA": "UCD 1",
-    "teamB": "TCD 3",
-    "league": "Silver",
+    "teamA": "UG 1",
+    "teamB": "UCC 2",
     "boats": {
-      "teamA": "Yellow",
-      "teamB": "Green"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:04:56.594Z",
-    "endTime": "2025-05-26T09:22:41.975Z",
-    "result": [
-      1,
-      5,
-      6,
-      2,
-      3,
-      4
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 23,
-    "teamA": "UCC 2",
-    "teamB": "MTU 2",
-    "league": "Gold",
+    "teamA": "UG 2",
+    "teamB": "UCC 2",
     "boats": {
-      "teamA": "Blue",
-      "teamB": "White"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:22:34.543Z",
-    "endTime": "2025-05-26T09:22:56.596Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 24,
-    "teamA": "UCD 1",
-    "teamB": "UCC 3",
-    "league": "Silver",
+    "teamA": "UG 2",
+    "teamB": "MTU 2",
     "boats": {
-      "teamA": "Yellow",
-      "teamB": "Green"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:22:50.828Z",
-    "endTime": "2025-05-26T09:23:07.046Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 25,
-    "teamA": "TCD 2",
+    "teamA": "TUD 2",
     "teamB": "MTU 2",
-    "league": "Gold",
     "boats": {
-      "teamA": "Blue",
-      "teamB": "White"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:22:59.965Z",
-    "endTime": "2025-05-26T09:23:17.761Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 26,
-    "teamA": "DCU 1",
-    "teamB": "UCC 3",
-    "league": "Silver",
+    "teamA": "TUD 2",
+    "teamB": "TCD 2",
     "boats": {
-      "teamA": "Yellow",
-      "teamB": "Green"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:23:10.703Z",
-    "endTime": "2025-05-26T09:23:26.074Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 27,
-    "teamA": "TCD 2",
-    "teamB": "UG 2",
-    "league": "Gold",
+    "teamA": "UCC 3",
+    "teamB": "TCD 2",
     "boats": {
-      "teamA": "Blue",
-      "teamB": "White"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:23:20.269Z",
-    "endTime": "2025-05-26T09:42:35.389Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 28,
-    "teamA": "DCU 1",
-    "teamB": "UG 1",
-    "league": "Silver",
+    "teamA": "UCC 3",
+    "teamB": "TCD 4",
     "boats": {
-      "teamA": "Yellow",
-      "teamB": "Green"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:23:33.219Z",
-    "endTime": "2025-05-26T09:44:09.546Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 29,
-    "teamA": "TUD 2",
-    "teamB": "UG 2",
-    "league": "Gold",
+    "teamA": "TCD 1",
+    "teamB": "TCD 4",
     "boats": {
-      "teamA": "Blue",
-      "teamB": "White"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:43:08.646Z",
-    "endTime": "2025-05-26T09:44:14.940Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 30,
-    "teamA": "TCD 4",
-    "teamB": "UG 1",
-    "league": "Silver",
+    "teamA": "TCD 1",
+    "teamB": "UL 1",
     "boats": {
-      "teamA": "Yellow",
-      "teamB": "Green"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:43:30.683Z",
-    "endTime": "2025-05-26T09:44:20.469Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 31,
-    "teamA": "TUD 2",
-    "teamB": "TCD 1",
-    "league": "Gold",
+    "teamA": "TCD 3",
+    "teamB": "UL 1",
     "boats": {
-      "teamA": "Blue",
-      "teamB": "White"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:43:32.112Z",
-    "endTime": "2025-05-26T09:44:24.558Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 32,
-    "teamA": "TCD 4",
-    "teamB": "TCD 3",
-    "league": "Silver",
+    "teamA": "TCD 3",
+    "teamB": "UCC 2",
     "boats": {
-      "teamA": "Yellow",
-      "teamB": "Green"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:43:33.404Z",
-    "endTime": "2025-05-26T09:44:29.120Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 33,
-    "teamA": "MTU 2",
-    "teamB": "TCD 1",
-    "league": "Gold",
+    "teamA": "DCU 1",
+    "teamB": "UCC 2",
     "boats": {
-      "teamA": "Blue",
-      "teamB": "White"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:43:34.813Z",
-    "endTime": "2025-05-26T09:44:33.149Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 34,
-    "teamA": "UCC 3",
-    "teamB": "TCD 3",
-    "league": "Silver",
+    "teamA": "DCU 1",
+    "teamB": "UCD 1",
     "boats": {
-      "teamA": "Yellow",
-      "teamB": "Green"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:43:36.209Z",
-    "endTime": "2025-05-26T09:44:37.875Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 35,
-    "teamA": "MTU 2",
-    "teamB": "UCD 2",
-    "league": "Gold",
+    "teamA": "UCD 2",
+    "teamB": "UCD 1",
     "boats": {
-      "teamA": "Blue",
-      "teamB": "White"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:43:37.681Z",
-    "endTime": "2025-05-26T09:44:42.337Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 36,
-    "teamA": "UCC 3",
-    "teamB": "UL 1",
-    "league": "Silver",
+    "teamA": "UCD 2",
+    "teamB": "UG 2",
     "boats": {
-      "teamA": "Yellow",
-      "teamB": "Green"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:43:39.079Z",
-    "endTime": "2025-05-26T09:44:46.784Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 37,
-    "teamA": "TUD 2",
-    "teamB": "UCD 2",
-    "league": "Gold",
+    "teamA": "UCC 3",
+    "teamB": "UG 2",
     "boats": {
-      "teamA": "Blue",
-      "teamB": "White"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:43:40.472Z",
-    "endTime": "2025-05-26T09:44:51.204Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 38,
-    "teamA": "TCD 4",
-    "teamB": "UL 1",
-    "league": "Silver",
+    "teamA": "UCC 3",
+    "teamB": "UG 1",
     "boats": {
-      "teamA": "Yellow",
-      "teamB": "Green"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:43:41.798Z",
-    "endTime": "2025-05-26T09:44:56.919Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 39,
     "teamA": "TUD 2",
-    "teamB": "UCC 2",
-    "league": "Gold",
+    "teamB": "UG 1",
     "boats": {
-      "teamA": "Blue",
-      "teamB": "White"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:43:44.280Z",
-    "endTime": "2025-05-26T09:45:01.685Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 40,
-    "teamA": "TCD 4",
-    "teamB": "UCD 1",
-    "league": "Silver",
+    "teamA": "TUD 2",
+    "teamB": "TCD 1",
     "boats": {
-      "teamA": "Yellow",
-      "teamB": "Green"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:43:45.741Z",
-    "endTime": "2025-05-26T09:45:06.767Z",
-    "result": [
-      1,
-      2,
-      3,
-      3,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 41,
-    "teamA": "TCD 2",
-    "teamB": "UCC 2",
-    "league": "Gold",
+    "teamA": "MTU 2",
+    "teamB": "TCD 1",
     "boats": {
-      "teamA": "Blue",
-      "teamB": "White"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:43:47.466Z",
-    "endTime": "2025-05-26T09:45:12.579Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
   },
   {
     "raceNumber": 42,
-    "teamA": "DCU 1",
-    "teamB": "UCD 1",
-    "league": "Silver",
+    "teamA": "MTU 2",
+    "teamB": "TCD 4",
     "boats": {
-      "teamA": "Yellow",
-      "teamB": "Green"
+      "teamA": "Red",
+      "teamB": "Black"
     },
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-26T09:43:49.117Z",
-    "endTime": "2025-05-26T09:45:19.935Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 43,
+    "teamA": "TCD 3",
+    "teamB": "TCD 4",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 44,
+    "teamA": "TCD 3",
+    "teamB": "UCD 1",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 45,
+    "teamA": "TCD 2",
+    "teamB": "UCD 1",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 46,
+    "teamA": "TCD 2",
+    "teamB": "DCU 1",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 47,
+    "teamA": "UG 2",
+    "teamB": "DCU 1",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 48,
+    "teamA": "UG 2",
+    "teamB": "UL 1",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 49,
+    "teamA": "UG 1",
+    "teamB": "UL 1",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 50,
+    "teamA": "UG 1",
+    "teamB": "UCD 2",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 51,
+    "teamA": "UCC 2",
+    "teamB": "UCD 2",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 52,
+    "teamA": "UCC 2",
+    "teamB": "MTU 2",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 53,
+    "teamA": "TCD 2",
+    "teamB": "MTU 2",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 54,
+    "teamA": "TCD 2",
+    "teamB": "UCD 2",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 55,
+    "teamA": "UCC 3",
+    "teamB": "UCD 2",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 56,
+    "teamA": "UCC 3",
+    "teamB": "TCD 1",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 57,
+    "teamA": "UCC 2",
+    "teamB": "TCD 1",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 58,
+    "teamA": "UCC 2",
+    "teamB": "TUD 2",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 59,
+    "teamA": "TCD 3",
+    "teamB": "TUD 2",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 60,
+    "teamA": "TCD 3",
+    "teamB": "UG 2",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 61,
+    "teamA": "TCD 4",
+    "teamB": "UG 2",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 62,
+    "teamA": "TCD 4",
+    "teamB": "DCU 1",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 63,
+    "teamA": "UG 1",
+    "teamB": "DCU 1",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 64,
+    "teamA": "UG 1",
+    "teamB": "TCD 2",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 65,
+    "teamA": "UL 1",
+    "teamB": "TCD 2",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 66,
+    "teamA": "UL 1",
+    "teamB": "MTU 2",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 67,
+    "teamA": "UCD 1",
+    "teamB": "MTU 2",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 68,
+    "teamA": "UCD 1",
+    "teamB": "UCC 3",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 69,
+    "teamA": "TCD 3",
+    "teamB": "UCC 3",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 70,
+    "teamA": "TCD 3",
+    "teamB": "UG 1",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 71,
+    "teamA": "TCD 4",
+    "teamB": "UG 1",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 72,
+    "teamA": "TCD 4",
+    "teamB": "UCD 2",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 73,
+    "teamA": "TUD 2",
+    "teamB": "UCD 2",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 74,
+    "teamA": "TUD 2",
+    "teamB": "DCU 1",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 75,
+    "teamA": "MTU 2",
+    "teamB": "DCU 1",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 76,
+    "teamA": "MTU 2",
+    "teamB": "TCD 3",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 77,
+    "teamA": "MTU 2",
+    "teamB": "UCD 2",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 78,
+    "teamA": "TCD 1",
+    "teamB": "UCD 1",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 79,
+    "teamA": "TCD 1",
+    "teamB": "UG 2",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 80,
+    "teamA": "TUD 2",
+    "teamB": "UG 2",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 81,
+    "teamA": "TUD 2",
+    "teamB": "UL 1",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 82,
+    "teamA": "UCC 3",
+    "teamB": "UL 1",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 83,
+    "teamA": "UCC 3",
+    "teamB": "UCC 2",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 84,
+    "teamA": "TCD 4",
+    "teamB": "UCC 2",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 85,
+    "teamA": "TCD 4",
+    "teamB": "UCD 1",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 86,
+    "teamA": "TUD 2",
+    "teamB": "UCD 1",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 87,
+    "teamA": "TCD 2",
+    "teamB": "UCC 2",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 88,
+    "teamA": "TCD 2",
+    "teamB": "UG 2",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 89,
+    "teamA": "TCD 1",
+    "teamB": "UG 1",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 90,
+    "teamA": "DCU 1",
+    "teamB": "UCC 3",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
+  },
+  {
+    "raceNumber": 91,
+    "teamA": "UL 1",
+    "teamB": "TCD 4",
+    "boats": {
+      "teamA": "Red",
+      "teamB": "Black"
+    },
+    "isLaunching": false,
+    "goToChangeover": false
   }
 ]

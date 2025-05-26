@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
-import { readFileSync } from 'fs'; // Add this for sync operations
+import { readFileSync } from 'fs';
 import path from 'path';
-import { updateMetrics } from '@/app/lib/metrics';
+import { updateMetrics } from '../../lib/metrics'; // Fix import path
 
 // Update Race type
 type Race = {
@@ -238,7 +238,7 @@ function resolveTeamGroup(group: TeamStats[], races: Race[]): TeamStats[] {
         stats.totalPoints += record.avgPoints;
       });
 
-      const winPercentage = (stats.wins / stats.totalGames) * 100;
+      const winPercentage = (stats.wins / stats.totalGames) + 100;
       const avgPoints = stats.totalPoints / stats.totalGames;
 
       console.log(`\n${team.team} head-to-head performance in this group:`, {
