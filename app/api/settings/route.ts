@@ -1,42 +1,97 @@
+import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { NextResponse } from 'next/server';
 
-interface Settings {
+type RacingFormat = '2v2' | '3v3' | '4v4';
+
+type Settings = {
   useLeagues: boolean;
-  leagues: any[];
+  leagues: Array<{
+    id: string;
+    name: string;
+    teams: string[];
+    boatSets: Array<{
+      id: string;
+      team1Color: string;
+      team2Color: string;
+    }>;
+  }>;
   teamInput: string;
-  boatSets: any[];
-}
+  boatSets: Array<{
+    id: string;
+    team1Color: string;
+    team2Color: string;
+  }>;
+  racingFormat: RacingFormat; // Add this field
+};
 
 export async function GET() {
   try {
-    const filePath = path.join(process.cwd(), 'data', 'settings.json');
-    const fileContents = await fs.readFile(filePath, 'utf-8');
-    const settings = JSON.parse(fileContents);
+    const settingsFile = path.join(process.cwd(), 'data', 'settings.json');
+    
+    let settings: Settings;
+    try {
+      const data = await fs.readFile(settingsFile, 'utf8');
+      settings = JSON.parse(data);
+      
+      // Ensure racingFormat is set (backward compatibility)
+      if (!settings.racingFormat) {
+        settings.racingFormat = '3v3';
+      }
+    } catch (error) {
+      // If file doesn't exist, return default settings
+      console.log('Settings file not found, using defaults');
+      settings = {
+        useLeagues: false,
+        leagues: [],
+        teamInput: '',
+        boatSets: [],
+        racingFormat: '3v3' // Default racing format
+      };
+    }
+
     return NextResponse.json(settings);
   } catch (error) {
-    // Return default settings if file doesn't exist
-    return NextResponse.json({
-      useLeagues: false,
-      leagues: [],
-      teamInput: '',
-      boatSets: [{
-        id: 'set-1',
-        team1Color: '',
-        team2Color: ''
-      }]
-    });
+    console.error('Error loading settings:', error);
+    return NextResponse.json(
+      { error: 'Failed to load settings' },
+      { status: 500 }
+    );
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const settings: Settings = await req.json();
-    const filePath = path.join(process.cwd(), 'data', 'settings.json');
-    await fs.writeFile(filePath, JSON.stringify(settings, null, 2));
+    const body = await req.json();
+    console.log('Received settings update:', body);
+
+    // Validate racing format
+    if (body.racingFormat && !['2v2', '3v3', '4v4'].includes(body.racingFormat)) {
+      return NextResponse.json(
+        { error: 'Invalid racing format. Must be 2v2, 3v3, or 4v4' },
+        { status: 400 }
+      );
+    }
+
+    // Ensure racingFormat is set
+    const settings: Settings = {
+      useLeagues: body.useLeagues ?? false,
+      leagues: body.leagues ?? [],
+      teamInput: body.teamInput ?? '',
+      boatSets: body.boatSets ?? [],
+      racingFormat: body.racingFormat ?? '3v3' // Default to 3v3 if not provided
+    };
+
+    const settingsFile = path.join(process.cwd(), 'data', 'settings.json');
+    await fs.writeFile(settingsFile, JSON.stringify(settings, null, 2));
+
+    console.log('Settings saved successfully:', settings);
     return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to save settings' }, { status: 500 });
+    console.error('Error saving settings:', error);
+    return NextResponse.json(
+      { error: 'Failed to save settings' },
+      { status: 500 }
+    );
   }
 }

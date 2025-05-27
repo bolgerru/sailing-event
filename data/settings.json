@@ -2,63 +2,41 @@
   "useLeagues": true,
   "leagues": [
     {
-      "id": "league-1-1748374016468",
+      "id": "league-1-1748380609919",
       "name": "Gold",
       "teams": [
-        "gold1",
+        "Gold1",
         "gold2",
         "gold3",
-        "gold4",
-        "gold5",
-        "gold6"
+        "gold4"
       ],
       "boatSets": [
         {
-          "id": "league-1-1748374016468-set-1-1748374016468",
-          "team1Color": "red",
-          "team2Color": "black"
+          "id": "league-1-1748380609919-set-1-1748380609919",
+          "team1Color": "Black",
+          "team2Color": "Red"
         }
       ]
     },
     {
-      "id": "league-2-1748374038517",
+      "id": "league-2-1748380632868",
       "name": "Silver",
       "teams": [
-        "silver1",
+        "Silver1",
         "silver2",
         "silver3",
-        "silver4",
-        "silver5",
-        "silver6"
+        "silver4"
       ],
       "boatSets": [
         {
-          "id": "league-2-1748374038517-set-1-1748374038517",
-          "team1Color": "blue",
-          "team2Color": "white"
-        }
-      ]
-    },
-    {
-      "id": "league-3-1748374060929",
-      "name": "Bronze",
-      "teams": [
-        "bronze1",
-        "bronze2",
-        "bronze3",
-        "bronze4",
-        "bronze5",
-        "bronze6"
-      ],
-      "boatSets": [
-        {
-          "id": "league-3-1748374060929-set-1-1748374060929",
-          "team1Color": "green",
-          "team2Color": "white"
+          "id": "league-2-1748380632868-set-1-1748380632868",
+          "team1Color": "Blue",
+          "team2Color": "Yellow"
         }
       ]
     }
   ],
   "teamInput": "",
-  "boatSets": []
+  "boatSets": [],
+  "racingFormat": "2v2"
 }

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 
-// First update the Race type to include status and times
+// First update the Race type to include racingFormat
 type Race = {
   raceNumber: number;
   teamA: string;
@@ -20,26 +20,43 @@ type Race = {
   isLaunching?: boolean;
   isKnockout?: boolean;
   stage?: string;
+  racingFormat?: '2v2' | '3v3' | '4v4';
 };
 
-function isValidResult(result: number[] | null): boolean {
+// Helper function to get boats per team based on racing format
+function getBoatsPerTeam(format?: string): number {
+  switch (format) {
+    case '2v2': return 2;
+    case '3v3': return 3;
+    case '4v4': return 4;
+    default: return 3; // Default to 3v3 for backward compatibility
+  }
+}
+
+function isValidResult(result: number[] | null, racingFormat?: string): boolean {
+  if (!Array.isArray(result)) return false;
+  
+  const boatsPerTeam = getBoatsPerTeam(racingFormat);
+  const expectedLength = boatsPerTeam * 2;
+  
   return (
-    Array.isArray(result) &&
-    result.length === 6 &&
-    result.every((pos) => typeof pos === 'number' && pos > 0)
+    result.length === expectedLength &&
+    result.every((pos) => typeof pos === 'number' && pos > 0 && pos <= expectedLength)
   );
 }
 
-function getWinner(result: number[] | null, teamA: string, teamB: string): string | null {
-  if (!isValidResult(result)) return null;
+function getWinner(result: number[] | null, teamA: string, teamB: string, racingFormat?: string): string | null {
+  if (!isValidResult(result, racingFormat)) return null;
 
-  const teamAPoints = result!.slice(0, 3).reduce((a, b) => a + b, 0);
-  const teamBPoints = result!.slice(3).reduce((a, b) => a + b, 0);
+  const boatsPerTeam = getBoatsPerTeam(racingFormat);
+  const teamAPoints = result!.slice(0, boatsPerTeam).reduce((a, b) => a + b, 0);
+  const teamBPoints = result!.slice(boatsPerTeam, boatsPerTeam * 2).reduce((a, b) => a + b, 0);
 
   if (teamAPoints < teamBPoints) return teamA;
   if (teamBPoints < teamAPoints) return teamB;
 
-  return result!.indexOf(1) < 3 ? teamB : teamA;
+  // Tie-breaker: team WITHOUT first place wins (team with 1st place loses)
+  return result!.indexOf(1) < boatsPerTeam ? teamB : teamA;
 }
 
 function getLeagueTagColors(league: string): string {
@@ -261,6 +278,7 @@ export default function SchedulePage() {
     return Array.from(options);
   }, [races]);
 
+  // Update the filteredRaces useMemo to use the new isValidResult function
   const filteredRaces = useMemo(() => {
     if (filter === 'all') return races;
 
@@ -277,15 +295,15 @@ export default function SchedulePage() {
     });
   }, [races, filter]);
 
-  // Separate knockout races from regular races
+  // Update the race separation logic
   const { knockoutRaces, regularRaces } = useMemo(() => {
-    const knockout = filteredRaces.filter(race => race.isKnockout && !isValidResult(race.result));
-    const regular = filteredRaces.filter(race => !race.isKnockout && !isValidResult(race.result));
+    const knockout = filteredRaces.filter(race => race.isKnockout && !isValidResult(race.result, race.racingFormat));
+    const regular = filteredRaces.filter(race => !race.isKnockout && !isValidResult(race.result, race.racingFormat));
     return { knockoutRaces: knockout, regularRaces: regular };
   }, [filteredRaces]);
 
-  const completedRaces = filteredRaces.filter(race => isValidResult(race.result));
-  const upcomingRaces = filteredRaces.filter(race => !isValidResult(race.result));
+  const completedRaces = filteredRaces.filter(race => isValidResult(race.result, race.racingFormat));
+  const upcomingRaces = filteredRaces.filter(race => !isValidResult(race.result, race.racingFormat));
 
   useEffect(() => {
     const handleScroll = () => {
@@ -468,21 +486,21 @@ export default function SchedulePage() {
 
                     {/* Update the race card result section in both knockout and regular races */}
                     <div className="p-3 bg-gray-50">
-                      {isValidResult(race.result) && race.result ? (
+                      {isValidResult(race.result, race.racingFormat) && race.result ? (
                         <div className="text-center space-y-2">
                           <div className="flex justify-center items-center gap-2 md:gap-8">
                             <RaceResults
                               race={race}
-                              isWinner={getWinner(race.result, race.teamA, race.teamB) === race.teamA}
+                              isWinner={getWinner(race.result, race.teamA, race.teamB, race.racingFormat) === race.teamA}
                               team={race.teamA}
-                              positions={race.result.slice(0, 3)}
+                              positions={race.result.slice(0, getBoatsPerTeam(race.racingFormat))}
                             />
                             <div className="text-gray-400 font-bold px-1 md:px-2">VS</div>
                             <RaceResults
                               race={race}
-                              isWinner={getWinner(race.result, race.teamA, race.teamB) === race.teamB}
+                              isWinner={getWinner(race.result, race.teamA, race.teamB, race.racingFormat) === race.teamB}
                               team={race.teamB}
-                              positions={race.result.slice(3)}
+                              positions={race.result.slice(getBoatsPerTeam(race.racingFormat))}
                             />
                           </div>
                         </div>
@@ -618,21 +636,21 @@ export default function SchedulePage() {
 
                     {/* Update the race card result section in both knockout and regular races */}
                     <div className="p-3 bg-gray-50">
-                      {isValidResult(race.result) && race.result ? (
+                      {isValidResult(race.result, race.racingFormat) && race.result ? (
                         <div className="text-center space-y-2">
                           <div className="flex justify-center items-center gap-2 md:gap-8">
                             <RaceResults
                               race={race}
-                              isWinner={getWinner(race.result, race.teamA, race.teamB) === race.teamA}
+                              isWinner={getWinner(race.result, race.teamA, race.teamB, race.racingFormat) === race.teamA}
                               team={race.teamA}
-                              positions={race.result.slice(0, 3)}
+                              positions={race.result.slice(0, getBoatsPerTeam(race.racingFormat))}
                             />
                             <div className="text-gray-400 font-bold px-1 md:px-2">VS</div>
                             <RaceResults
                               race={race}
-                              isWinner={getWinner(race.result, race.teamA, race.teamB) === race.teamB}
+                              isWinner={getWinner(race.result, race.teamA, race.teamB, race.racingFormat) === race.teamB}
                               team={race.teamB}
-                              positions={race.result.slice(3)}
+                              positions={race.result.slice(getBoatsPerTeam(race.racingFormat))}
                             />
                           </div>
                         </div>
@@ -674,7 +692,8 @@ export default function SchedulePage() {
         {completedRaces.length > 0 && (
           <div className="grid gap-4">
             {completedRaces.map((race) => {
-              const winner = getWinner(race.result, race.teamA, race.teamB);
+              const winner = getWinner(race.result, race.teamA, race.teamB, race.racingFormat);
+              const boatsPerTeam = getBoatsPerTeam(race.racingFormat);
 
               return (
                 <div
@@ -698,6 +717,12 @@ export default function SchedulePage() {
                         </div>
                         <div className="text-xs md:text-sm text-gray-500 text-center mt-1">
                           ({race.boats.teamA}) vs ({race.boats.teamB})
+                        </div>
+                        {/* Add racing format indicator */}
+                        <div className="mt-1">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                            {race.racingFormat || '3v3'} Racing
+                          </span>
                         </div>
                         {race.league && (
                           <div className="mt-2">
@@ -755,7 +780,7 @@ export default function SchedulePage() {
                       <div className="flex-1 text-center">
                         <h4 className="font-semibold text-blue-600">{race.teamA}</h4>
                         <div className="flex justify-center gap-2 mt-2">
-                          {race.result!.slice(0, 3).map((pos, i) => (
+                          {race.result!.slice(0, boatsPerTeam).map((pos, i) => (
                             <div
                               key={i}
                               className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-sm md:text-lg font-bold ${
@@ -772,7 +797,7 @@ export default function SchedulePage() {
                       <div className="flex-1 text-center">
                         <h4 className="font-semibold text-blue-600">{race.teamB}</h4>
                         <div className="flex justify-center gap-2 mt-2">
-                          {race.result!.slice(3).map((pos, i) => (
+                          {race.result!.slice(boatsPerTeam).map((pos, i) => (
                             <div
                               key={i}
                               className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-sm md:text-lg font-bold ${

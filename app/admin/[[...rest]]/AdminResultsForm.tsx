@@ -2,9 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState, memo } from 'react';
 import Link from 'next/link';
-// Update the import path below to the correct relative path if needed
 import KnockoutModal, { KnockoutConfig } from '../../components/KnockoutModal';
 
+// Add racing format types at the top of the file
+type RacingFormat = '2v2' | '3v3' | '4v4';
+
+// Update the Race type to include racing format
 type Race = {
   raceNumber: number;
   teamA: string;
@@ -12,15 +15,16 @@ type Race = {
   result?: number[] | null;
   winner?: string | null;
   boats?: {
-    [key: string]: string;
+    [key: string]: string; // Allow any string as key for boat colors
   };
   status?: 'not_started' | 'in_progress' | 'finished';
   startTime?: string;
   endTime?: string;
   isKnockout?: boolean;
   stage?: string;
-  league?: string;        // Add this line
-  matchNumber?: number;   // Add this line
+  league?: string;
+  matchNumber?: number;
+  racingFormat?: RacingFormat;
 };
 
 interface BoatSet {
@@ -32,28 +36,116 @@ interface BoatSet {
 interface League {
   id: string;
   name: string;
-  teams: string[];
+  teams: string[]; // Store teams as an array of strings
   boatSets: BoatSet[];
 }
 
-const NUMBERS = [1, 2, 3, 4, 5, 6];
-const BOAT_INDICES = [0, 1, 2];
+type Team = {
+  team: string;
+  wins: number;
+  totalRaces: number;
+  winPercentage: number;
+  points: number;
+  place: number;
+  league: string;
+  tiebreakNote?: string;
+};
 
-// Memoized components
+// Update the Settings type
+type Settings = {
+  useLeagues: boolean;
+  leagues: League[]; // Use the League interface
+  teamInput: string;
+  boatSets: BoatSet[];
+  racingFormat: RacingFormat;
+};
+
+// Get the number of boats per team based on racing format
+const getBoatsPerTeam = (format: RacingFormat): number => {
+  switch (format) {
+    case '2v2': return 2;
+    case '3v3': return 3;
+    case '4v4': return 4;
+    default: return 3;
+  }
+};
+
+// Update the NUMBERS constant to be dynamic
+const getValidPositions = (format: RacingFormat): number[] => {
+  const boatsPerTeam = getBoatsPerTeam(format);
+  const totalBoats = boatsPerTeam * 2;
+  return Array.from({ length: totalBoats }, (_, i) => i + 1);
+};
+
+// Update the BOAT_INDICES constant to be dynamic
+const getBoatIndices = (format: RacingFormat): number[] => {
+  const boatsPerTeam = getBoatsPerTeam(format);
+  return Array.from({ length: boatsPerTeam }, (_, i) => i);
+};
+
+const scrollToElement = (id: string) => {
+  const element = document.getElementById(id);
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+};
+
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+const getKnockoutStageDisplayName = (stage?: string): string => {
+  switch (stage?.toLowerCase()) {
+    case 'quarter': return 'Quarter Final';
+    case 'semi': return 'Semi Final';
+    case 'final': return 'Final';
+    default: return 'Knockout';
+  }
+};
+
+// Add helper function to get league tag colors
+const getLeagueTagColors = (league?: string): string => {
+  if (!league) return 'bg-gray-100 text-gray-800';
+  
+  switch (league.toLowerCase()) {
+    case 'gold': return 'bg-yellow-100 text-yellow-800';
+    case 'silver': return 'bg-gray-100 text-gray-700';
+    case 'bronze': return 'bg-orange-100 text-orange-800';
+    case 'main': return 'bg-blue-100 text-blue-800'; // For overall/main league
+    default: return 'bg-purple-100 text-purple-800'; // Default for other leagues
+  }
+};
+
+// Add helper function to get knockout stage tag colors
+const getKnockoutStageTagColors = (stage?: string): string => {
+  switch (stage?.toLowerCase()) {
+    case 'quarter': return 'bg-red-100 text-red-800';
+    case 'semi': return 'bg-orange-100 text-orange-800';
+    case 'final': return 'bg-green-100 text-green-800';
+    default: return 'bg-gray-100 text-gray-800';
+  }
+};
+
+// Memoized BoatInputs component
 const BoatInputs = memo(({ 
   raceNumber, 
   startIndex, 
   formData, 
-  onchange 
+  onchange,
+  format = '3v3' // Default format
 }: { 
   raceNumber: number;
   startIndex: number;
   formData: { [key: number]: (number | '')[] };
   onchange: (raceNumber: number, index: number, value: number) => void;
+  format?: RacingFormat;
 }) => {
+  const validPositions = getValidPositions(format);
+  const boatIndices = getBoatIndices(format);
+
   return (
     <>
-      {BOAT_INDICES.map((i) => (
+      {boatIndices.map((i: number) => (
         <div key={i} className="space-y-2 mb-2 last:mb-0">
           <div className="flex justify-between text-xs">
             <label>Boat {i + 1}</label>
@@ -62,7 +154,7 @@ const BoatInputs = memo(({
             </span>
           </div>
           <div className="flex gap-1">
-            {NUMBERS.map((num) => (
+            {validPositions.map((num: number) => (
               <button
                 key={num}
                 onClick={() => onchange(raceNumber, i + startIndex, num)}
@@ -78,10 +170,11 @@ const BoatInputs = memo(({
             <input
               type="number"
               min={1}
+              max={validPositions.length}
               value={formData[raceNumber]?.[i + startIndex] || ''}
               onChange={(e) => {
                 const value = parseInt(e.target.value);
-                if (!isNaN(value)) {
+                if (!isNaN(value) && value >= 1 && value <= validPositions.length) {
                   onchange(raceNumber, i + startIndex, value);
                 }
               }}
@@ -95,32 +188,6 @@ const BoatInputs = memo(({
   );
 });
 BoatInputs.displayName = 'BoatInputs';
-
-const scrollToElement = (id: string) => {
-  const element = document.getElementById(id);
-  if (element) {
-    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
-};
-
-const scrollToTop = () => {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-};
-
-type Settings = {
-  useLeagues: boolean;
-  leagues: Array<{
-    id: string;
-    name: string;
-    boatSets: Array<{
-      id: string;
-      team1Color: string;
-      team2Color: string;
-    }>;
-  }>;
-  teamInput: string;
-  boatSets: Array<BoatSet>;
-};
 
 export default function AdminResultsForm({ races: initialRaces }: { races: Race[] }) {
   const [races, setRaces] = useState<Race[]>(initialRaces);
@@ -137,8 +204,211 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     useLeagues: false,
     leagues: [],
     teamInput: '',
-    boatSets: []
+    boatSets: [],
+    racingFormat: '3v3'
   });
+  const [racingFormat, setRacingFormat] = useState<RacingFormat>('3v3');
+
+  // --- START OF FUNCTION DEFINITIONS ---
+
+  const fetchRaces = useCallback(async () => {
+    try {
+      const response = await fetch('/api/schedule');
+      if (response.ok) {
+        const data = await response.json();
+        setRaces(data);
+      } else {
+        console.error('Failed to fetch races');
+      }
+    } catch (error) {
+      console.error('Error fetching races:', error);
+    }
+  }, []);
+
+  const getTeamScore = useCallback((result: (number | '')[] | undefined, startIndex: number, format: RacingFormat): number => {
+    if (!result || !Array.isArray(result)) return 0;
+    const boatsPerTeam = getBoatsPerTeam(format);
+    return result.slice(startIndex, startIndex + boatsPerTeam)
+      .filter((pos): pos is number => typeof pos === 'number') // Type guard
+      .reduce((sum, pos) => sum + pos, 0);
+  }, []);
+
+  const determineWinner = useCallback((race: Race, result: (number | '')[]): string => {
+    const format = race.racingFormat || racingFormat || '3v3';
+    const boatsPerTeam = getBoatsPerTeam(format);
+    
+    const teamABoats = result.slice(0, boatsPerTeam).map(v => typeof v === 'number' ? v : 0);
+    const teamBBoats = result.slice(boatsPerTeam, boatsPerTeam * 2).map(v => typeof v === 'number' ? v : 0);
+    const sumA = teamABoats.reduce((a, b) => a + b, 0);
+    const sumB = teamBBoats.reduce((a, b) => a + b, 0);
+
+    if (sumA < sumB) return race.teamA;
+    if (sumB < sumA) return race.teamB;
+
+    const firstPlaceIndex = result.findIndex((pos) => pos === 1);
+    return firstPlaceIndex < boatsPerTeam ? race.teamB : race.teamA;
+  }, [racingFormat]);
+
+  const handleChange = useCallback((raceNumber: number, index: number, value: number) => {
+    setFormData(prev => ({
+      ...prev,
+      [raceNumber]: {
+        ...prev[raceNumber],
+        [index]: value
+      }
+    }));
+  }, []);
+
+  const handleSubmit = useCallback(async (raceNumber: number) => {
+    const resultInput = formData[raceNumber];
+    if (!resultInput) {
+      alert('Please enter race results');
+      return;
+    }
+
+    const race = races.find(r => r.raceNumber === raceNumber);
+    if (!race) {
+      alert('Race not found');
+      return;
+    }
+
+    const format = race.racingFormat || racingFormat || '3v3';
+    const boatsPerTeam = getBoatsPerTeam(format);
+    const totalBoats = boatsPerTeam * 2;
+
+    const resultArray: (number | '')[] = [];
+    for (let i = 0; i < totalBoats; i++) {
+        resultArray.push(resultInput[i] || '');
+    }
+    
+    if (resultArray.some(pos => pos === '')) {
+      alert('Please fill in all boat positions');
+      return;
+    }
+
+    const numericResult = resultArray.map(pos => parseInt(pos.toString()));
+    if (numericResult.some(pos => isNaN(pos) || pos < 1 || pos > totalBoats)) {
+      alert(`All positions must be numbers between 1 and ${totalBoats}`);
+      return;
+    }
+
+    const uniquePositions = new Set(numericResult);
+    if (uniquePositions.size !== numericResult.length) {
+      alert('Each position can only be used once');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/results', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ raceNumber, result: numericResult }),
+      });
+
+      if (response.ok) {
+        await fetchRaces(); // Refresh races after saving
+        alert('Result saved successfully');
+      } else {
+        const errorData = await response.text();
+        alert(`Failed to save result: ${errorData}`);
+      }
+    } catch (error) {
+      console.error('Error saving result:', error);
+      alert('Error saving result');
+    }
+  }, [formData, races, racingFormat, fetchRaces]);
+
+  const handleClear = useCallback(async (raceNumber: number) => {
+    try {
+      const response = await fetch('/api/results', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ raceNumber }),
+      });
+
+      if (response.ok) {
+        setFormData(prev => {
+          const newData = { ...prev };
+          delete newData[raceNumber];
+          return newData;
+        });
+        await fetchRaces(); // Refresh races after clearing
+        alert('Result cleared successfully');
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to clear result: ${errorData.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error clearing result:', error);
+      alert('Error clearing result');
+    }
+  }, [fetchRaces]);
+
+  const handleLeagueChange = useCallback((leagueIndex: number, field: keyof League, value: any) => {
+    setLeagues(prev => {
+      const newLeagues = [...prev];
+      if (field === 'teams' && typeof value === 'string') {
+        newLeagues[leagueIndex] = {
+          ...newLeagues[leagueIndex],
+          teams: value.split(',').map(team => team.trim()).filter(team => team.length > 0)
+        };
+      } else {
+        (newLeagues[leagueIndex] as any)[field] = value;
+      }
+      return newLeagues;
+    });
+  }, []);
+  
+  const handleRemoveLeague = useCallback((leagueIndex: number) => {
+    setLeagues(prev => prev.filter((_, index) => index !== leagueIndex));
+  }, []);
+
+  const handleAddLeague = useCallback(() => {
+    const newLeague: League = {
+      id: `league-${Date.now()}`,
+      name: '',
+      teams: [],
+      boatSets: [{ id: `set-${Date.now()}`, team1Color: '', team2Color: '' }]
+    };
+    setLeagues(prev => [...prev, newLeague]);
+  }, []);
+
+  const handleAddBoatSetToLeague = useCallback((leagueIndex: number) => {
+    setLeagues(prev => {
+      const newLeagues = [...prev];
+      if (newLeagues[leagueIndex]) { // Check if league exists
+        newLeagues[leagueIndex].boatSets.push({
+          id: `set-${Date.now()}`,
+          team1Color: '',
+          team2Color: ''
+        });
+      }
+      return newLeagues;
+    });
+  }, []);
+  
+  const handleBoatSetChange = useCallback((index: number, field: keyof BoatSet, value: string) => {
+    setBoatSets(prev => {
+      const newBoatSets = [...prev];
+      (newBoatSets[index] as any)[field] = value;
+      return newBoatSets;
+    });
+  }, []);
+
+  const handleRemoveBoatSet = useCallback((index: number) => {
+    setBoatSets(prev => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const handleAddBoatSet = useCallback(() => {
+    const newBoatSet: BoatSet = {
+      id: `set-${Date.now()}`,
+      team1Color: '',
+      team2Color: ''
+    };
+    setBoatSets(prev => [...prev, newBoatSet]);
+  }, []);
+
+  // --- END OF FUNCTION DEFINITIONS ---
 
   // Load saved settings from localStorage on component mount
   useEffect(() => {
@@ -150,12 +420,12 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
         }
         const data = await response.json();
         
-        // Store the complete settings object
         setSettings(data);
         
-        // Only update state if we have valid data
         if (data) {
           setUseLeagues(data.useLeagues ?? false);
+          setRacingFormat(data.racingFormat || '3v3');
+          
           if (data.useLeagues) {
             if (Array.isArray(data.leagues)) {
               setLeagues(data.leagues);
@@ -178,7 +448,7 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
   }, []);
 
   // Save settings to API
-  const saveSettings = async (newSettings: any) => {
+  const saveSettings = async (newSettings: Partial<Settings>) => { // Use Partial<Settings>
     try {
       console.log('Saving settings:', newSettings);
       
@@ -192,7 +462,6 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
         throw new Error('Failed to save settings');
       }
       
-      // Update the local settings state
       setSettings(prev => ({ ...prev, ...newSettings }));
       console.log('Settings saved successfully');
     } catch (error) {
@@ -200,364 +469,92 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     }
   };
 
-  // Update the settings effect
-  useEffect(() => {
-    // Debounce the save operation
-    const timeoutId = setTimeout(() => {
-      // Always save all settings, regardless of mode
-      const settingsToSave = {
-        useLeagues,
-        leagues: useLeagues ? leagues : [], // Only save leagues if using league mode
-        teamInput: useLeagues ? '' : teamInput, // Only save teamInput if not using leagues
-        boatSets: useLeagues ? [] : boatSets // Only save global boatSets if not using leagues
-      };
-      
-      console.log('Auto-saving settings:', settingsToSave);
-      saveSettings(settingsToSave);
-    }, 1000); // Wait 1 second after changes before saving
-
-    return () => clearTimeout(timeoutId);
-  }, [useLeagues, leagues, teamInput, boatSets]);
-
-  useEffect(() => {
-    // Load initial form data - set empty strings instead of zeros
-    const initialData: { [key: number]: (number | '')[] } = {};
-    initialRaces.forEach((race) => {
-      // Use race.result if it exists, otherwise use array of empty strings
-      initialData[race.raceNumber] = race.result || Array(6).fill('');
-    });
-    setFormData(initialData);
-
-    // Load boat sets from the first race that has them
-    const raceWithBoats = initialRaces.find(race => race.boats && Object.keys(race.boats).length > 0);
-    if (raceWithBoats?.boats) {
-      const sets = new Set(
-        Object.keys(raceWithBoats.boats)
-          .map(key => key.split('-')[1])
-          .filter(Boolean)
-      );
-
-      const loadedBoatSets = Array.from(sets).map(setNumber => ({
-        id: `set-${setNumber}`,
-        team1Color: raceWithBoats.boats![`set-${setNumber}-team1`] || '',
-        team2Color: raceWithBoats.boats![`set-${setNumber}-team2`] || ''
-      }));
-
-      setBoatSets(loadedBoatSets);
-    }
-  }, [initialRaces]);
-
-  const fetchRaces = async () => {
-    try {
-      const response = await fetch('/api/schedule');
-      if (response.ok) {
-        const freshRaces = await response.json();
-        setRaces(freshRaces); // Update the races state
-        
-        // Update the form data with new races
-        const updatedData: { [key: number]: (number | '')[] } = {};
-        freshRaces.forEach((race: Race) => {
-          updatedData[race.raceNumber] = race.result || Array(6).fill('');
-        });
-        setFormData(updatedData);
-        
-        // Find next unfinished race
-        const unfinishedRace = freshRaces.find((race: Race) => !race.result);
-        setNextUnfinishedRace(unfinishedRace || null);
-      } else {
-        console.error('Failed to fetch updated races');
-      }
-    } catch (error) {
-      console.error('Error fetching races:', error);
-    }
-  };
-
-  const determineWinner = (race: Race, result: (number | '')[]): string => {
-    const teamABoats = result.slice(0, 3).map(v => typeof v === 'number' ? v : 0);
-    const teamBBoats = result.slice(3, 6).map(v => typeof v === 'number' ? v : 0);
-    const sumA = teamABoats.reduce((a, b) => a + b, 0);
-    const sumB = teamBBoats.reduce((a, b) => a + b, 0);
-
-    if (sumA < sumB) return race.teamA;
-    if (sumB < sumA) return race.teamB;
-
-    const firstPlaceIndex = result.findIndex((pos) => pos === 1);
-    return firstPlaceIndex < 3 ? race.teamB : race.teamA; // 1st was on teamA, they lose tie
-  };
-
-  const handleChange = useCallback((raceNumber: number, index: number, value: number) => {
-    setFormData(prev => {
-      const current = prev[raceNumber] || Array(6).fill('');
-      const updated = [...current];
-      updated[index] = value || '';
-      return { ...prev, [raceNumber]: updated };
-    });
-  }, []);
-
-  const handleStartRace = useCallback(async (raceNumber: number) => {
-    try {
-      const res = await fetch('/api/results', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          raceNumber,
-          status: 'in_progress',
-          startTime: new Date().toISOString()
-        }),
-      });
-
-      if (!res.ok) throw new Error('Failed to start race');
-      await fetchRaces();
-    } catch (error) {
-      alert('Error starting race: ' + (error as Error).message);
-    }
-  }, [fetchRaces]);
-
-  const handleSubmit = async (raceNumber: number) => {
-    const result = formData[raceNumber];
-    if (
-      result &&
-      result.length === 6 &&
-      result.every((pos): pos is number => 
-        typeof pos === 'number' && pos >= 1
-      )
-    ) {
-      const res = await fetch('/api/results', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          raceNumber, 
-          result,
-          status: 'finished',
-          endTime: new Date().toISOString()
-        }),
-      });
-
-      let data: any = {};
-      try {
-        data = await res.json();
-      } catch (e) {
-        console.error('Failed to parse response JSON:', e);
-      }
-
-      if (res.ok) {
-        alert(`Results saved for Race ${raceNumber}`);
-        await fetchRaces();
-      } else {
-        alert(`Error: ${data.error || 'Unknown error'}`);
-      }
-    } else {
-      alert('Please enter 6 positions with numbers greater than or equal to 1');
-    }
-  };
-
-  const handleClear = async (raceNumber: number) => {
-    // Set to empty strings instead of zeros
-    setFormData({ ...formData, [raceNumber]: Array(6).fill('') });
-
-    const res = await fetch('/api/results', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ raceNumber, result: null }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      alert(`Results cleared for Race ${raceNumber}`);
-      await fetchRaces();
-    } else {
-      alert(`Error clearing results: ${data.error || 'Unknown error'}`);
-    }
-  };
-
-  // Update the handleShowTeamInput function
   const handleShowTeamInput = async () => {
     try {
       setShowTeamInput(true);
-      
-      // Load settings first
-      const response = await fetch('/api/settings');
-      if (response.ok) {
-        const settings = await response.json();
-        console.log('Loaded settings:', settings);
+      // Settings are already loaded in the useEffect, no need to fetch again
+      // If settings are not up-to-date, consider a refresh mechanism if needed
+      console.log('Using already loaded settings for team input dialog:', settings);
 
-        // Apply the loaded settings
-        setUseLeagues(settings.useLeagues);
-        
-        if (settings.useLeagues && Array.isArray(settings.leagues)) {
-          // Ensure each league has proper structure
-          const formattedLeagues = settings.leagues.map((league: {
-            id?: string;
-            name?: string;
-            teams?: string[];
-            boatSets?: Array<{
-              id?: string;
-              team1Color?: string;
-              team2Color?: string;
-            }>;
-          }) => ({
-            id: league.id || `league-${Date.now()}`,
-            name: league.name || '',
-            teams: Array.isArray(league.teams) ? league.teams : [],
-            boatSets: Array.isArray(league.boatSets) ? league.boatSets.map((set: {
-              id?: string;
-              team1Color?: string;
-              team2Color?: string;
-            }) => ({
-              id: set.id || `set-${Date.now()}`,
-              team1Color: set.team1Color || '',
-              team2Color: set.team2Color || ''
-            })) : []
-          }));
-          setLeagues(formattedLeagues);
+      // Populate form fields based on current `settings` state
+      setUseLeagues(settings.useLeagues);
+      setRacingFormat(settings.racingFormat || '3v3');
+
+      if (settings.useLeagues && Array.isArray(settings.leagues)) {
+        const formattedLeagues = settings.leagues.map(league => ({
+          id: league.id || `league-${Date.now()}`,
+          name: league.name || '',
+          teams: Array.isArray(league.teams) ? league.teams : [],
+          boatSets: Array.isArray(league.boatSets) ? league.boatSets.map(set => ({
+            id: set.id || `set-${Date.now()}`,
+            team1Color: set.team1Color || '',
+            team2Color: set.team2Color || ''
+          })) : []
+        }));
+        setLeagues(formattedLeagues);
+        setTeamInput(''); // Clear non-league input
+        setBoatSets([]);  // Clear non-league boat sets
+      } else {
+         setTeamInput(settings.teamInput || '');
+        if (Array.isArray(settings.boatSets) && settings.boatSets.length > 0) {
+          setBoatSets(settings.boatSets);
         } else {
-          // For non-league mode
-          if (settings.teamInput) {
-            setTeamInput(settings.teamInput);
-          } else {
-            // If no saved teams, get them from existing races
-            const existingTeams = Array.from(
-              new Set(races.flatMap((race) => [race.teamA, race.teamB]))
-            ).join(', ');
-            setTeamInput(existingTeams);
-          }
-
-          if (Array.isArray(settings.boatSets) && settings.boatSets.length > 0) {
-            setBoatSets(settings.boatSets);
-          } else {
-            // Set default boat set if none exists
-            setBoatSets([{
-              id: `set-1-${Date.now()}`,
-              team1Color: '',
-              team2Color: ''
-            }]);
+           // Only set default if boatSets is empty AND not in league mode
+          if (!settings.useLeagues && boatSets.length === 0) {
+            setBoatSets([{ id: `set-1-${Date.now()}`, team1Color: '', team2Color: '' }]);
+          } else if (settings.useLeagues) {
+            setBoatSets([]); // Clear if switching to league mode
           }
         }
-      } else {
-        console.error('Failed to load settings');
-        // Set default values if settings load fails
-        setUseLeagues(false);
-        setTeamInput('');
-        setBoatSets([{
-          id: `set-1-${Date.now()}`,
-          team1Color: '',
-          team2Color: ''
-        }]);
-        setLeagues([]);
+        setLeagues([]); // Clear league input
       }
     } catch (error) {
-      console.error('Error loading settings:', error);
+      console.error('Error in handleShowTeamInput:', error);
     }
   };
 
-  // Update the useEffect for initial settings load
-  useEffect(() => {
-    const loadSavedSettings = async () => {
-      try {
-        const response = await fetch('/api/settings');
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Initial settings load:', data);
-          setSettings(data);
-        }
-      } catch (error) {
-        console.error('Error loading initial settings:', error);
-      }
+  const handleGenerateSchedule = async () => {
+    const currentSettingsToSave: Settings = {
+      useLeagues,
+      leagues: useLeagues ? leagues : [],
+      teamInput: useLeagues ? '' : teamInput,
+      boatSets: useLeagues ? [] : boatSets,
+      racingFormat
     };
 
-    loadSavedSettings();
-  }, []);
-
-  const handleAddBoatSet = () => {
-    const timestamp = Date.now(); // Add timestamp to ensure uniqueness
-    setBoatSets([
-      ...boatSets, 
-      { 
-        id: `set-${boatSets.length + 1}-${timestamp}`, 
-        team1Color: '', 
-        team2Color: '' 
-      }
-    ]);
-  };
-
-  const handleRemoveBoatSet = (index: number) => {
-    const newBoatSets = [...boatSets];
-    newBoatSets.splice(index, 1);
-    setBoatSets(newBoatSets);
-  };
-
-  const handleBoatSetChange = (index: number, field: keyof BoatSet, value: string) => {
-    const newBoatSets = [...boatSets];
-    newBoatSets[index][field] = value;
-    setBoatSets(newBoatSets);
-  };
-
-  // Update the handleAddLeague function to ensure unique boat set IDs
-  const handleAddLeague = () => {
-    const timestamp = Date.now();
-    const newLeagueId = `league-${leagues.length + 1}-${timestamp}`;
-    setLeagues([
-      ...leagues,
-      {
-        id: newLeagueId,
-        name: `League ${leagues.length + 1}`,
-        teams: [],
-        boatSets: [{
-          id: `${newLeagueId}-set-1-${timestamp}`, // Include timestamp in boat set ID
-          team1Color: '',
-          team2Color: ''
-        }]
-      }
-    ]);
-  };
-
-  const handleRemoveLeague = (index: number) => {
-    const newLeagues = [...leagues];
-    newLeagues.splice(index, 1);
-    setLeagues(newLeagues);
-  };
-
-  const handleLeagueChange = (index: number, field: keyof League, value: any) => {
-    const newLeagues = [...leagues];
-    newLeagues[index][field] = value;
-    setLeagues(newLeagues);
-  };
-
-  // Update the handleAddBoatSetToLeague function
-  const handleAddBoatSetToLeague = (leagueIndex: number) => {
-    const newLeagues = [...leagues];
-    const league = newLeagues[leagueIndex];
-    const timestamp = Date.now();
-    const newSetId = `${league.id}-set-${league.boatSets.length + 1}-${timestamp}`;
-    league.boatSets.push({
-      id: newSetId,
-      team1Color: '',
-      team2Color: ''
-    });
-    setLeagues(newLeagues);
-  };
-
-  // Update the handleGenerateSchedule function to always save settings
-  const handleGenerateSchedule = async () => {
     if (useLeagues) {
-      if (leagues.length === 0) {
-        alert('Please add at least one league');
+      if (leagues.length === 0 || leagues.every(l => l.teams.length === 0)) {
+        alert('Please add at least one league with teams');
         return;
       }
+      // Further validation for league boat sets if necessary
+    } else {
+      if (boatSets.length === 0) {
+        alert('Please add at least one boat set for non-league mode');
+        return;
+      }
+      const teamsArray = teamInput.split(',').map((t) => t.trim()).filter(Boolean);
+      if (teamsArray.length < 2) {
+        alert('Please enter at least 2 teams for non-league mode');
+        return;
+      }
+    }
 
-      // Generate schedule with league boat sets
-      const scheduleRes = await fetch('/api/schedule/generate', {
+    // Save settings first
+    await saveSettings(currentSettingsToSave); 
+    console.log('Settings saved before generating schedule.');
+
+    // Proceed with schedule generation
+    const endpoint = '/api/schedule/generate';
+    const body = useLeagues 
+      ? { leagues: leagues.map(l => ({ ...l, boatSets: l.boatSets.map(bs => ({id: bs.id, team1Color: bs.team1Color, team2Color: bs.team2Color})) })), racingFormat }
+      : { teams: teamInput.split(',').map((t) => t.trim()).filter(Boolean), boatSets: boatSets.map(bs => ({id: bs.id, team1Color: bs.team1Color, team2Color: bs.team2Color})), racingFormat };
+
+    try {
+      const scheduleRes = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          leagues: leagues.map(league => ({
-            ...league,
-            boatSets: league.boatSets.map(set => ({
-              id: set.id,
-              team1Color: set.team1Color,
-              team2Color: set.team2Color
-            }))
-          }))
-        })
+        body: JSON.stringify(body)
       });
 
       if (!scheduleRes.ok) {
@@ -566,112 +563,46 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
         return;
       }
 
-      // Reset leaderboard
-      const leaderboardRes = await fetch('/api/results/reset', {
-        method: 'POST',
-      });
-
+      const leaderboardRes = await fetch('/api/results/reset', { method: 'POST' });
       if (!leaderboardRes.ok) {
         alert('Warning: Failed to reset leaderboard');
       }
-
-      // Save current settings with leagues
-      await fetch('/api/settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          useLeagues: true,
-          leagues: leagues,
-          teamInput: '', // Clear team input when using leagues
-          boatSets: [] // Clear global boat sets when using leagues
-        })
-      });
       
-      alert('League schedule generated successfully');
+      alert('Schedule generated successfully');
       setShowTeamInput(false);
-      await fetchRaces();
-    } else {
-      if (boatSets.length === 0) {
-        alert('Please add at least one boat set');
-        return;
-      }
-
-      const teams = teamInput.split(',').map((t) => t.trim()).filter(Boolean);
-      if (teams.length < 2) {
-        alert('Please enter at least 2 teams');
-        return;
-      }
-
-      // Include full boat set information
-      const scheduleRes = await fetch('/api/schedule/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          teams,
-          boatSets: boatSets.map((set) => ({
-            id: set.id,
-            team1Color: set.team1Color,
-            team2Color: set.team2Color
-          }))
-        }),
-      });
-
-      const scheduleData = await scheduleRes.json();
-      if (!scheduleRes.ok) {
-        alert(`Error generating schedule: ${scheduleData.error || 'Unknown error'}`);
-        return;
-      }
-
-      // Reset leaderboard
-      const leaderboardRes = await fetch('/api/results/reset', {
-        method: 'POST',
-      });
-
-      if (!leaderboardRes.ok) {
-        alert('Warning: Failed to reset leaderboard');
-      }
-
-      // FIXED: Save settings for non-league mode too
-      await fetch('/api/settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          useLeagues: false,
-          leagues: [], // Clear leagues when not using them
-          teamInput: teamInput, // Save the team input
-          boatSets: boatSets // Save the boat sets
-        })
-      });
-
-      alert('Schedule generated and leaderboard reset successfully');
-      setShowTeamInput(false);
-      await fetchRaces();
+      await fetchRaces(); // Refresh races
+    } catch (error) {
+      console.error('Error in schedule generation process:', error);
+      alert('An error occurred during schedule generation.');
     }
   };
 
-  // Helper function to determine if team is winning (add this before the return statement)
-  const getTeamScore = (positions: (number | '')[], startIndex: number) => {
-    return positions
-      ?.slice(startIndex, startIndex + 3)
-      .reduce<number>((sum, pos) => {
-        if (typeof pos === 'number') {
-          return sum + pos;
-        }
-        return sum;
-      }, 0);
-  };
-
-  // Memoize race calculations
+  // Update the raceData useMemo to check for both stored results and form data
   const raceData = useMemo(() => 
     races.map(race => {
-      const result = formData[race.raceNumber];
-      const teamAScore = getTeamScore(result, 0);
-      const teamBScore = getTeamScore(result, 3);
-      const isTeamAWinning = teamAScore < teamBScore;
-      const isTeamBWinning = teamBScore < teamAScore;
-      const winner = result && result.every((n) => 
-        typeof n === 'number' && n >= 1
-      ) ? determineWinner(race, result) : null;
+      const result = formData[race.raceNumber] || []; // Form data
+      const storedResult = race.result || []; // Stored result from database
+      const format = race.racingFormat || racingFormat || '3v3';
+      const boatsPerTeam = getBoatsPerTeam(format);
+      
+      // Use stored result if available, otherwise use form data
+      const activeResult = storedResult.length > 0 ? storedResult : result;
+      
+      const teamAScore = getTeamScore(activeResult, 0, format);
+      const teamBScore = getTeamScore(activeResult, boatsPerTeam, format);
+      
+      let winner = null;
+      
+      // Check if we have a complete result (either stored or in form)
+      if (Array.isArray(activeResult) && activeResult.length === boatsPerTeam * 2) {
+        const allPositionsFilled = activeResult.every(pos => typeof pos === 'number' && pos >= 1 && pos <= boatsPerTeam * 2);
+        if (allPositionsFilled) {
+          winner = determineWinner(race, activeResult as (number | '')[]);
+        }
+      }
+      
+      const isTeamAWinning = winner === race.teamA;
+      const isTeamBWinning = winner === race.teamB;
 
       return {
         race,
@@ -683,148 +614,100 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
         winner
       };
     }),
-    [races, formData]
+    [races, formData, racingFormat, getTeamScore, determineWinner]
   );
 
-  // First, look for unfinished knockout races
   useEffect(() => {
-    // Get all unfinished knockout races
-    const unfinishedKnockoutRaces = races.filter(race => race.isKnockout && !race.result);
-    
-    if (unfinishedKnockoutRaces.length > 0) {
-      // Define stage priority (latest stages first)
-      const stagePriority = { 'final': 3, 'semi': 2, 'quarter': 1 };
-      
-      // Sort by stage priority (highest first), then by race number
-      const prioritizedKnockoutRaces = unfinishedKnockoutRaces.sort((a, b) => {
-        const aPriority = stagePriority[a.stage as keyof typeof stagePriority] || 0;
-        const bPriority = stagePriority[b.stage as keyof typeof stagePriority] || 0;
-        
-        // If same stage priority, sort by race number
-        if (aPriority === bPriority) {
-          return a.raceNumber - b.raceNumber;
-        }
-        
-        // Higher priority (later stage) comes first
-        return bPriority - aPriority;
+    const unfinishedKnockouts = races.filter(r => r.isKnockout && !r.result);
+    if (unfinishedKnockouts.length > 0) {
+      const stagePriority = { 'final': 3, 'semi': 2, 'quarter': 1 } as const;
+      unfinishedKnockouts.sort((a, b) => {
+        const priorityA = stagePriority[a.stage as keyof typeof stagePriority] || 0;
+        const priorityB = stagePriority[b.stage as keyof typeof stagePriority] || 0;
+        if (priorityA !== priorityB) return priorityB - priorityA;
+        return (a.matchNumber || 0) - (b.matchNumber || 0) || a.raceNumber - b.raceNumber;
       });
-      
-      setNextUnfinishedRace(prioritizedKnockoutRaces[0]);
+      setNextUnfinishedRace(unfinishedKnockouts[0]);
     } else {
-      // If no unfinished knockout races, find first regular race that has no result
-      const unfinishedRegularRace = races.find(race => !race.isKnockout && !race.result);
-      setNextUnfinishedRace(unfinishedRegularRace || null);
+      const unfinishedRegular = races.find(r => !r.isKnockout && !r.result);
+      setNextUnfinishedRace(unfinishedRegular || null);
     }
   }, [races]);
 
-  const fetchLeaderboard = async () => {
+  const fetchLeaderboard = useCallback(async () => { // Added useCallback
     try {
-      console.log('Fetching leaderboard...');
       const response = await fetch('/api/leaderboard');
       if (response.ok) {
         const data = await response.json();
-        console.log('Fetched leaderboard data:', data);
         setLeaderboard(data);
       } else {
-        throw new Error('Failed to fetch leaderboard');
+        console.error('Failed to fetch leaderboard');
       }
     } catch (error) {
       console.error('Error fetching leaderboard:', error);
     }
-  };
+  }, []);
 
   const handleCreateKnockouts = async (config: KnockoutConfig) => {
     try {
-      console.log('Creating knockout schedule with config:', config);
-      console.log('Current settings:', settings);
+      // Ensure settings are up-to-date before creating knockouts
+      const currentSettingsResponse = await fetch('/api/settings');
+      if (!currentSettingsResponse.ok) throw new Error("Failed to fetch current settings");
+      const currentSettingsData = await currentSettingsResponse.json();
       
-      // Handle both league and non-league modes properly
-      if (settings.useLeagues) {
-        const availableLeagueNames = settings.leagues.map(l => l.name);
-        const missingLeagues = config.selectedLeagues.filter(league => 
-          !availableLeagueNames.includes(league)
-        );
-        
-        if (missingLeagues.length > 0) {
-          console.warn('Missing league settings for:', missingLeagues);
-          config.selectedLeagues = config.selectedLeagues.filter(league => 
-            availableLeagueNames.includes(league)
-          );
-          
-          if (config.selectedLeagues.length === 0) {
-            throw new Error('No valid leagues selected for knockout creation');
-          }
-        }
-      } else {
-        const availableLeagueNames = Object.keys(leaderboard);
-        console.log('Available leagues from leaderboard:', availableLeagueNames);
-        
-        if (availableLeagueNames.length === 0) {
-          throw new Error('No teams available for knockout creation');
-        }
-        
-        config.selectedLeagues = config.selectedLeagues.filter(league => 
-          availableLeagueNames.includes(league)
-        );
-        
-        if (config.selectedLeagues.length === 0) {
-          config.selectedLeagues = availableLeagueNames;
-        }
-      }
+      const payload = {
+        ...config,
+        racingFormat: currentSettingsData.racingFormat || racingFormat, // Use fetched or current state
+        // Pass leagues from current settings if in league mode
+        leagues: currentSettingsData.useLeagues ? currentSettingsData.leagues : undefined, 
+      };
 
-      console.log('Final config being sent:', config);
-
-      // FIXED: Use the correct API endpoint
       const response = await fetch('/api/knockouts/generate', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(config),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
         const errorData = await response.text();
         throw new Error(`HTTP ${response.status}: ${errorData}`);
       }
-
-      const result = await response.json();
-      console.log('Knockout creation result:', result);
       
-      // Refresh the page to show new races
-      window.location.reload();
+      window.location.reload(); // Refresh to see new knockout races
     } catch (error) {
       console.error('Error in handleCreateKnockouts:', error);
       alert('Failed to create knockout schedule: ' + (error as Error).message);
     }
   };
 
-  // Add a function to refresh both races and leaderboard
-  const refreshData = async () => {
+  const refreshData = useCallback(async () => { // Added useCallback
     try {
-      await Promise.all([
-        fetchRaces(),
-        fetchLeaderboard()
-      ]);
+      await Promise.all([fetchRaces(), fetchLeaderboard()]);
     } catch (error) {
       console.error('Error refreshing data:', error);
     }
-  };
+  }, [fetchRaces, fetchLeaderboard]); // Added dependencies
 
-  // Update the modal open handler
   const handleOpenKnockoutModal = async () => {
-    await refreshData(); // Refresh data before opening modal
+    await refreshData();
     setShowKnockoutModal(true);
   };
 
-  // Add useEffect to fetch races periodically
   useEffect(() => {
-    if (showTeamInput) {
-      const interval = setInterval(fetchRaces, 5000); // Refresh every 5 seconds
-      return () => clearInterval(interval);
-    }
-  }, [showTeamInput]);
+    // Fetch initial data on mount
+    refreshData();
 
+    // Periodic refresh only if not showing team input dialog
+    let intervalId: NodeJS.Timeout | null = null;
+    if (!showTeamInput) {
+      intervalId = setInterval(refreshData, 30000); // Refresh every 30 seconds
+    }
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [showTeamInput, refreshData]); // refreshData is now stable due to useCallback
+
+  // JSX rendering starts here
   return (
     <div className="space-y-6">
       {/* Add link to Race Control at the top */}
@@ -844,7 +727,7 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
               Generate New Schedule
             </button>
             <button
-              onClick={handleOpenKnockoutModal} // Use the new handler
+              onClick={handleOpenKnockoutModal}
               className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors"
             >
               Create Knockout Stage
@@ -860,11 +743,46 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
               <input
                 type="checkbox"
                 checked={useLeagues}
-                onChange={(e) => setUseLeagues(e.target.checked)}
+                onChange={(e) => {
+                  setUseLeagues(e.target.checked);
+                  // When switching modes, reset the other mode's data
+                  if (e.target.checked) {
+                    setTeamInput('');
+                    setBoatSets([]);
+                    if (leagues.length === 0) handleAddLeague(); // Add a default league
+                  } else {
+                    setLeagues([]);
+                     if (boatSets.length === 0) handleAddBoatSet(); // Add a default boat set
+                  }
+                }}
                 className="rounded text-blue-600"
               />
               <span>Use Multiple Leagues</span>
             </label>
+          </div>
+
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Racing Format
+            </label>
+            <div className="flex gap-4">
+              {(['2v2', '3v3', '4v4'] as const).map((format) => (
+                <label key={format} className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    name="racingFormat"
+                    value={format}
+                    checked={racingFormat === format}
+                    onChange={(e) => setRacingFormat(e.target.value as RacingFormat)}
+                    className="text-blue-600"
+                  />
+                  <span>{format} Racing</span>
+                </label>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              {racingFormat} = {getBoatsPerTeam(racingFormat)} boats per team, {getBoatsPerTeam(racingFormat) * 2} boats total per race
+            </p>
           </div>
 
           {useLeagues ? (
@@ -879,37 +797,28 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
                       className="font-bold text-lg border-b w-full mr-4"
                       placeholder="League Name"
                     />
-                    <button
-                      onClick={() => handleRemoveLeague(leagueIndex)}
-                      className="text-red-600 hover:text-red-800 px-2"
-                    >
-                      ×
-                    </button>
+                    {leagues.length > 1 && (
+                        <button
+                        onClick={() => handleRemoveLeague(leagueIndex)}
+                        className="text-red-600 hover:text-red-800 px-2"
+                        >
+                        ×
+                        </button>
+                    )}
                   </div>
 
                   <div className="mb-4">
-                    <label className="block text-sm mb-2">Teams:</label>
+                    <label className="block text-sm mb-2">Teams (comma-separated):</label>
                     <textarea
-                      value={typeof league.teams === 'string' ? league.teams : league.teams.join(', ')}
-                      onChange={(e) => {
-                        const inputValue = e.target.value;
-                        handleLeagueChange(leagueIndex, 'teams', inputValue);
-                      }}
-                      onBlur={(e) => {
-                        // Convert to array when focus is lost
-                        const teams = e.target.value
-                          .split(',')
-                          .map(team => team.trim())
-                          .filter(team => team.length > 0);
-                        handleLeagueChange(leagueIndex, 'teams', teams);
-                      }}
+                      value={Array.isArray(league.teams) ? league.teams.join(', ') : league.teams}
+                      onChange={(e) => handleLeagueChange(leagueIndex, 'teams', e.target.value)}
                       className="w-full border rounded px-2 py-1 h-24"
                       placeholder="Enter team names, separated by commas"
                     />
                   </div>
 
                   <div className="mb-4">
-                    <label className="block text-sm mb-2">Boat Sets:</label>
+                    <label className="block text-sm mb-2">Boat Sets for this League:</label>
                     {league.boatSets.map((set, setIndex) => (
                       <div key={set.id} className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
                         <input
@@ -921,7 +830,7 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
                             setLeagues(newLeagues);
                           }}
                           className="w-full border rounded px-2 py-1"
-                          placeholder="Team 1 Color"
+                          placeholder="Team 1 Color (e.g., Red)"
                         />
                         <div className="flex items-center gap-2">
                           <input
@@ -933,7 +842,7 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
                               setLeagues(newLeagues);
                             }}
                             className="flex-1 border rounded px-2 py-1"
-                            placeholder="Team 2 Color"
+                            placeholder="Team 2 Color (e.g., Blue)"
                           />
                           {league.boatSets.length > 1 && (
                             <button
@@ -954,7 +863,7 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
                       onClick={() => handleAddBoatSetToLeague(leagueIndex)}
                       className="text-blue-600 hover:text-blue-800"
                     >
-                      + Add Boat Set
+                      + Add Boat Set to League
                     </button>
                   </div>
                 </div>
@@ -964,10 +873,8 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
                 onClick={handleAddLeague}
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
               >
-                Add League
+                Add Another League
               </button>
-
-              {/* Add Generate Schedule button */}
               <div className="flex gap-4 mt-6">
                 <button
                   onClick={handleGenerateSchedule}
@@ -994,14 +901,14 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
                   placeholder="Enter team names (separated by commas)"
                 />
                 <div className="mb-4">
-                  <label className="block text-sm mb-2">Boat Sets:</label>
+                  <label className="block text-sm mb-2">Global Boat Sets:</label>
                   {boatSets.map((set, index) => (
                     <div key={set.id} className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
                       <input
                         type="text"
                         value={set.team1Color}
                         onChange={(e) => handleBoatSetChange(index, 'team1Color', e.target.value)}
-                        placeholder="Team 1 Color"
+                        placeholder="Team 1 Color (e.g., Red)"
                         className="w-full border rounded px-2 py-1"
                       />
                       <div className="flex items-center gap-2">
@@ -1009,15 +916,17 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
                           type="text"
                           value={set.team2Color}
                           onChange={(e) => handleBoatSetChange(index, 'team2Color', e.target.value)}
-                          placeholder="Team 2 Color"
+                          placeholder="Team 2 Color (e.g., Blue)"
                           className="flex-1 border rounded px-2 py-1"
                         />
-                        <button
-                          onClick={() => handleRemoveBoatSet(index)}
-                          className="text-red-600 hover:text-red-800 px-2"
-                        >
-                          ×
-                        </button>
+                         {boatSets.length > 1 && (
+                            <button
+                            onClick={() => handleRemoveBoatSet(index)}
+                            className="text-red-600 hover:text-red-800 px-2"
+                            >
+                            ×
+                            </button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -1048,7 +957,6 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
         </div>
       )}
       
-      {/* Floating buttons */}
       {nextUnfinishedRace && (
         <button
           onClick={() => scrollToElement(`race-${nextUnfinishedRace.raceNumber}`)}
@@ -1065,15 +973,14 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
           </span>
           <span className="md:hidden">
             {nextUnfinishedRace.isKnockout 
-              ? getKnockoutStageDisplayName(nextUnfinishedRace.stage).split(' ')[0] // Show just "Quarter", "Semi", or "Final"
+              ? getKnockoutStageDisplayName(nextUnfinishedRace.stage).split(' ')[0]
               : 'Race'
             }
           </span>
-          {" "}({nextUnfinishedRace.raceNumber})
+          {` (${nextUnfinishedRace.raceNumber})`}
         </button>
       )}
 
-      {/* Jump to Top button */}
       <button
         onClick={scrollToTop}
         className="fixed bottom-4 right-4 md:bottom-8 md:right-8 bg-green-600 text-white p-3 rounded-full shadow-lg hover:bg-green-700 transition-colors z-50"
@@ -1084,188 +991,111 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
         </svg>
       </button>
 
-      {raceData.map(({ race, result, isTeamAWinning, isTeamBWinning, winner }) => (
-        <div 
-          key={race.raceNumber} 
-          id={`race-${race.raceNumber}`}
-          className="p-3 bg-white border rounded-md"
-        >
-          <div className="flex justify-between items-center mb-3">
-            <div className="flex items-center gap-2">
-              <p className="text-xl md:text-2xl font-bold text-gray-700">
-                Race {race.raceNumber}
-              </p>
-              
-              {/* League Tag */}
-              {race.league && (
-                <span className={`
-                  inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                  ${getLeagueTagColors(race.league)}
-                `}>
-                  {race.league === 'main' ? 'Overall' : `${race.league} League`}
+      {raceData.map(({ race, result, isTeamAWinning, isTeamBWinning, winner }) => {
+        const format = race.racingFormat || racingFormat || '3v3';
+        const boatsPerTeam = getBoatsPerTeam(format);
+
+        return (
+          <div 
+            key={race.raceNumber} 
+            id={`race-${race.raceNumber}`}
+            className="p-3 bg-white border rounded-md"
+          >
+            <div className="flex justify-between items-center mb-3">
+              <div className="flex items-center gap-2">
+                <p className="text-xl md:text-2xl font-bold text-gray-700">
+                  Race {race.raceNumber}
+                </p>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                  {format} Racing
                 </span>
-              )}
-              
-              {/* Knockout Stage Tag */}
-              {race.isKnockout && race.stage && (
-                <span className={`
-                  inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                  ${getKnockoutStageTagColors(race.stage)}
-                `}>
-                  {getKnockoutStageDisplayName(race.stage)}
-                  {race.matchNumber && ` #${race.matchNumber}`}
-                </span>
+                {race.league && (
+                  <span className={`
+                    inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
+                    ${getLeagueTagColors(race.league)}
+                  `}>
+                    {race.league === 'main' ? 'Overall' : `${race.league} League`}
+                  </span>
+                )}
+                {race.isKnockout && race.stage && (
+                  <span className={`
+                    inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                    ${getKnockoutStageTagColors(race.stage)}
+                  `}>
+                    {getKnockoutStageDisplayName(race.stage)}
+                    {race.matchNumber && ` #${race.matchNumber}`}
+                  </span>
+                )}
+              </div>
+              {race.status === 'in_progress' ? (
+                <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm">In Progress</span>
+              ) : race.status === 'finished' ? (
+                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">Finished</span>
+              ) : (
+                <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">Not Started</span>
               )}
             </div>
-            
-            {race.status === 'in_progress' ? (
-              <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm">
-                In Progress
-              </span>
-            ) : race.status === 'finished' ? (
-              <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                Finished
-              </span>
-            ) : (
-              <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
-                Not Started
-              </span>
+            <div className="mb-3">
+              <div className="flex justify-between items-baseline">
+                <div className="text-center flex-1">
+                  <h3 className="text-base md:text-lg font-semibold">{race.teamA}</h3>
+                  <span className="text-xs text-gray-600">({race.boats?.teamA || 'N/A'})</span>
+                </div>
+                <span className="text-gray-400 mx-2">vs</span>
+                <div className="text-center flex-1">
+                  <h3 className="text-base md:text-lg font-semibold">{race.teamB}</h3>
+                  <span className="text-xs text-gray-600">({race.boats?.teamB || 'N/A'})</span>
+                </div>
+              </div>
+            </div>
+            {winner && (
+              <div className="mb-3 text-green-700 font-semibold text-sm md:text-base">
+                Winner: {winner}
+              </div>
             )}
-          </div>
-
-          <div className="mb-3">
-            <div className="flex justify-between items-baseline">
-              <div className="text-center flex-1">
-                <h3 className="text-base md:text-lg font-semibold">{race.teamA}</h3>
-                <span className="text-xs text-gray-600">({race.boats?.teamA})</span>
+            <div className="space-y-4 md:grid md:grid-cols-2 md:gap-4 md:space-y-0">
+              <div className="space-y-2">
+                <h3 className={`font-medium text-sm md:text-base ${isTeamAWinning ? 'text-green-600' : (winner ? 'text-red-600' : 'text-gray-700')}`}>{race.teamA}</h3>
+                <div className={`space-y-4 p-3 rounded-md ${isTeamAWinning ? 'bg-green-50' : (winner ? 'bg-red-50' : 'bg-gray-50')}`}>
+                  <div className="bg-white shadow-sm p-2 rounded-md">
+                    <BoatInputs raceNumber={race.raceNumber} startIndex={0} formData={formData} onchange={handleChange} format={format} />
+                  </div>
+                </div>
               </div>
-              <span className="text-gray-400 mx-2">vs</span>
-              <div className="text-center flex-1">
-                <h3 className="text-base md:text-lg font-semibold">{race.teamB}</h3>
-                <span className="text-xs text-gray-600">({race.boats?.teamB})</span>
-              </div>
-            </div>
-          </div>
-          
-          {winner && (
-            <div className="mb-3 text-green-700 font-semibold text-sm md:text-base">
-              Winner: {winner}
-            </div>
-          )}
-
-          {/* Rest of the race card remains the same... */}
-          <div className="space-y-4 md:grid md:grid-cols-2 md:gap-4 md:space-y-0">
-            {/* Team A Boats */}
-            <div className="space-y-2">
-              <h3 className={`font-medium text-sm md:text-base ${
-                isTeamAWinning ? 'text-green-600' : 'text-red-600'
-              }`}>{race.teamA}</h3>
-              <div className={`space-y-4 p-3 rounded-md ${
-                isTeamAWinning ? 'bg-green-50' : 'bg-red-50'
-              }`}>
-                <div className="bg-white shadow-sm p-2 rounded-md">
-                  <BoatInputs
-                    raceNumber={race.raceNumber}
-                    startIndex={0}
-                    formData={formData}
-                    onchange={handleChange}
-                  />
+              <div className="space-y-2">
+                <h3 className={`font-medium text-sm md:text-base ${isTeamBWinning ? 'text-green-600' : (winner ? 'text-red-600' : 'text-gray-700')}`}>{race.teamB}</h3>
+                <div className={`space-y-4 p-3 rounded-md ${isTeamBWinning ? 'bg-green-50' : (winner ? 'bg-red-50' : 'bg-gray-50')}`}>
+                  <div className="bg-white p-2 rounded-md">
+                    <BoatInputs raceNumber={race.raceNumber} startIndex={boatsPerTeam} formData={formData} onchange={handleChange} format={format} />
+                  </div>
                 </div>
               </div>
             </div>
-
-            {/* Team B Boats */}
-            <div className="space-y-2">
-              <h3 className={`font-medium text-sm md:text-base ${
-                isTeamBWinning ? 'text-green-600' : 'text-red-600'
-              }`}>{race.teamB}</h3>
-              <div className={`space-y-4 p-3 rounded-md ${
-                isTeamBWinning ? 'bg-green-50' : 'bg-red-50'
-              }`}>
-                <div className="bg-white p-2 rounded-md">
-                  <BoatInputs
-                    raceNumber={race.raceNumber}
-                    startIndex={3}
-                    formData={formData}
-                    onchange={handleChange}
-                  />
-                </div>
-              </div>
+            <div className="flex gap-2 mt-4">
+              <button onClick={() => handleSubmit(race.raceNumber)} className="flex-1 bg-blue-600 text-white px-4 py-2 rounded text-sm md:text-base hover:bg-blue-700">
+                Save Result
+              </button>
+              <button onClick={() => handleClear(race.raceNumber)} className="flex-1 bg-gray-500 text-white px-4 py-2 rounded text-sm md:text-base hover:bg-gray-600">
+                Clear Results
+              </button>
             </div>
           </div>
-
-          <div className="flex gap-2 mt-4">
-            <button
-              onClick={() => handleSubmit(race.raceNumber)}
-              className="flex-1 bg-blue-600 text-white px-4 py-2 rounded text-sm md:text-base hover:bg-blue-700"
-            >
-              Save Result
-            </button>
-            <button
-              onClick={() => handleClear(race.raceNumber)}
-              className="flex-1 bg-gray-500 text-white px-4 py-2 rounded text-sm md:text-base hover:bg-gray-600"
-            >
-              Clear Results
-            </button>
-          </div>
-        </div>
-      ))}
+        );
+      })}
 
       <KnockoutModal
         isOpen={showKnockoutModal}
         onClose={() => setShowKnockoutModal(false)}
-        leagues={leaderboard}
-        settings={{
-          useLeagues: settings.useLeagues,
-          leagues: settings.leagues,
-          boatSets: settings.boatSets || [] // Add global boat sets
+        leagues={leaderboard} // Pass the fetched leaderboard data
+        settings={settings || { // Add fallback for undefined settings
+          useLeagues: false,
+          leagues: [],
+          boatSets: [],
+          racingFormat: '3v3'
         }}
-        races={races}
+        races={races} // Pass current races
         onConfirm={handleCreateKnockouts}
       />
     </div>
   );
 }
-
-type Team = {
-  team: string;
-  wins: number;
-  totalRaces: number;
-  winPercentage: number;
-  points: number;
-  place: number;
-  league: string;
-  tiebreakNote?: string;
-};
-
-const getKnockoutStageDisplayName = (stage?: string): string => {
-  switch (stage?.toLowerCase()) {
-    case 'quarter': return 'Quarter Final';
-    case 'semi': return 'Semi Final';
-    case 'final': return 'Final';
-    default: return 'Knockout';
-  }
-};
-
-// Add helper function to get league tag colors
-const getLeagueTagColors = (league?: string): string => {
-  if (!league) return 'bg-gray-100 text-gray-800';
-  
-  switch (league.toLowerCase()) {
-    case 'gold': return 'bg-yellow-100 text-yellow-800';
-    case 'silver': return 'bg-gray-100 text-gray-700';
-    case 'bronze': return 'bg-orange-100 text-orange-800';
-    case 'main': return 'bg-blue-100 text-blue-800';
-    default: return 'bg-purple-100 text-purple-800';
-  }
-};
-
-// Add helper function to get knockout stage tag colors
-const getKnockoutStageTagColors = (stage?: string): string => {
-  switch (stage?.toLowerCase()) {
-    case 'quarter': return 'bg-red-100 text-red-800';
-    case 'semi': return 'bg-orange-100 text-orange-800';
-    case 'final': return 'bg-green-100 text-green-800';
-    default: return 'bg-gray-100 text-gray-800';
-  }
-};

@@ -19,6 +19,7 @@ type Settings = {
   useLeagues: boolean;
   leagues: League[];
   boatSets: BoatSet[];
+  racingFormat?: '2v2' | '3v3' | '4v4'; // Add this line
 };
 
 type KnockoutMatch = {
@@ -36,6 +37,7 @@ type KnockoutMatch = {
   stage: 'quarter' | 'semi' | 'final';
   matchNumber: number;
   status: 'not_started';
+  racingFormat?: '2v2' | '3v3' | '4v4'; // Add this line
 };
 
 type MatchupInput = {
@@ -48,9 +50,9 @@ type MatchupInput = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { selectedLeagues, matchups, bestOf, stage } = await req.json();
+    const { selectedLeagues, matchups, bestOf, stage, racingFormat } = await req.json(); // Add racingFormat
     
-    console.log('Received knockout request:', { selectedLeagues, matchups, bestOf, stage });
+    console.log('Received knockout request:', { selectedLeagues, matchups, bestOf, stage, racingFormat });
     
     // Load existing schedule
     const scheduleFile = path.join(process.cwd(), 'data', 'schedule.json');
@@ -58,10 +60,14 @@ export async function POST(req: NextRequest) {
     const lastRaceNumber = Math.max(...existingSchedule.map((r: any) => r.raceNumber), 0);
     let nextRaceNumber = lastRaceNumber + 1;
 
-    // Load settings
+    // Load settings to get the current racing format if not provided
     const settingsFile = path.join(process.cwd(), 'data', 'settings.json');
     const settings: Settings = JSON.parse(await fs.readFile(settingsFile, 'utf8'));
     
+    // Use provided racing format or fall back to settings
+    const finalRacingFormat = racingFormat || settings.racingFormat || '3v3';
+    
+    console.log('Using racing format:', finalRacingFormat);
     console.log('Loaded settings:', settings);
 
     const knockoutSchedule: KnockoutMatch[] = [];
@@ -141,11 +147,12 @@ export async function POST(req: NextRequest) {
             bestOf,
             stage,
             matchNumber: matchup.matchNumber || matchIndex + 1,
-            status: 'not_started'
+            status: 'not_started',
+            racingFormat: finalRacingFormat // Add racing format to each race
           };
 
           knockoutSchedule.push(race);
-          console.log(`    Created race ${race.raceNumber}: ${race.teamA} vs ${race.teamB} (Match ${race.matchNumber}, Race ${raceIndex + 1}/${bestOf})`);
+          console.log(`    Created race ${race.raceNumber}: ${race.teamA} vs ${race.teamB} (Match ${race.matchNumber}, Race ${raceIndex + 1}/${bestOf}) - ${finalRacingFormat} format`);
           
           // Increment race number for this boat set
           boatSetNextRaceNumber[boatSetId]++;

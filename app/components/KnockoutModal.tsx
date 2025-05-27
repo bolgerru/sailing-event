@@ -2,7 +2,20 @@
 
 import { useState, useEffect, useMemo } from 'react';
 
-// Update the Race type definition to include the league property
+// Add racing format type
+type RacingFormat = '2v2' | '3v3' | '4v4';
+
+// Add helper function to get boats per team
+const getBoatsPerTeam = (format: RacingFormat): number => {
+  switch (format) {
+    case '2v2': return 2;
+    case '3v3': return 3;
+    case '4v4': return 4;
+    default: return 3;
+  }
+};
+
+// Update the Race type definition to include racingFormat
 type Race = {
   raceNumber: number;
   teamA: string;
@@ -17,8 +30,9 @@ type Race = {
   endTime?: string;
   isKnockout?: boolean;
   stage?: string;
-  league?: string; // Add this line
+  league?: string;
   matchNumber?: number;
+  racingFormat?: RacingFormat; // Add this line
 };
 
 // Update the Team type to match leaderboard structure
@@ -33,14 +47,14 @@ type Team = {
   tiebreakNote?: string;
 };
 
-// Update the props interface to include global boat sets
+// Update the props interface to include racingFormat
 type KnockoutModalProps = {
   isOpen: boolean;
   onClose: () => void;
   leagues: { [key: string]: Team[] };
   onConfirm: (config: KnockoutConfig) => void;
   settings: {
-    useLeagues: boolean; // Add this
+    useLeagues: boolean;
     leagues: Array<{
       id: string;
       name: string;
@@ -50,11 +64,12 @@ type KnockoutModalProps = {
         team2Color: string;
       }>;
     }>;
-    boatSets: Array<{ // Add global boat sets
+    boatSets: Array<{
       id: string;
       team1Color: string;
       team2Color: string;
     }>;
+    racingFormat: '2v2' | '3v3' | '4v4'; // Add this line
   };
   races: Race[];
 };
@@ -99,6 +114,11 @@ export default function KnockoutModal({ isOpen, onClose, leagues, onConfirm, set
 
   // FIXED: Extract boat sets from both league and global settings
   const boatSets = useMemo(() => {
+    // Add safety check for undefined settings
+    if (!settings) {
+      return [];
+    }
+    
     if (settings.useLeagues) {
       // For leagues mode, use league-specific boat sets
       const allBoatSets = settings.leagues.flatMap(league => 
@@ -113,8 +133,8 @@ export default function KnockoutModal({ isOpen, onClose, leagues, onConfirm, set
       
       return allBoatSets.length > 0 ? allBoatSets : [];
     } else {
-      // FIXED: For non-leagues mode, use global boat sets
-      return settings.boatSets.map(set => ({
+      // For non-leagues mode, use global boat sets
+      return (settings.boatSets || []).map(set => ({
         id: set.id,
         name: `${set.team1Color} vs ${set.team2Color}`,
         leagueId: 'global',
@@ -170,7 +190,23 @@ export default function KnockoutModal({ isOpen, onClose, leagues, onConfirm, set
     setMatchups([]);
   };
 
-  // Add the PreviousWinners component definition
+  // Update the useEffect to ensure knockout winners are recalculated when races change
+  useEffect(() => {
+    if (isOpen && races.length > 0) {
+      console.log('Races updated, recalculating knockout winners...');
+      const winners = getKnockoutWinners(races);
+      setKnockoutWinners(winners);
+      console.log('Updated knockout winners:', winners);
+      
+      // Regenerate matchups if we have all the required data
+      if (stage && selectedLeagues.length > 0 && bestOf) {
+        console.log('Regenerating matchups due to race update...');
+        generateMatchups(selectedLeagues);
+      }
+    }
+  }, [races, isOpen]); // Add races as dependency
+
+  // Enhanced PreviousWinners component with better styling and more information
   const PreviousWinners = ({ stage }: { stage: string }) => {
     const stageWinners = knockoutWinners[stage];
     if (!stageWinners || Object.keys(stageWinners).length === 0) {
@@ -197,22 +233,26 @@ export default function KnockoutModal({ isOpen, onClose, leagues, onConfirm, set
     });
 
     return (
-      <div className="mb-4 p-3 bg-green-50 rounded-lg border border-green-200">
-        <h4 className="font-medium text-green-800 mb-2">
-          Previous {getStageDisplayName(stage)} Winners:
+      <div className="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
+        <h4 className="font-medium text-green-800 mb-3 flex items-center">
+          <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+          </svg>
+          {getStageDisplayName(stage)} Winners:
         </h4>
-        <div className="space-y-2">
+        <div className="space-y-3">
           {Object.entries(winnersByLeague).map(([league, winners]) => (
             <div key={league}>
-              <h5 className="text-sm font-medium text-green-700">{league}:</h5>
-              <div className="flex flex-wrap gap-2 ml-2">
+              <h5 className="text-sm font-medium text-green-700 mb-2">{league} League:</h5>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 ml-4">
                 {winners.map(({ matchNumber, winner }) => (
-                  <span 
+                  <div 
                     key={matchNumber}
-                    className="bg-green-100 text-green-800 px-2 py-1 rounded text-sm"
+                    className="bg-green-100 text-green-800 px-3 py-2 rounded-lg text-sm flex items-center justify-between"
                   >
-                    Match {matchNumber}: {winner}
-                  </span>
+                    <span className="font-medium">{winner}</span>
+                    <span className="text-xs bg-green-200 px-2 py-1 rounded">Match {matchNumber}</span>
+                  </div>
                 ))}
               </div>
             </div>
@@ -311,56 +351,231 @@ export default function KnockoutModal({ isOpen, onClose, leagues, onConfirm, set
     return winnerTeams;
   };
 
-  // Update the generateMatchups function to create empty matchups when insufficient teams
+  // Enhanced getKnockoutWinners function to better handle race results
+  const getKnockoutWinners = (races: Race[]) => {
+    const knockoutWinners: { [key: string]: { [key: number]: { winner: string; league: string } } } = {};
+    
+    console.log('=== ANALYZING KNOCKOUT RACES ===');
+    console.log('Total races:', races.length);
+    
+    // Filter knockout races with results
+    const knockoutRaces = races.filter(race => {
+      const hasResult = race.isKnockout && race.result && Array.isArray(race.result) && race.result.length > 0;
+      if (hasResult) {
+        console.log(`Found knockout race ${race.raceNumber}: ${race.teamA} vs ${race.teamB} (${race.stage} #${race.matchNumber})`);
+      }
+      return hasResult;
+    });
+    
+    console.log('Knockout races with results:', knockoutRaces.length);
+    
+    // Group races by stage and match number
+    const racesByStageAndMatch: { 
+      [stage: string]: { 
+        [matchNumber: number]: Race[] 
+      } 
+    } = {};
+    
+    knockoutRaces.forEach(race => {
+      const stage = race.stage || 'unknown';
+      const matchNumber = race.matchNumber || 0;
+      
+      if (!racesByStageAndMatch[stage]) {
+        racesByStageAndMatch[stage] = {};
+      }
+      if (!racesByStageAndMatch[stage][matchNumber]) {
+        racesByStageAndMatch[stage][matchNumber] = [];
+      }
+      
+      racesByStageAndMatch[stage][matchNumber].push(race);
+    });
+    
+    console.log('Races grouped by stage and match:', racesByStageAndMatch);
+    
+    // Process each stage and match to determine winners
+    Object.entries(racesByStageAndMatch).forEach(([stage, matches]) => {
+      console.log(`\n--- Processing ${stage} stage ---`);
+      knockoutWinners[stage] = {};
+      
+      Object.entries(matches).forEach(([matchNumberStr, matchRaces]) => {
+        const matchNumber = parseInt(matchNumberStr);
+        
+        if (matchRaces.length === 0) return;
+        
+        // Sort races by race number to ensure proper order
+        const sortedRaces = matchRaces.sort((a, b) => a.raceNumber - b.raceNumber);
+        
+        // Count wins for each team in this match
+        const teamAWins = { count: 0, team: sortedRaces[0].teamA };
+        const teamBWins = { count: 0, team: sortedRaces[0].teamB };
+        
+        console.log(`\nMatch ${matchNumber}: ${teamAWins.team} vs ${teamBWins.team}`);
+        console.log(`Races in this match: ${sortedRaces.map(r => r.raceNumber).join(', ')}`);
+        
+        sortedRaces.forEach((race, raceIndex) => {
+          // Get the racing format for this specific race or use settings default with safety check
+          const raceFormat = race.racingFormat || settings?.racingFormat || '3v3';
+          const boatsPerTeam = getBoatsPerTeam(raceFormat);
+          
+          console.log(`  Race ${race.raceNumber} (${raceFormat} format):`, race.result);
+          
+          // Calculate points for each team in this race using dynamic format
+          const teamAPoints = race.result!.slice(0, boatsPerTeam).reduce((a: number, b: number) => a + b, 0);
+          const teamBPoints = race.result!.slice(boatsPerTeam, boatsPerTeam * 2).reduce((a: number, b: number) => a + b, 0);
+          
+          let raceWinner: string;
+          if (teamAPoints < teamBPoints) {
+            raceWinner = race.teamA;
+            teamAWins.count++;
+          } else if (teamBPoints < teamAPoints) {
+            raceWinner = race.teamB;
+            teamBWins.count++;
+          } else {
+            // Tie-breaker: team WITHOUT first place wins (team WITH first place loses)
+            const firstPlaceIndex = race.result!.indexOf(1);
+            if (firstPlaceIndex < boatsPerTeam) {
+              // Team A has first place, so Team B wins
+              raceWinner = race.teamB;
+              teamBWins.count++;
+            } else {
+              // Team B has first place, so Team A wins
+              raceWinner = race.teamA;
+              teamAWins.count++;
+            }
+          }
+          
+          console.log(`    ${raceWinner} wins (${teamAPoints} vs ${teamBPoints})`);
+        });
+        
+        // Determine match winner based on series format
+        const totalRaces = sortedRaces.length;
+        const racesToWin = Math.ceil(totalRaces / 2); // For Best of 3: need 2, for Best of 5: need 3
+        
+        let matchWinner: string;
+        let matchComplete = false;
+        
+        if (teamAWins.count >= racesToWin) {
+          matchWinner = teamAWins.team;
+          matchComplete = true;
+        } else if (teamBWins.count >= racesToWin) {
+          matchWinner = teamBWins.team;
+          matchComplete = true;
+        } else {
+          // Match not yet complete - determine current leader
+          if (teamAWins.count > teamBWins.count) {
+            matchWinner = teamAWins.team;
+          } else if (teamBWins.count > teamAWins.count) {
+            matchWinner = teamBWins.team;
+          } else {
+            // Tied - use the winner of the most recent race
+            const lastRace = sortedRaces[sortedRaces.length - 1];
+            const lastRaceFormat = lastRace.racingFormat || settings?.racingFormat || '3v3';
+            const lastRaceBoatsPerTeam = getBoatsPerTeam(lastRaceFormat);
+            const lastRaceTeamAPoints = lastRace.result!.slice(0, lastRaceBoatsPerTeam).reduce((a: number, b: number) => a + b, 0);
+            const lastRaceTeamBPoints = lastRace.result!.slice(lastRaceBoatsPerTeam, lastRaceBoatsPerTeam * 2).reduce((a: number, b: number) => a + b, 0);
+            
+            if (lastRaceTeamAPoints < lastRaceTeamBPoints) {
+              matchWinner = lastRace.teamA;
+            } else if (lastRaceTeamBPoints < lastRaceTeamAPoints) {
+              matchWinner = lastRace.teamB;
+            } else {
+              // Tie-breaker - team WITHOUT 1st place wins
+              const firstPlaceIndex = lastRace.result!.indexOf(1);
+              matchWinner = firstPlaceIndex < lastRaceBoatsPerTeam ? lastRace.teamB : lastRace.teamA;
+            }
+          }
+        }
+        
+        console.log(`  Match Result: ${matchWinner} leads/wins series ${teamAWins.count}-${teamBWins.count} (needs ${racesToWin} to win)`);
+        console.log(`  Match Complete: ${matchComplete}`);
+        
+        // Record the winner (even if match is not complete, we track the current leader)
+        const winnerTeam = Object.keys(leagues).find(leagueName => 
+          leagues[leagueName].some(team => team.team === matchWinner)
+        );
+        
+        const winnerLeague = winnerTeam ? winnerTeam : sortedRaces[0].league || '';
+        
+        knockoutWinners[stage][matchNumber] = {
+          winner: matchWinner,
+          league: winnerLeague
+        };
+        
+        console.log(`  Recorded winner: ${matchWinner} from ${winnerLeague} league`);
+      });
+    });
+    
+    console.log('\n=== FINAL KNOCKOUT WINNERS ===');
+    Object.entries(knockoutWinners).forEach(([stage, matches]) => {
+      console.log(`${stage}:`, Object.entries(matches).map(([match, info]) => `Match ${match}: ${info.winner}`));
+    });
+    
+    return knockoutWinners;
+  };
+
+  // Enhanced matchup generation with better winner progression
   const generateMatchups = (selectedLeagueNames: string[]) => {
-    console.log('Generating matchups for leagues:', selectedLeagueNames);
-    console.log('Settings mode:', settings.useLeagues ? 'leagues' : 'non-leagues');
+    console.log('=== GENERATING MATCHUPS ===');
+    console.log('Selected leagues:', selectedLeagueNames);
+    console.log('Current stage:', stage);
+    console.log('Available knockout winners:', knockoutWinners);
+    console.log('Settings mode:', settings?.useLeagues ? 'leagues' : 'non-leagues');
     
     const newMatchups: { teamA: string; teamB: string; boatSet?: string; league: string; matchNumber?: number }[] = [];
     let globalMatchNumber = 1;
 
     selectedLeagueNames.forEach(leagueName => {
+      console.log(`\n--- Processing league: ${leagueName} ---`);
+      
       const leagueTeams = leagues[leagueName] || [];
+      console.log(`Available teams in ${leagueName}:`, leagueTeams.map(t => `${t.team} (${t.place})`));
+      
       let sortedTeams: Team[] = [];
 
       // Check if we should use previous knockout winners
-      const shouldUseWinners = stage && knockoutWinners[getPreviousStage(stage)];
+      const previousStage = getPreviousStage(stage || '');
+      const shouldUseWinners = stage && previousStage && knockoutWinners[previousStage];
+      
+      console.log(`Previous stage: ${previousStage}, Should use winners: ${shouldUseWinners}`);
       
       if (shouldUseWinners) {
         const previousStageWinners = getPreviousStageWinners(leagueName);
         
         if (previousStageWinners.length > 0) {
           sortedTeams = previousStageWinners;
-          console.log(`Using previous ${getPreviousStage(stage)} winners for ${leagueName}:`, 
+          console.log(`✓ Using ${previousStageWinners.length} previous ${previousStage} winners for ${leagueName}:`, 
             sortedTeams.map(t => `${t.team} (seed ${t.place})`));
         } else {
+          // Fall back to leaderboard if no winners found
           sortedTeams = [...leagueTeams].sort((a: Team, b: Team) => {
             if (a.place !== b.place) return a.place - b.place;
             return b.winPercentage - a.winPercentage;
           });
-          console.log(`No previous winners found for ${leagueName}, using leaderboard`);
+          console.log(`⚠ No previous winners found for ${leagueName}, using leaderboard:`,
+            sortedTeams.map(t => `${t.team} (${t.place})`));
         }
       } else {
+        // First stage or no previous winners - use leaderboard
         sortedTeams = [...leagueTeams].sort((a: Team, b: Team) => {
           if (a.place !== b.place) return a.place - b.place;
           return b.winPercentage - a.winPercentage;
         });
-        console.log(`Using leaderboard for ${leagueName} ${stage} stage`);
+        console.log(`Using leaderboard for ${leagueName} ${stage} stage:`,
+          sortedTeams.map(t => `${t.team} (${t.place})`));
       }
 
-      // IMPROVED: Handle boat sets for both league and non-league modes
+      // Handle boat sets for both league and non-league modes with safety checks
       let availableBoatSets: any[] = [];
       
-      if (settings.useLeagues) {
+      if (settings?.useLeagues) {
         // League mode: find specific league settings
-        const leagueSettings = settings.leagues.find(l => l.name === leagueName);
+        const leagueSettings = settings.leagues?.find(l => l.name === leagueName);
         const leagueBoatSets = leagueSettings?.boatSets || [];
         availableBoatSets = leagueBoatSets.length > 0 ? leagueBoatSets : 
-          settings.leagues.flatMap(league => league.boatSets);
+          (settings.leagues?.flatMap(league => league.boatSets) || []);
       } else {
         // Non-league mode: use global boat sets
-        availableBoatSets = settings.boatSets || [];
-        console.log('Using global boat sets:', availableBoatSets);
+        availableBoatSets = settings?.boatSets || [];
       }
 
       // Fallback if no boat sets found
@@ -377,7 +592,7 @@ export default function KnockoutModal({ isOpen, onClose, leagues, onConfirm, set
       let pairs: [number, number][] = [];
       let requiredTeams = 0;
 
-      // FIXED: Determine required matchups based on stage regardless of available teams
+      // Determine required matchups based on stage
       if (stage === 'quarter') {
         pairs = [[0,7], [1,6], [2,5], [3,4]];
         requiredTeams = 8;
@@ -389,18 +604,21 @@ export default function KnockoutModal({ isOpen, onClose, leagues, onConfirm, set
         requiredTeams = 2;
       }
 
+      console.log(`Stage ${stage} requires ${requiredTeams} teams, have ${numTeams} teams`);
+      console.log(`Will create ${pairs.length} matchups with pairs:`, pairs);
+
       // Create matchups for all required pairs
       pairs.forEach(([a, b], pairIndex) => {
         const defaultBoatSet = availableBoatSets[pairIndex % availableBoatSets.length];
         
-        // FIXED: Use available teams or empty strings if insufficient teams
+        // Use available teams or empty strings if insufficient teams
         const teamA = sortedTeams[a]?.team || '';
         const teamB = sortedTeams[b]?.team || '';
         
         if (teamA && teamB) {
-          console.log(`Match ${globalMatchNumber}: ${teamA} (seed ${sortedTeams[a]?.place || '?'}) vs ${teamB} (seed ${sortedTeams[b]?.place || '?'}) - ${leagueName}`);
+          console.log(`✓ Match ${globalMatchNumber}: ${teamA} (seed ${sortedTeams[a]?.place || '?'}) vs ${teamB} (seed ${sortedTeams[b]?.place || '?'}) - ${leagueName}`);
         } else {
-          console.log(`Match ${globalMatchNumber}: Empty matchup created for ${leagueName} (insufficient teams: ${numTeams}/${requiredTeams})`);
+          console.log(`⚠ Match ${globalMatchNumber}: Empty matchup created for ${leagueName} (insufficient teams: ${numTeams}/${requiredTeams})`);
         }
         
         newMatchups.push({
@@ -420,150 +638,15 @@ export default function KnockoutModal({ isOpen, onClose, leagues, onConfirm, set
       }
     });
 
+    console.log('\n=== FINAL MATCHUPS ===');
+    newMatchups.forEach((matchup, i) => {
+      console.log(`Match ${i + 1}: ${matchup.teamA} vs ${matchup.teamB} (${matchup.league})`);
+    });
+
     setMatchups(newMatchups);
     setAllTeams(selectedLeagueNames.flatMap(name => leagues[name] || []));
   };
 
-  // Fix the getKnockoutWinners function to properly determine match winners based on series results
-  const getKnockoutWinners = (races: Race[]) => {
-    const knockoutWinners: { [key: string]: { [key: number]: { winner: string; league: string } } } = {};
-    
-    // Group races by stage and match number
-    const racesByStageAndMatch: { 
-      [stage: string]: { 
-        [matchNumber: number]: Race[] 
-      } 
-    } = {};
-    
-    races
-      .filter(race => race.isKnockout && race.result && race.status === 'finished')
-      .forEach(race => {
-        const stage = race.stage || '';
-        const matchNumber = race.matchNumber || 0;
-        
-        if (!racesByStageAndMatch[stage]) {
-          racesByStageAndMatch[stage] = {};
-        }
-        if (!racesByStageAndMatch[stage][matchNumber]) {
-          racesByStageAndMatch[stage][matchNumber] = [];
-        }
-        
-        racesByStageAndMatch[stage][matchNumber].push(race);
-      });
-    
-    // Process each stage and match to determine winners
-    Object.entries(racesByStageAndMatch).forEach(([stage, matches]) => {
-      knockoutWinners[stage] = {};
-      
-      Object.entries(matches).forEach(([matchNumberStr, matchRaces]) => {
-        const matchNumber = parseInt(matchNumberStr);
-        
-        if (matchRaces.length === 0) return;
-        
-        // Sort races by race number to ensure proper order
-        const sortedRaces = matchRaces.sort((a, b) => a.raceNumber - b.raceNumber);
-        
-        // Count wins for each team in this match
-        const teamAWins = { count: 0, team: sortedRaces[0].teamA };
-        const teamBWins = { count: 0, team: sortedRaces[0].teamB };
-        
-        console.log(`Analyzing Match ${matchNumber} in ${stage}:`);
-        console.log(`  ${teamAWins.team} vs ${teamBWins.team}`);
-        
-        sortedRaces.forEach((race, raceIndex) => {
-          // Calculate points for each team in this race
-          const teamAPoints = race.result!.slice(0, 3).reduce((a: number, b: number) => a + b, 0);
-          const teamBPoints = race.result!.slice(3).reduce((a: number, b: number) => a + b, 0);
-          
-          let raceWinner: string;
-          if (teamAPoints < teamBPoints) {
-            raceWinner = race.teamA;
-            teamAWins.count++;
-          } else if (teamBPoints < teamAPoints) {
-            raceWinner = race.teamB;
-            teamBWins.count++;
-          } else {
-            // Tie-breaker: first place wins
-            const firstPlaceIndex = race.result!.indexOf(1);
-            if (firstPlaceIndex < 3) {
-              raceWinner = race.teamA;
-              teamAWins.count++;
-            } else {
-              raceWinner = race.teamB;
-              teamBWins.count++;
-            }
-          }
-          
-          console.log(`    Race ${raceIndex + 1}: ${raceWinner} wins (${teamAPoints} vs ${teamBPoints})`);
-        });
-        
-        // Determine match winner based on series format
-        const totalRaces = sortedRaces.length;
-        const racesToWin = Math.ceil(totalRaces / 2); // For Best of 3: need 2, for Best of 5: need 3
-        
-        let matchWinner: string;
-        let matchComplete = false;
-        
-        if (teamAWins.count >= racesToWin) {
-          matchWinner = teamAWins.team;
-          matchComplete = true;
-        } else if (teamBWins.count >= racesToWin) {
-          matchWinner = teamBWins.team;
-          matchComplete = true;
-        } else {
-          // Match not yet complete - determine based on current leader
-          // But only count as winner if all races in the series are finished
-          if (teamAWins.count > teamBWins.count) {
-            matchWinner = teamAWins.team;
-          } else if (teamBWins.count > teamAWins.count) {
-            matchWinner = teamBWins.team;
-          } else {
-            // Tied - use the winner of the most recent race
-            const lastRace = sortedRaces[sortedRaces.length - 1];
-            const lastRaceTeamAPoints = lastRace.result!.slice(0, 3).reduce((a: number, b: number) => a + b, 0);
-            const lastRaceTeamBPoints = lastRace.result!.slice(3).reduce((a: number, b: number) => a + b, 0);
-            
-            if (lastRaceTeamAPoints < lastRaceTeamBPoints) {
-              matchWinner = lastRace.teamA;
-            } else if (lastRaceTeamBPoints < lastRaceTeamAPoints) {
-              matchWinner = lastRace.teamB;
-            } else {
-              const firstPlaceIndex = lastRace.result!.indexOf(1);
-              matchWinner = firstPlaceIndex < 3 ? lastRace.teamA : lastRace.teamB;
-            }
-          }
-          
-          // Only consider the match complete if we have enough races for the format
-          // or if one team already has enough wins
-          matchComplete = teamAWins.count >= racesToWin || teamBWins.count >= racesToWin;
-        }
-        
-        console.log(`  Match Result: ${matchWinner} wins series ${teamAWins.count}-${teamBWins.count} (needs ${racesToWin} to win)`);
-        console.log(`  Match Complete: ${matchComplete}`);
-        
-        // Only record the winner if the match is complete or if we have a clear series winner
-        if (matchComplete || teamAWins.count >= racesToWin || teamBWins.count >= racesToWin) {
-          // Determine the league of the winner
-          const winnerTeam = Object.keys(leagues).find(leagueName => 
-            leagues[leagueName].some(team => team.team === matchWinner)
-          );
-          
-          const winnerLeague = winnerTeam ? winnerTeam : sortedRaces[0].league || '';
-          
-          knockoutWinners[stage][matchNumber] = {
-            winner: matchWinner,
-            league: winnerLeague
-          };
-          
-          console.log(`  Recorded winner: ${matchWinner} from ${winnerLeague}`);
-        }
-      });
-    });
-    
-    return knockoutWinners;
-  };
-
-  // Update handleSubmit to validate complete matchups
   const handleSubmit = async () => {
     if (selectedLeagues.length === 0) {
       alert('Please select at least one league');
@@ -708,6 +791,42 @@ export default function KnockoutModal({ isOpen, onClose, leagues, onConfirm, set
               {['quarter', 'semi', 'final'].map(stage => (
                 <PreviousWinners key={stage} stage={stage} />
               ))}
+            </div>
+          )}
+
+          {/* Current Stage Status */}
+          {Object.keys(knockoutWinners).length > 0 && (
+            <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <h4 className="font-medium text-blue-800 mb-3">Stage Availability:</h4>
+              <div className="space-y-2">
+                {['quarter', 'semi', 'final'].map(stageKey => {
+                  const stageWinners = knockoutWinners[stageKey];
+                  const winnerCount = stageWinners ? Object.keys(stageWinners).length : 0;
+                  const isAvailable = stageKey === 'quarter' || winnerCount > 0;
+                  
+                  let requiredWinners = 0;
+                  if (stageKey === 'semi') requiredWinners = 4; // Need 4 quarter winners for semi
+                  if (stageKey === 'final') requiredWinners = 2; // Need 2 semi winners for final
+                  
+                  return (
+                    <div key={stageKey} className={`flex items-center justify-between p-2 rounded ${
+                      isAvailable ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+                    }`}>
+                      <span className="font-medium">
+                        {stageKey === 'quarter' ? 'Quarter Finals' : 
+                         stageKey === 'semi' ? 'Semi Finals' : 'Finals'}
+                      </span>
+                      <div className="text-sm">
+                        {stageKey === 'quarter' ? 
+                          'Always Available' :
+                          `${winnerCount}/${requiredWinners} winners available`
+                        }
+                        {isAvailable && <span className="ml-2">✓</span>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 

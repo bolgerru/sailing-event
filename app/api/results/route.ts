@@ -2,44 +2,20 @@ import { NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import { readFileSync } from 'fs';
 import path from 'path';
-import { updateMetrics } from '../../lib/metrics'; // Fix import path
+import { updateMetrics } from '../../lib/metrics';
 
-// Update Race type at the top of the file
-type Race = {
-  raceNumber: number;
-  teamA: string;
-  teamB: string;
-  league?: string;
-  result?: number[] | null;
-  boats: {
-    teamA: string;
-    teamB: string;
-  };
-  status?: 'not_started' | 'in_progress' | 'finished';
-  startTime?: string;
-  endTime?: string;
-  goToChangeover?: boolean;
-  isLaunching?: boolean;
-  isKnockout?: boolean; // Add this property
-  bestOf?: number;      // Optional: Add if needed for knockouts
-  stage?: string;       // Optional: Add if needed for knockouts
-  matchNumber?: number; // Optional: Add if needed for knockouts
-};
-
-type RaceWithChangeover = Race & { goToChangeover: boolean };
-
-// First add tiebreak info to TeamStats type
+// Add missing type definitions
 type TeamStats = {
   team: string;
   wins: number;
   totalRaces: number;
-  points: number;
   winPercentage: number;
+  points: number;
   place: number;
-  tiebreakNote?: string;  // Add this field
+  league: string;
+  tiebreakNote?: string;
 };
 
-// Add types for the stats objects
 type H2HStats = {
   team: string;
   wins: number;
@@ -56,30 +32,50 @@ type CommonOpponentStats = {
   tiebreakNote?: string;
 };
 
-// Load schedule JSON from disk
-async function loadSchedule(): Promise<Race[]> {
-  const filePath = path.join(process.cwd(), 'data', 'schedule.json');
-  try {
-    const json = await fs.readFile(filePath, 'utf-8');
-    return JSON.parse(json);
-  } catch (error) {
-    console.error('Error loading schedule:', error);
-    return [];
+// Update the Race type
+type Race = {
+  raceNumber: number;
+  teamA: string;
+  teamB: string;
+  league?: string;
+  result?: number[] | null;
+  boats: {
+    teamA: string;
+    teamB: string;
+  };
+  status?: 'not_started' | 'in_progress' | 'finished';
+  startTime?: string;
+  endTime?: string;
+  goToChangeover?: boolean;
+  isLaunching?: boolean;
+  isKnockout?: boolean;
+  bestOf?: number;
+  stage?: string;
+  matchNumber?: number;
+  racingFormat?: '2v2' | '3v3' | '4v4';
+};
+
+// Helper function to get boats per team based on racing format
+function getBoatsPerTeam(format?: string): number {
+  switch (format) {
+    case '2v2': return 2;
+    case '3v3': return 3;
+    case '4v4': return 4;
+    default: return 3; // Default to 3v3 for backward compatibility
   }
 }
 
-// Save schedule JSON to disk
-async function saveSchedule(races: Race[]) {
-  const filePath = path.join(process.cwd(), 'data', 'schedule.json');
-  await fs.writeFile(filePath, JSON.stringify(races, null, 2));
-}
-
+// Update functions that calculate race winners to be format-aware
 function isCompletedRace(race: Race): boolean {
+  if (!race.result || race.result === null || race.result === undefined) {
+    return false;
+  }
+
+  const expectedLength = getBoatsPerTeam(race.racingFormat) * 2;
   return (
-    race.result !== null &&
-    race.result !== undefined &&
-    race.result.length === 6 &&
-    !race.result.every(score => score === 0)
+    race.result.length === expectedLength &&
+    !race.result.every(score => score === 0) &&
+    race.result.every(score => typeof score === 'number' && score > 0)
   );
 }
 
@@ -103,18 +99,25 @@ function getHeadToHeadRecord(
   matches.forEach(race => {
     if (!race.result) return;
     matchCount++;
+    
+    const boatsPerTeam = getBoatsPerTeam(race.racingFormat);
     const isTeamA = race.teamA === teamA;
+    
     const teamPoints = isTeamA
-      ? race.result.slice(0, 3).reduce((a, b) => a + b, 0)
-      : race.result.slice(3).reduce((a, b) => a + b, 0);
+      ? race.result.slice(0, boatsPerTeam).reduce((a, b) => a + b, 0)
+      : race.result.slice(boatsPerTeam, boatsPerTeam * 2).reduce((a, b) => a + b, 0);
     const otherTeamPoints = isTeamA
-      ? race.result.slice(3).reduce((a, b) => a + b, 0)
-      : race.result.slice(0, 3).reduce((a, b) => a + b, 0);
+      ? race.result.slice(boatsPerTeam, boatsPerTeam * 2).reduce((a, b) => a + b, 0)
+      : race.result.slice(0, boatsPerTeam).reduce((a, b) => a + b, 0);
 
-    if (teamPoints < otherTeamPoints) wins++;
-    else if (teamPoints === otherTeamPoints) {
+    if (teamPoints < otherTeamPoints) {
+      wins++;
+    } else if (teamPoints === otherTeamPoints) {
+      // Tie-breaker: team WITHOUT first place wins (team with 1st place loses)
       const pos1Index = race.result.indexOf(1);
-      if ((isTeamA && pos1Index >= 3) || (!isTeamA && pos1Index < 3)) wins++;
+      if ((isTeamA && pos1Index >= boatsPerTeam) || (!isTeamA && pos1Index < boatsPerTeam)) {
+        wins++; // teamA didn't get first place, so teamA wins
+      }
     }
     totalPoints += teamPoints;
   });
@@ -125,6 +128,7 @@ function getHeadToHeadRecord(
   };
 }
 
+// Update getLastMatchResult function
 function getLastMatchResult(teamA: string, teamB: string, races: Race[]): number {
   const match = races
     .filter(
@@ -137,15 +141,29 @@ function getLastMatchResult(teamA: string, teamB: string, races: Race[]): number
 
   if (!match || !match.result) return 0;
 
+  const boatsPerTeam = getBoatsPerTeam(match.racingFormat);
   const isTeamA = match.teamA === teamA;
+  
   const teamPoints = isTeamA
-    ? match.result.slice(0, 3).reduce((a, b) => a + b, 0)
-    : match.result.slice(3).reduce((a, b) => a + b, 0);
+    ? match.result.slice(0, boatsPerTeam).reduce((a, b) => a + b, 0)
+    : match.result.slice(boatsPerTeam, boatsPerTeam * 2).reduce((a, b) => a + b, 0);
   const otherTeamPoints = isTeamA
-    ? match.result.slice(3).reduce((a, b) => a + b, 0)
-    : match.result.slice(0, 3).reduce((a, b) => a + b, 0);
+    ? match.result.slice(boatsPerTeam, boatsPerTeam * 2).reduce((a, b) => a + b, 0)
+    : match.result.slice(0, boatsPerTeam).reduce((a, b) => a + b, 0);
 
-  return teamPoints < otherTeamPoints ? 1 : teamPoints > otherTeamPoints ? -1 : 0;
+  if (teamPoints < otherTeamPoints) {
+    return 1; // teamA wins
+  } else if (teamPoints > otherTeamPoints) {
+    return -1; // teamA loses
+  } else {
+    // Tie on points - check first place
+    const pos1Index = match.result.indexOf(1);
+    if ((isTeamA && pos1Index >= boatsPerTeam) || (!isTeamA && pos1Index < boatsPerTeam)) {
+      return 1; // teamA didn't get first place, so teamA wins
+    } else {
+      return -1; // teamA got first place, so teamA loses
+    }
+  }
 }
 
 function findCommonOpponents(teams: string[], races: Race[]): string[] {
@@ -165,6 +183,7 @@ function findCommonOpponents(teams: string[], races: Race[]): string[] {
   );
 }
 
+// Update getPointsAgainstOpponents function
 function getPointsAgainstOpponents(team: string, opponents: string[], races: Race[]): number {
   let totalPoints = 0;
   races.forEach(race => {
@@ -173,14 +192,34 @@ function getPointsAgainstOpponents(team: string, opponents: string[], races: Rac
       (race.teamA === team && opponents.includes(race.teamB)) ||
       (race.teamB === team && opponents.includes(race.teamA))
     ) {
+      const boatsPerTeam = getBoatsPerTeam(race.racingFormat);
       const isTeamA = race.teamA === team;
+      
       const teamPoints = isTeamA
-        ? race.result.slice(0, 3).reduce((a, b) => a + b, 0)
-        : race.result.slice(3).reduce((a, b) => a + b, 0);
+        ? race.result.slice(0, boatsPerTeam).reduce((a, b) => a + b, 0)
+        : race.result.slice(boatsPerTeam, boatsPerTeam * 2).reduce((a, b) => a + b, 0);
       totalPoints += teamPoints;
     }
   });
   return totalPoints;
+}
+
+// Load schedule JSON from disk
+async function loadSchedule(): Promise<Race[]> {
+  const filePath = path.join(process.cwd(), 'data', 'schedule.json');
+  try {
+    const json = await fs.readFile(filePath, 'utf-8');
+    return JSON.parse(json);
+  } catch (error) {
+    console.error('Error loading schedule:', error);
+    return [];
+  }
+}
+
+// Save schedule JSON to disk
+async function saveSchedule(races: Race[]) {
+  const filePath = path.join(process.cwd(), 'data', 'schedule.json');
+  await fs.writeFile(filePath, JSON.stringify(races, null, 2));
 }
 
 function resolveTeamGroup(group: TeamStats[], races: Race[]): TeamStats[] {
@@ -242,7 +281,7 @@ function resolveTeamGroup(group: TeamStats[], races: Race[]): TeamStats[] {
         stats.totalPoints += record.avgPoints;
       });
 
-      const winPercentage = (stats.wins / stats.totalGames) + 100;
+      const winPercentage = (stats.wins / stats.totalGames) * 100;
       const avgPoints = stats.totalPoints / stats.totalGames;
 
       console.log(`\n${team.team} head-to-head performance in this group:`, {
@@ -257,7 +296,7 @@ function resolveTeamGroup(group: TeamStats[], races: Race[]): TeamStats[] {
         team: team.team,
         winPercentage,
         avgPoints,
-        tiebreakNote: undefined // initialize optional property
+        tiebreakNote: undefined
       };
     });
 
@@ -325,14 +364,12 @@ function resolveTeamGroup(group: TeamStats[], races: Race[]): TeamStats[] {
           });
 
           // Create a subset of races that include ANY of these tied teams
-          // (not just races between them)
           const subGroupRaces = races.filter(race => 
             teams.some(t => t.team === race.teamA || t.team === race.teamB)
           );
 
           // Recursively resolve the tie with all relevant races
           const resolvedSubGroup = resolveTeamGroup(teams, subGroupRaces);
-          // Keep existing tiebreak notes from recursive resolution
           finalOrder.push(...resolvedSubGroup);
           currentPlace = Math.max(...resolvedSubGroup.map(t => t.place)) + 1;
           
@@ -432,7 +469,7 @@ function resolveTeamGroup(group: TeamStats[], races: Race[]): TeamStats[] {
       return { 
         team: team.team, 
         points,
-        tiebreakNote: undefined // initialize optional property
+        tiebreakNote: undefined
       };
     });
 
@@ -491,7 +528,7 @@ function resolveTeamGroup(group: TeamStats[], races: Race[]): TeamStats[] {
       });
 
       const finalOrder: TeamStats[] = [];
-      let currentPlace = Math.min(...group.map(t => t.place || 2));
+      let currentPlace = Math.min(...group.map(t => t.place || 1));
 
       // Process each points group, recursively resolving any ties
       for (const [points, teams] of Array.from(pointGroups.entries()).sort((a, b) => a[0] - b[0])) {
@@ -633,10 +670,14 @@ function updateChangeoverFlags(races: Race[]): void {
   });
 }
 
-// Update the ComputeLeaderboard function
+// Update the computeLeaderboard function to handle different racing formats
 function computeLeaderboard(races: Race[]): { [key: string]: TeamStats[] } {
   // Filter out knockout matches first
   const regularRaces = races.filter(race => !race.isKnockout);
+
+  // Log racing formats found
+  const formats = new Set(regularRaces.map(race => race.racingFormat || '3v3'));
+  console.log('Racing formats found in schedule:', Array.from(formats));
 
   // If no leagues are defined, create a default league with all regular races
   if (!regularRaces.some(race => race.league)) {
@@ -669,18 +710,20 @@ function computeLeaderboard(races: Race[]): { [key: string]: TeamStats[] } {
       teamAStats.totalRaces++;
       teamBStats.totalRaces++;
 
-      const teamAPoints = race.result.slice(0, 3).reduce((a, b) => a + b, 0);
-      const teamBPoints = race.result.slice(3).reduce((a, b) => a + b, 0);
+      const boatsPerTeam = getBoatsPerTeam(race.racingFormat);
+      const teamAPoints = race.result.slice(0, boatsPerTeam).reduce((a, b) => a + b, 0);
+      const teamBPoints = race.result.slice(boatsPerTeam, boatsPerTeam * 2).reduce((a, b) => a + b, 0);
 
       if (teamAPoints < teamBPoints) {
         teamAStats.wins++;
       } else if (teamBPoints < teamAPoints) {
         teamBStats.wins++;
       } else {
-        if (race.result.indexOf(1) < 3) {
-          teamBStats.wins++;
+        // Tie-breaker: team WITHOUT first place wins (team with 1st place loses)
+        if (race.result.indexOf(1) < boatsPerTeam) {
+          teamBStats.wins++; // Team A got first place, so Team B wins
         } else {
-          teamAStats.wins++;
+          teamAStats.wins++; // Team B got first place, so Team A wins
         }
       }
     });
@@ -747,7 +790,7 @@ function computeLeaderboard(races: Race[]): { [key: string]: TeamStats[] } {
       points: 0,
       winPercentage: 0,
       place: 0,
-      league: leagueName, // Add league to stats
+      league: leagueName,
     }));
 
     // Calculate stats for this league
@@ -760,18 +803,20 @@ function computeLeaderboard(races: Race[]): { [key: string]: TeamStats[] } {
       teamAStats.totalRaces++;
       teamBStats.totalRaces++;
 
-      const teamAPoints = race.result.slice(0, 3).reduce((a, b) => a + b, 0);
-      const teamBPoints = race.result.slice(3).reduce((a, b) => a + b, 0);
+      const boatsPerTeam = getBoatsPerTeam(race.racingFormat);
+      const teamAPoints = race.result.slice(0, boatsPerTeam).reduce((a, b) => a + b, 0);
+      const teamBPoints = race.result.slice(boatsPerTeam, boatsPerTeam * 2).reduce((a, b) => a + b, 0);
 
       if (teamAPoints < teamBPoints) {
         teamAStats.wins++;
       } else if (teamBPoints < teamAPoints) {
         teamBStats.wins++;
       } else {
-        if (race.result.indexOf(1) < 3) {
-          teamBStats.wins++;
+        // Tie-breaker: team WITHOUT first place wins (team with 1st place loses)
+        if (race.result.indexOf(1) < boatsPerTeam) {
+          teamBStats.wins++; // Team A got first place, so Team B wins
         } else {
-          teamAStats.wins++;
+          teamAStats.wins++; // Team B got first place, so Team A wins
         }
       }
     });
@@ -811,7 +856,21 @@ function computeLeaderboard(races: Race[]): { [key: string]: TeamStats[] } {
   return leagueLeaderboards;
 }
 
-// Update the POST handler to handle race status updates
+// GET endpoint
+export async function GET() {
+  try {
+    const races = await loadSchedule();
+    return NextResponse.json(races);
+  } catch (error) {
+    console.error('Error in GET /api/results:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+// POST endpoint for updating race results
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -833,6 +892,19 @@ export async function POST(req: Request) {
         { error: `Race ${raceNumber} not found` },
         { status: 404 }
       );
+    }
+
+    const race = races[raceIndex];
+
+    // Validate result array length if provided
+    if (result !== undefined && result !== null && Array.isArray(result)) {
+      const expectedLength = getBoatsPerTeam(race.racingFormat) * 2;
+      if (result.length !== expectedLength) {
+        return NextResponse.json(
+          { error: `Result must contain exactly ${expectedLength} positions for ${race.racingFormat || '3v3'} racing format` },
+          { status: 400 }
+        );
+      }
     }
 
     // Update race data
@@ -874,6 +946,59 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error('Error in POST /api/results:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE endpoint for clearing race results
+export async function DELETE(req: Request) {
+  try {
+    const body = await req.json();
+    const { raceNumber } = body;
+
+    // Validate raceNumber
+    if (typeof raceNumber !== 'number') {
+      return NextResponse.json(
+        { error: 'raceNumber must be a number' },
+        { status: 400 }
+      );
+    }
+
+    const races = await loadSchedule();
+    const raceIndex = races.findIndex(r => r.raceNumber === raceNumber);
+
+    if (raceIndex === -1) {
+      return NextResponse.json(
+        { error: `Race ${raceNumber} not found` },
+        { status: 404 }
+      );
+    }
+
+    // Clear the result for the specified race
+    races[raceIndex] = {
+      ...races[raceIndex],
+      result: null,
+      status: 'not_started',
+      startTime: undefined,
+      endTime: undefined,
+    };
+
+    await saveSchedule(races);
+
+    // Update leaderboard after clearing results
+    const leagueLeaderboards = computeLeaderboard(races);
+    const leaderboardPath = path.join(process.cwd(), 'data', 'leaderboard.json');
+    await fs.writeFile(leaderboardPath, JSON.stringify(leagueLeaderboards, null, 2));
+
+    return NextResponse.json({
+      success: true,
+      message: `Result for race ${raceNumber} cleared successfully`,
+    });
+  } catch (error) {
+    console.error('Error in DELETE /api/results:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
