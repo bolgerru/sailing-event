@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState, memo } from 'react';
 import Link from 'next/link';
+// Update the import path below to the correct relative path if needed
+import KnockoutModal, { KnockoutConfig } from '../../components/KnockoutModal';
 
 type Race = {
   raceNumber: number;
@@ -97,6 +99,21 @@ const scrollToElement = (id: string) => {
   }
 };
 
+type Settings = {
+  useLeagues: boolean;
+  leagues: Array<{
+    id: string;
+    name: string;
+    boatSets: Array<{
+      id: string;
+      team1Color: string;
+      team2Color: string;
+    }>;
+  }>;
+  teamInput: string;
+  boatSets: Array<BoatSet>;
+};
+
 export default function AdminResultsForm({ races: initialRaces }: { races: Race[] }) {
   const [races, setRaces] = useState<Race[]>(initialRaces);
   const [formData, setFormData] = useState<{ [key: number]: (number | '')[] }>({});
@@ -106,24 +123,42 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
   const [leagues, setLeagues] = useState<League[]>([]);
   const [useLeagues, setUseLeagues] = useState(false);
   const [nextUnfinishedRace, setNextUnfinishedRace] = useState<Race | null>(null);
+  const [showKnockoutModal, setShowKnockoutModal] = useState(false);
+  const [leaderboard, setLeaderboard] = useState<{ [key: string]: Team[] }>({});
+  const [settings, setSettings] = useState<Settings>({
+    useLeagues: false,
+    leagues: [],
+    teamInput: '',
+    boatSets: []
+  });
 
   // Load saved settings from localStorage on component mount
   useEffect(() => {
     const loadSavedSettings = async () => {
       try {
         const response = await fetch('/api/settings');
-        if (response.ok) {
-          const settings = await response.json();
-          setUseLeagues(settings.useLeagues || false);
-          if (settings.useLeagues) {
-            setLeagues(settings.leagues || []);
+        if (!response.ok) {
+          throw new Error('Failed to load settings');
+        }
+        const data = await response.json();
+        
+        // Store the complete settings object
+        setSettings(data);
+        
+        // Only update state if we have valid data
+        if (data) {
+          setUseLeagues(data.useLeagues ?? false);
+          if (data.useLeagues) {
+            if (Array.isArray(data.leagues)) {
+              setLeagues(data.leagues);
+            }
           } else {
-            setTeamInput(settings.teamInput || '');
-            setBoatSets(settings.boatSets || [{
-              id: 'set-1',
-              team1Color: '',
-              team2Color: ''
-            }]);
+            if (typeof data.teamInput === 'string') {
+              setTeamInput(data.teamInput);
+            }
+            if (Array.isArray(data.boatSets)) {
+              setBoatSets(data.boatSets);
+            }
           }
         }
       } catch (error) {
@@ -135,25 +170,44 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
   }, []);
 
   // Save settings to API
-  useEffect(() => {
-    const saveSettings = async () => {
-      try {
-        await fetch('/api/settings', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            useLeagues,
-            leagues,
-            teamInput,
-            boatSets
-          })
-        });
-      } catch (error) {
-        console.error('Error saving settings:', error);
-      }
-    };
+  const saveSettings = async (newSettings: any) => {
+    try {
+      const currentResponse = await fetch('/api/settings');
+      const currentSettings = await currentResponse.json();
 
-    saveSettings();
+      // Merge current settings with new settings
+      const mergedSettings = {
+        ...currentSettings,
+        ...newSettings
+      };
+
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(mergedSettings)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save settings');
+      }
+    } catch (error) {
+      console.error('Error saving settings:', error);
+    }
+  };
+
+  // Update the settings effect
+  useEffect(() => {
+    // Debounce the save operation
+    const timeoutId = setTimeout(() => {
+      saveSettings({
+        useLeagues,
+        leagues,
+        teamInput,
+        boatSets
+      });
+    }, 1000); // Wait 1 second after changes before saving
+
+    return () => clearTimeout(timeoutId);
   }, [useLeagues, leagues, teamInput, boatSets]);
 
   useEffect(() => {
@@ -189,17 +243,23 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
       const response = await fetch('/api/schedule');
       if (response.ok) {
         const freshRaces = await response.json();
-        setRaces(freshRaces);
+        setRaces(freshRaces); // Update the races state
+        
+        // Update the form data with new races
         const updatedData: { [key: number]: (number | '')[] } = {};
         freshRaces.forEach((race: Race) => {
           updatedData[race.raceNumber] = race.result || Array(6).fill('');
         });
         setFormData(updatedData);
+        
+        // Find next unfinished race
+        const unfinishedRace = freshRaces.find((race: Race) => !race.result);
+        setNextUnfinishedRace(unfinishedRace || null);
       } else {
-        alert('Failed to fetch updated races');
+        console.error('Failed to fetch updated races');
       }
     } catch (error) {
-      alert('Error fetching races: ' + (error as Error).message);
+      console.error('Error fetching races:', error);
     }
   };
 
@@ -300,36 +360,114 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     }
   };
 
-  // Modify handleShowTeamInput to use saved settings
+  // Update the handleShowTeamInput function
   const handleShowTeamInput = async () => {
     try {
+      setShowTeamInput(true);
+      
+      // Load settings first
       const response = await fetch('/api/settings');
       if (response.ok) {
         const settings = await response.json();
+        console.log('Loaded settings:', settings);
+
+        // Apply the loaded settings
         setUseLeagues(settings.useLeagues);
-        if (settings.useLeagues) {
-          setLeagues(settings.leagues || []);
+        
+        if (settings.useLeagues && Array.isArray(settings.leagues)) {
+          // Ensure each league has proper structure
+          const formattedLeagues = settings.leagues.map((league: {
+            id?: string;
+            name?: string;
+            teams?: string[];
+            boatSets?: Array<{
+              id?: string;
+              team1Color?: string;
+              team2Color?: string;
+            }>;
+          }) => ({
+            id: league.id || `league-${Date.now()}`,
+            name: league.name || '',
+            teams: Array.isArray(league.teams) ? league.teams : [],
+            boatSets: Array.isArray(league.boatSets) ? league.boatSets.map((set: {
+              id?: string;
+              team1Color?: string;
+              team2Color?: string;
+            }) => ({
+              id: set.id || `set-${Date.now()}`,
+              team1Color: set.team1Color || '',
+              team2Color: set.team2Color || ''
+            })) : []
+          }));
+          setLeagues(formattedLeagues);
         } else {
-          // Get existing teams if no saved team input
-          const existingTeams = Array.from(
-            new Set(races.flatMap((race) => [race.teamA, race.teamB]))
-          ).join(', ');
-          setTeamInput(settings.teamInput || existingTeams);
-          setBoatSets(settings.boatSets || [{
-            id: 'set-1',
-            team1Color: '',
-            team2Color: ''
-          }]);
+          // For non-league mode
+          if (settings.teamInput) {
+            setTeamInput(settings.teamInput);
+          } else {
+            // If no saved teams, get them from existing races
+            const existingTeams = Array.from(
+              new Set(races.flatMap((race) => [race.teamA, race.teamB]))
+            ).join(', ');
+            setTeamInput(existingTeams);
+          }
+
+          if (Array.isArray(settings.boatSets) && settings.boatSets.length > 0) {
+            setBoatSets(settings.boatSets);
+          } else {
+            // Set default boat set if none exists
+            setBoatSets([{
+              id: `set-1-${Date.now()}`,
+              team1Color: '',
+              team2Color: ''
+            }]);
+          }
         }
+      } else {
+        console.error('Failed to load settings');
+        // Set default values if settings load fails
+        setUseLeagues(false);
+        setTeamInput('');
+        setBoatSets([{
+          id: `set-1-${Date.now()}`,
+          team1Color: '',
+          team2Color: ''
+        }]);
+        setLeagues([]);
       }
-      setShowTeamInput(true);
     } catch (error) {
       console.error('Error loading settings:', error);
     }
   };
 
+  // Update the useEffect for initial settings load
+  useEffect(() => {
+    const loadSavedSettings = async () => {
+      try {
+        const response = await fetch('/api/settings');
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Initial settings load:', data);
+          setSettings(data);
+        }
+      } catch (error) {
+        console.error('Error loading initial settings:', error);
+      }
+    };
+
+    loadSavedSettings();
+  }, []);
+
   const handleAddBoatSet = () => {
-    setBoatSets([...boatSets, { id: `set-${boatSets.length + 1}`, team1Color: '', team2Color: '' }]);
+    const timestamp = Date.now(); // Add timestamp to ensure uniqueness
+    setBoatSets([
+      ...boatSets, 
+      { 
+        id: `set-${boatSets.length + 1}-${timestamp}`, 
+        team1Color: '', 
+        team2Color: '' 
+      }
+    ]);
   };
 
   const handleRemoveBoatSet = (index: number) => {
@@ -344,15 +482,18 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     setBoatSets(newBoatSets);
   };
 
+  // Update the handleAddLeague function to ensure unique boat set IDs
   const handleAddLeague = () => {
+    const timestamp = Date.now();
+    const newLeagueId = `league-${leagues.length + 1}-${timestamp}`;
     setLeagues([
       ...leagues,
       {
-        id: `league-${leagues.length + 1}`,
+        id: newLeagueId,
         name: `League ${leagues.length + 1}`,
         teams: [],
         boatSets: [{
-          id: `set-1`,
+          id: `${newLeagueId}-set-1-${timestamp}`, // Include timestamp in boat set ID
           team1Color: '',
           team2Color: ''
         }]
@@ -372,11 +513,14 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     setLeagues(newLeagues);
   };
 
+  // Update the handleAddBoatSetToLeague function
   const handleAddBoatSetToLeague = (leagueIndex: number) => {
     const newLeagues = [...leagues];
     const league = newLeagues[leagueIndex];
+    const timestamp = Date.now();
+    const newSetId = `${league.id}-set-${league.boatSets.length + 1}-${timestamp}`;
     league.boatSets.push({
-      id: `set-${league.boatSets.length + 1}`,
+      id: newSetId,
       team1Color: '',
       team2Color: ''
     });
@@ -390,40 +534,51 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
         return;
       }
 
-      // Generate schedule
+      // Generate schedule with league boat sets
       const scheduleRes = await fetch('/api/schedule/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          leagues: leagues
+          leagues: leagues.map(league => ({
+            ...league,
+            boatSets: league.boatSets.map(set => ({
+              id: set.id,
+              team1Color: set.team1Color,
+              team2Color: set.team2Color
+            }))
+          }))
         })
       });
 
-      if (scheduleRes.ok) {
-        // Reset leaderboard
-        const leaderboardRes = await fetch('/api/results/reset', {
-          method: 'POST',
-        });
-
-        if (!leaderboardRes.ok) {
-          alert('Warning: Failed to reset leaderboard');
-        }
-
-        // Save current settings with leagues
-        await fetch('/api/settings', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            useLeagues: true,
-            leagues: leagues,
-            teamInput: '',
-            boatSets: []
-          })
-        });
-        
-        setShowTeamInput(false);
-        await fetchRaces();
+      if (!scheduleRes.ok) {
+        const error = await scheduleRes.text();
+        alert(`Error generating schedule: ${error}`);
+        return;
       }
+
+      // Reset leaderboard
+      const leaderboardRes = await fetch('/api/results/reset', {
+        method: 'POST',
+      });
+
+      if (!leaderboardRes.ok) {
+        alert('Warning: Failed to reset leaderboard');
+      }
+
+      // Save current settings with leagues
+      await fetch('/api/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          useLeagues: true,
+          leagues: leagues,
+          teamInput: '',
+          boatSets: []
+        })
+      });
+      
+      setShowTeamInput(false);
+      await fetchRaces();
     } else {
       if (boatSets.length === 0) {
         alert('Please add at least one boat set');
@@ -436,15 +591,17 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
         return;
       }
 
+      // Include full boat set information
       const scheduleRes = await fetch('/api/schedule/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           teams,
           boatSets: boatSets.map((set) => ({
-            ...set,
-            id: set.id.replace('set-', '')
-          })),
+            id: set.id,
+            team1Color: set.team1Color,
+            team2Color: set.team2Color
+          }))
         }),
       });
 
@@ -454,6 +611,7 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
         return;
       }
 
+      // Reset leaderboard
       const leaderboardRes = await fetch('/api/results/reset', {
         method: 'POST',
       });
@@ -472,7 +630,7 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
           leagues: [],
           teamInput: '',
           boatSets: [{
-            id: 'set-1',
+            id: `default-set-1-${Date.now()}`, // Add timestamp to default set
             team1Color: '',
             team2Color: ''
           }]
@@ -526,6 +684,75 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     setNextUnfinishedRace(unfinishedRace || null);
   }, [races]);
 
+  const fetchLeaderboard = async () => {
+    try {
+      console.log('Fetching leaderboard...');
+      const response = await fetch('/api/leaderboard');
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Fetched leaderboard data:', data);
+        setLeaderboard(data);
+      } else {
+        throw new Error('Failed to fetch leaderboard');
+      }
+    } catch (error) {
+      console.error('Error fetching leaderboard:', error);
+    }
+  };
+
+  const handleCreateKnockouts = async (config: KnockoutConfig) => {
+    try {
+      const res = await fetch('/api/knockouts/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config)
+      });
+
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(`Failed to create knockout schedule: ${error}`);
+      }
+
+      // Close modal first
+      setShowKnockoutModal(false);
+
+      // Then refresh everything
+      await Promise.all([
+        fetchRaces(),
+        fetchLeaderboard()
+      ]);
+    } catch (error) {
+      console.error('Error in handleCreateKnockouts:', error);
+      alert('Error creating knockout schedule: ' + (error as Error).message);
+    }
+  };
+
+  // Add a function to refresh both races and leaderboard
+  const refreshData = async () => {
+    try {
+      await Promise.all([
+        fetchRaces(),
+        fetchLeaderboard()
+      ]);
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    }
+  };
+
+  // Update the modal open handler
+  const handleOpenKnockoutModal = async () => {
+    await refreshData(); // Refresh data before opening modal
+    setShowKnockoutModal(true);
+  };
+
+  // Add useEffect to fetch races periodically
+  useEffect(() => {
+    if (showTeamInput) {
+      const interval = setInterval(fetchRaces, 5000); // Refresh every 5 seconds
+      return () => clearInterval(interval);
+    }
+  }, [showTeamInput]);
+
   return (
     <div className="space-y-6">
       {/* Add link to Race Control at the top */}
@@ -543,6 +770,12 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
               className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
             >
               Generate New Schedule
+            </button>
+            <button
+              onClick={handleOpenKnockoutModal} // Use the new handler
+              className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors"
+            >
+              Create Knockout Stage
             </button>
           </div>
         )}
@@ -862,6 +1095,25 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
           </div>
         </div>
       ))}
+
+      <KnockoutModal
+        isOpen={showKnockoutModal}
+        onClose={() => setShowKnockoutModal(false)}
+        leagues={leaderboard}
+        settings={settings}
+        onConfirm={handleCreateKnockouts}
+      />
     </div>
   );
 }
+
+type Team = {
+  team: string;
+  wins: number;
+  totalRaces: number;
+  winPercentage: number;
+  points: number;
+  place: number;
+  league: string;
+  tiebreakNote?: string;
+};

@@ -4,7 +4,7 @@ import { readFileSync } from 'fs';
 import path from 'path';
 import { updateMetrics } from '../../lib/metrics'; // Fix import path
 
-// Update Race type
+// Update Race type at the top of the file
 type Race = {
   raceNumber: number;
   teamA: string;
@@ -19,7 +19,11 @@ type Race = {
   startTime?: string;
   endTime?: string;
   goToChangeover?: boolean;
-  isLaunching?: boolean; // Add this property
+  isLaunching?: boolean;
+  isKnockout?: boolean; // Add this property
+  bestOf?: number;      // Optional: Add if needed for knockouts
+  stage?: string;       // Optional: Add if needed for knockouts
+  matchNumber?: number; // Optional: Add if needed for knockouts
 };
 
 type RaceWithChangeover = Race & { goToChangeover: boolean };
@@ -631,13 +635,16 @@ function updateChangeoverFlags(races: Race[]): void {
 
 // Update the ComputeLeaderboard function
 function computeLeaderboard(races: Race[]): { [key: string]: TeamStats[] } {
-  // If no leagues are defined, create a default league with all races
-  if (!races.some(race => race.league)) {
+  // Filter out knockout matches first
+  const regularRaces = races.filter(race => !race.isKnockout);
+
+  // If no leagues are defined, create a default league with all regular races
+  if (!regularRaces.some(race => race.league)) {
     console.log('\n=== Computing Single Leaderboard (No Leagues) ===');
     
-    // Get all teams
+    // Get all teams from regular matches only
     const teams = new Set<string>();
-    races.forEach(race => {
+    regularRaces.forEach(race => {
       teams.add(race.teamA);
       teams.add(race.teamB);
     });
@@ -652,8 +659,8 @@ function computeLeaderboard(races: Race[]): { [key: string]: TeamStats[] } {
       league: 'main'
     }));
 
-    // Calculate stats
-    races.forEach(race => {
+    // Calculate stats for regular matches only
+    regularRaces.forEach(race => {
       if (!isCompletedRace(race) || !race.result) return;
 
       const teamAStats = stats.find(s => s.team === race.teamA)!;
@@ -710,9 +717,9 @@ function computeLeaderboard(races: Race[]): { [key: string]: TeamStats[] } {
     return { main: sortedTeams };
   }
 
-  // Existing league-based logic
+  // League-based logic - group regular races by league
   const leagueRaces = new Map<string, Race[]>();
-  races.forEach(race => {
+  regularRaces.forEach(race => {
     if (!race.league) return;
     if (!leagueRaces.has(race.league)) {
       leagueRaces.set(race.league, []);
@@ -720,13 +727,13 @@ function computeLeaderboard(races: Race[]): { [key: string]: TeamStats[] } {
     leagueRaces.get(race.league)!.push(race);
   });
 
-  // Create leaderboard for each league
+  // Create leaderboard for each league using regular matches only
   const leagueLeaderboards: { [key: string]: TeamStats[] } = {};
 
   leagueRaces.forEach((leagueRaces, leagueName) => {
-    console.log(`\n=== Computing Leaderboard for ${leagueName} League ===`);
+    console.log(`\n=== Computing Leaderboard for ${leagueName} League (Regular Matches Only) ===`);
     
-    // Get teams in this league
+    // Get teams in this league from regular matches
     const teams = new Set<string>();
     leagueRaces.forEach(race => {
       teams.add(race.teamA);
