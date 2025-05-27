@@ -311,7 +311,7 @@ export default function KnockoutModal({ isOpen, onClose, leagues, onConfirm, set
     return winnerTeams;
   };
 
-  // Update the generateMatchups function to handle non-league boat sets
+  // Update the generateMatchups function to create empty matchups when insufficient teams
   const generateMatchups = (selectedLeagueNames: string[]) => {
     console.log('Generating matchups for leagues:', selectedLeagueNames);
     console.log('Settings mode:', settings.useLeagues ? 'leagues' : 'non-leagues');
@@ -375,32 +375,49 @@ export default function KnockoutModal({ isOpen, onClose, leagues, onConfirm, set
 
       const numTeams = sortedTeams.length;
       let pairs: [number, number][] = [];
+      let requiredTeams = 0;
 
-      if (stage === 'quarter' && numTeams >= 8) {
+      // FIXED: Determine required matchups based on stage regardless of available teams
+      if (stage === 'quarter') {
         pairs = [[0,7], [1,6], [2,5], [3,4]];
-      } else if (stage === 'semi' && numTeams >= 4) {
+        requiredTeams = 8;
+      } else if (stage === 'semi') {
         pairs = [[0,3], [1,2]];
-      } else if (stage === 'final' && numTeams >= 2) {
+        requiredTeams = 4;
+      } else if (stage === 'final') {
         pairs = [[0,1]];
+        requiredTeams = 2;
       }
 
+      // Create matchups for all required pairs
       pairs.forEach(([a, b], pairIndex) => {
-        if (sortedTeams[a] && sortedTeams[b]) {
-          const defaultBoatSet = availableBoatSets[pairIndex % availableBoatSets.length];
-          
-          console.log(`Match ${globalMatchNumber}: ${sortedTeams[a].team} (seed ${sortedTeams[a].place}) vs ${sortedTeams[b].team} (seed ${sortedTeams[b].place}) - ${leagueName}`);
-          
-          newMatchups.push({
-            teamA: sortedTeams[a].team,
-            teamB: sortedTeams[b].team,
-            boatSet: defaultBoatSet?.id,
-            league: leagueName,
-            matchNumber: globalMatchNumber
-          });
-          
-          globalMatchNumber++;
+        const defaultBoatSet = availableBoatSets[pairIndex % availableBoatSets.length];
+        
+        // FIXED: Use available teams or empty strings if insufficient teams
+        const teamA = sortedTeams[a]?.team || '';
+        const teamB = sortedTeams[b]?.team || '';
+        
+        if (teamA && teamB) {
+          console.log(`Match ${globalMatchNumber}: ${teamA} (seed ${sortedTeams[a]?.place || '?'}) vs ${teamB} (seed ${sortedTeams[b]?.place || '?'}) - ${leagueName}`);
+        } else {
+          console.log(`Match ${globalMatchNumber}: Empty matchup created for ${leagueName} (insufficient teams: ${numTeams}/${requiredTeams})`);
         }
+        
+        newMatchups.push({
+          teamA: teamA,
+          teamB: teamB,
+          boatSet: defaultBoatSet?.id,
+          league: leagueName,
+          matchNumber: globalMatchNumber
+        });
+        
+        globalMatchNumber++;
       });
+
+      // Log summary for this league
+      if (numTeams < requiredTeams) {
+        console.warn(`League ${leagueName}: Only ${numTeams} teams available for ${stage} stage (requires ${requiredTeams}). Created ${pairs.length} matchups with empty slots.`);
+      }
     });
 
     setMatchups(newMatchups);
@@ -546,7 +563,7 @@ export default function KnockoutModal({ isOpen, onClose, leagues, onConfirm, set
     return knockoutWinners;
   };
 
-  // Update handleSubmit to include refresh
+  // Update handleSubmit to validate complete matchups
   const handleSubmit = async () => {
     if (selectedLeagues.length === 0) {
       alert('Please select at least one league');
@@ -560,6 +577,21 @@ export default function KnockoutModal({ isOpen, onClose, leagues, onConfirm, set
 
     if (!stage) {
       alert('Please select a stage');
+      return;
+    }
+
+    // FIXED: Check for incomplete matchups
+    const incompleteMatchups = matchups.filter(m => !m.teamA || !m.teamB);
+    if (incompleteMatchups.length > 0) {
+      alert(`Please select teams for all matchups. ${incompleteMatchups.length} matchup(s) are incomplete.`);
+      return;
+    }
+
+    // Check for duplicate teams
+    const allSelectedTeams = matchups.flatMap(m => [m.teamA, m.teamB]);
+    const uniqueTeams = new Set(allSelectedTeams);
+    if (allSelectedTeams.length !== uniqueTeams.size) {
+      alert('Each team can only participate in one match per stage. Please check for duplicate team selections.');
       return;
     }
 
@@ -625,6 +657,39 @@ export default function KnockoutModal({ isOpen, onClose, leagues, onConfirm, set
     };
     setMatchups(newMatchups);
     console.log('Updated matchup:', newMatchups[index]); // Add logging
+  };
+
+  // Add a function to handle match deletion
+  const handleMatchupDelete = (index: number) => {
+    const newMatchups = matchups.filter((_, i) => i !== index);
+    
+    // Update match numbers to maintain sequential numbering
+    const updatedMatchups = newMatchups.map((matchup, i) => ({
+      ...matchup,
+      matchNumber: i + 1
+    }));
+    
+    setMatchups(updatedMatchups);
+    console.log('Deleted matchup at index:', index);
+    console.log('Updated matchups:', updatedMatchups);
+  };
+
+  // Add a function to add a new empty matchup
+  const handleAddMatchup = () => {
+    const newMatchNumber = matchups.length + 1;
+    const defaultBoatSet = boatSets[0]?.id || '';
+    const defaultLeague = selectedLeagues[0] || '';
+    
+    const newMatchup = {
+      teamA: '',
+      teamB: '',
+      boatSet: defaultBoatSet,
+      league: defaultLeague,
+      matchNumber: newMatchNumber
+    };
+    
+    setMatchups([...matchups, newMatchup]);
+    console.log('Added new matchup:', newMatchup);
   };
 
   // Update the return JSX to include proper button handlers and disable states
@@ -784,86 +849,197 @@ export default function KnockoutModal({ isOpen, onClose, leagues, onConfirm, set
             <h3 className="text-lg font-semibold mb-2">Matchups</h3>
             {matchups.length > 0 ? (
               <div className="space-y-2">
-                {matchups.map((matchup, index) => (
-                  <div
-                    key={`matchup-${index}`}
-                    className="bg-gray-50 p-4 rounded-lg flex items-center justify-between"
-                  >
-                    <div className="flex-1 flex items-center gap-4">
-                      <select
-                        value={matchup.teamA}
-                        onChange={(e) => handleMatchupEdit(index, 'teamA', e.target.value)}
-                        className="p-2 border rounded"
-                      >
-                        {allTeams.map(team => (
-                          <option key={team.team} value={team.team}>
-                            {team.team} ({team.league} - Place: {team.place})
-                          </option>
-                        ))}
-                      </select>
+                {matchups.map((matchup, index) => {
+                  // Check if this matchup has empty teams
+                  const hasEmptyTeams = !matchup.teamA || !matchup.teamB;
+                  
+                  return (
+                    <div
+                      key={`matchup-${index}`}
+                      className={`p-4 rounded-lg flex items-center justify-between ${
+                        hasEmptyTeams 
+                          ? 'bg-yellow-50 border border-yellow-200' 
+                          : 'bg-gray-50'
+                      }`}
+                    >
+                      <div className="flex-1 flex items-center gap-4">
+                        <select
+                          value={matchup.teamA}
+                          onChange={(e) => handleMatchupEdit(index, 'teamA', e.target.value)}
+                          className={`p-2 border rounded ${
+                            !matchup.teamA ? 'border-yellow-400 bg-yellow-50' : ''
+                          }`}
+                        >
+                          <option value="">Select Team A</option>
+                          {allTeams.map(team => (
+                            <option key={team.team} value={team.team}>
+                              {team.team} ({team.league} - Place: {team.place})
+                            </option>
+                          ))}
+                        </select>
 
-                      <span className="font-medium">vs</span>
+                        <span className="font-medium">vs</span>
 
-                      <select
-                        value={matchup.teamB}
-                        onChange={(e) => handleMatchupEdit(index, 'teamB', e.target.value)}
-                        className="p-2 border rounded"
-                      >
-                        {allTeams.map(team => (
-                          <option key={team.team} value={team.team}>
-                            {team.team} ({team.league} - Place: {team.place})
-                          </option>
-                        ))}
-                      </select>
+                        <select
+                          value={matchup.teamB}
+                          onChange={(e) => handleMatchupEdit(index, 'teamB', e.target.value)}
+                          className={`p-2 border rounded ${
+                            !matchup.teamB ? 'border-yellow-400 bg-yellow-50' : ''
+                          }`}
+                        >
+                          <option value="">Select Team B</option>
+                          {allTeams.map(team => (
+                            <option key={team.team} value={team.team}>
+                              {team.team} ({team.league} - Place: {team.place})
+                            </option>
+                          ))}
+                        </select>
 
-                      <select
-                        value={matchup.boatSet || ''}
-                        onChange={(e) => handleMatchupEdit(index, 'boatSet', e.target.value)}
-                        className="p-2 border rounded"
+                        <select
+                          value={matchup.boatSet || ''}
+                          onChange={(e) => handleMatchupEdit(index, 'boatSet', e.target.value)}
+                          className="p-2 border rounded"
+                        >
+                          <option value="">Select Boat Set</option>
+                          {boatSets.map(set => (
+                            <option key={set.id} value={set.id}>
+                              {set.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="text-sm text-gray-600 ml-4 flex flex-col items-center">
+                        <span>Match {matchup.matchNumber}</span>
+                        {hasEmptyTeams && (
+                          <span className="text-xs text-yellow-600 mt-1">
+                            Manual Selection Required
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Delete Button */}
+                      <button
+                        onClick={() => handleMatchupDelete(index)}
+                        className="ml-3 p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Delete this matchup"
                       >
-                        <option value="">Select Boat Set</option>
-                        {boatSets.map(set => (
-                          <option key={set.id} value={set.id}>
-                            {set.name}
-                          </option>
-                        ))}
-                      </select>
+                        <svg 
+                          className="w-5 h-5" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          viewBox="0 0 24 24"
+                        >
+                          <path 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            strokeWidth={2} 
+                            d="M6 18L18 6M6 6l12 12" 
+                          />
+                        </svg>
+                      </button>
                     </div>
-
-                    <div className="text-sm text-gray-600 ml-4">
-                      Match {matchup.matchNumber}
+                  );
+                })}
+                
+                {/* Add Matchup Button */}
+                <div className="flex justify-center mt-4">
+                  <button
+                    onClick={handleAddMatchup}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+                  >
+                    <svg 
+                      className="w-4 h-4" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={2} 
+                        d="M12 4v16m8-8H4" 
+                      />
+                    </svg>
+                    Add Matchup
+                  </button>
+                </div>
+                
+                {/* Show warning if any matchups are incomplete */}
+                {matchups.some(m => !m.teamA || !m.teamB) && (
+                  <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-3 mt-4">
+                    <div className="flex items-center">
+                      <div className="text-yellow-600 mr-2">⚠️</div>
+                      <div>
+                        <p className="text-sm font-medium text-yellow-800">
+                          Incomplete Matchups Detected
+                        </p>
+                        <p className="text-xs text-yellow-700 mt-1">
+                          Some matchups require manual team selection. Please select teams for all highlighted matchups before creating the knockout schedule.
+                        </p>
+                      </div>
                     </div>
                   </div>
-                ))}
+                )}
+
+                {/* Show match count summary */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-4">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-blue-800 font-medium">
+                      Total Matchups: {matchups.length}
+                    </span>
+                    <span className="text-blue-700">
+                      Races to be created: {matchups.length * (bestOf || 1)}
+                    </span>
+                  </div>
+                </div>
               </div>
             ) : (
-              <p className="text-gray-500">
-                {stage && selectedLeagues.length > 0 
-                  ? 'Select a match format to generate matchups'
-                  : 'Select leagues and stage to see matchups'
-                }
-              </p>
+              <div className="text-center py-8">
+                <p className="text-gray-500 mb-4">
+                  {stage && selectedLeagues.length > 0 
+                    ? 'Select a match format to generate matchups'
+                    : 'Select leagues and stage to see matchups'
+                  }
+                </p>
+                {stage && selectedLeagues.length > 0 && (
+                  <button
+                    onClick={handleAddMatchup}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 mx-auto"
+                  >
+                    <svg 
+                      className="w-4 h-4" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={2} 
+                        d="M12 4v16m8-8H4" 
+                      />
+                    </svg>
+                    Add First Matchup
+                  </button>
+                )}
+              </div>
             )}
           </div>
 
-          {/* Action Buttons */}
+          {/* Submit Button */}
           <div className="flex justify-end gap-4">
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+              className="px-4 py-2 bg-gray-200 rounded"
             >
               Cancel
             </button>
             <button
               onClick={handleSubmit}
-              disabled={!bestOf || !stage || selectedLeagues.length === 0 || matchups.length === 0}
-              className={`px-4 py-2 rounded ${
-                bestOf && stage && selectedLeagues.length > 0 && matchups.length > 0
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
+              className="px-4 py-2 bg-blue-600 text-white rounded"
             >
-              Create Knockout Schedule
+              Create Knockouts
             </button>
           </div>
         </div>

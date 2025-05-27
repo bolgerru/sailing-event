@@ -8,9 +8,18 @@
       "teamA": "red",
       "teamB": "black"
     },
-    "isLaunching": true,
+    "isLaunching": false,
     "goToChangeover": false,
-    "result": null
+    "result": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "status": "finished",
+    "endTime": "2025-05-27T19:53:57.973Z"
   },
   {
     "raceNumber": 2,
@@ -21,8 +30,18 @@
       "teamA": "blue",
       "teamB": "white"
     },
-    "isLaunching": true,
-    "goToChangeover": false
+    "isLaunching": false,
+    "goToChangeover": false,
+    "status": "finished",
+    "endTime": "2025-05-27T19:54:22.250Z",
+    "result": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
   },
   {
     "raceNumber": 3,
@@ -70,7 +89,7 @@
       "teamB": "white"
     },
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": true
   },
   {
     "raceNumber": 7,
@@ -82,7 +101,7 @@
       "teamB": "black"
     },
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": true
   },
   {
     "raceNumber": 8,
@@ -543,7 +562,7 @@
   {
     "raceNumber": 46,
     "teamA": "gold1",
-    "teamB": "gold4",
+    "teamB": "silver4",
     "league": "Gold",
     "boats": {
       "teamA": "red",
@@ -552,10 +571,10 @@
     },
     "isKnockout": true,
     "bestOf": 3,
-    "stage": "semi",
+    "stage": "quarter",
     "matchNumber": 1,
     "status": "finished",
-    "endTime": "2025-05-27T19:30:14.382Z",
+    "endTime": "2025-05-27T19:51:31.394Z",
     "result": [
       1,
       2,
@@ -569,8 +588,8 @@
   },
   {
     "raceNumber": 47,
-    "teamA": "gold2",
-    "teamB": "gold3",
+    "teamA": "gold3",
+    "teamB": "silver2",
     "league": "Gold",
     "boats": {
       "teamA": "blue",
@@ -579,12 +598,12 @@
     },
     "isKnockout": true,
     "bestOf": 3,
-    "stage": "semi",
-    "matchNumber": 2,
+    "stage": "quarter",
+    "matchNumber": 3,
     "status": "finished",
     "goToChangeover": false,
     "isLaunching": false,
-    "endTime": "2025-05-27T19:32:09.723Z",
+    "endTime": "2025-05-27T19:51:37.433Z",
     "result": [
       4,
       5,
@@ -596,22 +615,22 @@
   },
   {
     "raceNumber": 48,
-    "teamA": "gold1",
-    "teamB": "gold4",
+    "teamA": "gold4",
+    "teamB": "silver1",
     "league": "Gold",
     "boats": {
-      "teamA": "red",
-      "teamB": "black",
-      "setId": "league-1-1748374016468-set-1-1748374016468"
+      "teamA": "green",
+      "teamB": "white",
+      "setId": "league-3-1748374060929-set-1-1748374060929"
     },
     "isKnockout": true,
     "bestOf": 3,
-    "stage": "semi",
-    "matchNumber": 1,
+    "stage": "quarter",
+    "matchNumber": 4,
     "status": "finished",
     "goToChangeover": false,
     "isLaunching": false,
-    "endTime": "2025-05-27T19:31:46.341Z",
+    "endTime": "2025-05-27T19:51:43.356Z",
     "result": [
       4,
       5,
@@ -623,8 +642,35 @@
   },
   {
     "raceNumber": 49,
-    "teamA": "gold2",
-    "teamB": "gold3",
+    "teamA": "gold1",
+    "teamB": "silver4",
+    "league": "Gold",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black",
+      "setId": "league-1-1748374016468-set-1-1748374016468"
+    },
+    "isKnockout": true,
+    "bestOf": 3,
+    "stage": "quarter",
+    "matchNumber": 1,
+    "status": "finished",
+    "goToChangeover": false,
+    "isLaunching": false,
+    "endTime": "2025-05-27T19:51:47.876Z",
+    "result": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  },
+  {
+    "raceNumber": 50,
+    "teamA": "gold3",
+    "teamB": "silver2",
     "league": "Gold",
     "boats": {
       "teamA": "blue",
@@ -633,12 +679,12 @@
     },
     "isKnockout": true,
     "bestOf": 3,
-    "stage": "semi",
-    "matchNumber": 2,
+    "stage": "quarter",
+    "matchNumber": 3,
     "status": "finished",
     "goToChangeover": false,
     "isLaunching": false,
-    "endTime": "2025-05-27T19:31:42.080Z",
+    "endTime": "2025-05-27T19:51:52.446Z",
     "result": [
       4,
       5,
@@ -649,63 +695,36 @@
     ]
   },
   {
-    "raceNumber": 50,
-    "teamA": "gold1",
-    "teamB": "gold4",
-    "league": "Gold",
-    "boats": {
-      "teamA": "red",
-      "teamB": "black",
-      "setId": "league-1-1748374016468-set-1-1748374016468"
-    },
-    "isKnockout": true,
-    "bestOf": 3,
-    "stage": "semi",
-    "matchNumber": 1,
-    "status": "finished",
-    "goToChangeover": false,
-    "isLaunching": false,
-    "endTime": "2025-05-27T19:31:06.739Z",
-    "result": [
-      1,
-      2,
-      3,
-      4,
-      5,
-      6
-    ]
-  },
-  {
     "raceNumber": 51,
-    "teamA": "gold2",
-    "teamB": "gold3",
+    "teamA": "gold4",
+    "teamB": "silver1",
     "league": "Gold",
     "boats": {
-      "teamA": "blue",
+      "teamA": "green",
       "teamB": "white",
-      "setId": "league-2-1748374038517-set-1-1748374038517"
+      "setId": "league-3-1748374060929-set-1-1748374060929"
     },
     "isKnockout": true,
     "bestOf": 3,
-    "stage": "semi",
-    "matchNumber": 2,
+    "stage": "quarter",
+    "matchNumber": 4,
     "status": "finished",
     "goToChangeover": false,
     "isLaunching": false,
-    "endTime": "2025-05-27T19:31:12.372Z",
+    "endTime": "2025-05-27T19:51:57.283Z",
     "result": [
-      1,
-      2,
-      3,
       4,
       5,
-      6
+      6,
+      1,
+      2,
+      3
     ]
   },
   {
     "raceNumber": 52,
     "teamA": "gold1",
-    "teamB": "gold3",
+    "teamB": "silver4",
     "league": "Gold",
     "boats": {
       "teamA": "red",
@@ -714,15 +733,26 @@
     },
     "isKnockout": true,
     "bestOf": 3,
-    "stage": "final",
+    "stage": "quarter",
     "matchNumber": 1,
-    "status": "not_started"
+    "status": "finished",
+    "goToChangeover": false,
+    "isLaunching": false,
+    "endTime": "2025-05-27T19:52:02.388Z",
+    "result": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
   },
   {
     "raceNumber": 53,
-    "teamA": "silver1",
+    "teamA": "gold3",
     "teamB": "silver2",
-    "league": "Silver",
+    "league": "Gold",
     "boats": {
       "teamA": "blue",
       "teamB": "white",
@@ -730,46 +760,52 @@
     },
     "isKnockout": true,
     "bestOf": 3,
-    "stage": "final",
-    "matchNumber": 2,
-    "status": "not_started"
+    "stage": "quarter",
+    "matchNumber": 3,
+    "status": "finished",
+    "goToChangeover": false,
+    "isLaunching": false,
+    "endTime": "2025-05-27T19:52:06.315Z",
+    "result": [
+      4,
+      5,
+      6,
+      1,
+      2,
+      3
+    ]
   },
   {
     "raceNumber": 54,
-    "teamA": "gold1",
-    "teamB": "gold3",
+    "teamA": "gold4",
+    "teamB": "silver1",
     "league": "Gold",
     "boats": {
-      "teamA": "red",
-      "teamB": "black",
-      "setId": "league-1-1748374016468-set-1-1748374016468"
+      "teamA": "green",
+      "teamB": "white",
+      "setId": "league-3-1748374060929-set-1-1748374060929"
     },
     "isKnockout": true,
     "bestOf": 3,
-    "stage": "final",
-    "matchNumber": 1,
-    "status": "not_started"
+    "stage": "quarter",
+    "matchNumber": 4,
+    "status": "finished",
+    "goToChangeover": false,
+    "isLaunching": false,
+    "endTime": "2025-05-27T19:52:10.910Z",
+    "result": [
+      4,
+      5,
+      6,
+      1,
+      2,
+      3
+    ]
   },
   {
     "raceNumber": 55,
-    "teamA": "silver1",
-    "teamB": "silver2",
-    "league": "Silver",
-    "boats": {
-      "teamA": "blue",
-      "teamB": "white",
-      "setId": "league-2-1748374038517-set-1-1748374038517"
-    },
-    "isKnockout": true,
-    "bestOf": 3,
-    "stage": "final",
-    "matchNumber": 2,
-    "status": "not_started"
-  },
-  {
-    "raceNumber": 56,
-    "teamA": "gold1",
-    "teamB": "gold3",
+    "teamA": "gold2",
+    "teamB": "silver3",
     "league": "Gold",
     "boats": {
       "teamA": "red",
@@ -778,15 +814,107 @@
     },
     "isKnockout": true,
     "bestOf": 3,
-    "stage": "final",
-    "matchNumber": 1,
-    "status": "not_started"
+    "stage": "quarter",
+    "matchNumber": 2,
+    "status": "finished",
+    "goToChangeover": false,
+    "isLaunching": false,
+    "endTime": "2025-05-27T19:52:14.660Z",
+    "result": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  },
+  {
+    "raceNumber": 56,
+    "teamA": "gold2",
+    "teamB": "silver3",
+    "league": "Gold",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black",
+      "setId": "league-1-1748374016468-set-1-1748374016468"
+    },
+    "isKnockout": true,
+    "bestOf": 3,
+    "stage": "quarter",
+    "matchNumber": 2,
+    "status": "finished",
+    "goToChangeover": false,
+    "isLaunching": false,
+    "endTime": "2025-05-27T19:52:19.506Z",
+    "result": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
   },
   {
     "raceNumber": 57,
-    "teamA": "silver1",
-    "teamB": "silver2",
-    "league": "Silver",
+    "teamA": "gold2",
+    "teamB": "silver3",
+    "league": "Gold",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black",
+      "setId": "league-1-1748374016468-set-1-1748374016468"
+    },
+    "isKnockout": true,
+    "bestOf": 3,
+    "stage": "quarter",
+    "matchNumber": 2,
+    "status": "finished",
+    "goToChangeover": false,
+    "isLaunching": false,
+    "endTime": "2025-05-27T19:52:23.758Z",
+    "result": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  },
+  {
+    "raceNumber": 58,
+    "teamA": "gold1",
+    "teamB": "gold2",
+    "league": "Gold",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black",
+      "setId": "league-1-1748374016468-set-1-1748374016468"
+    },
+    "isKnockout": true,
+    "bestOf": 3,
+    "stage": "semi",
+    "matchNumber": 1,
+    "status": "finished",
+    "goToChangeover": false,
+    "isLaunching": false,
+    "endTime": "2025-05-27T19:54:33.052Z",
+    "result": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  },
+  {
+    "raceNumber": 59,
+    "teamA": "silver2",
+    "teamB": "silver1",
+    "league": "Gold",
     "boats": {
       "teamA": "blue",
       "teamB": "white",
@@ -794,8 +922,189 @@
     },
     "isKnockout": true,
     "bestOf": 3,
-    "stage": "final",
+    "stage": "semi",
     "matchNumber": 2,
+    "status": "finished",
+    "goToChangeover": false,
+    "isLaunching": false,
+    "endTime": "2025-05-27T19:54:37.814Z",
+    "result": [
+      4,
+      5,
+      6,
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "raceNumber": 60,
+    "teamA": "gold1",
+    "teamB": "gold2",
+    "league": "Gold",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black",
+      "setId": "league-1-1748374016468-set-1-1748374016468"
+    },
+    "isKnockout": true,
+    "bestOf": 3,
+    "stage": "semi",
+    "matchNumber": 1,
+    "status": "finished",
+    "goToChangeover": false,
+    "isLaunching": false,
+    "endTime": "2025-05-27T19:54:41.916Z",
+    "result": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  },
+  {
+    "raceNumber": 61,
+    "teamA": "silver2",
+    "teamB": "silver1",
+    "league": "Gold",
+    "boats": {
+      "teamA": "blue",
+      "teamB": "white",
+      "setId": "league-2-1748374038517-set-1-1748374038517"
+    },
+    "isKnockout": true,
+    "bestOf": 3,
+    "stage": "semi",
+    "matchNumber": 2,
+    "status": "finished",
+    "goToChangeover": false,
+    "isLaunching": false,
+    "endTime": "2025-05-27T19:54:46.344Z",
+    "result": [
+      4,
+      5,
+      6,
+      1,
+      2,
+      3
+    ]
+  },
+  {
+    "raceNumber": 62,
+    "teamA": "gold1",
+    "teamB": "gold2",
+    "league": "Gold",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black",
+      "setId": "league-1-1748374016468-set-1-1748374016468"
+    },
+    "isKnockout": true,
+    "bestOf": 3,
+    "stage": "semi",
+    "matchNumber": 1,
+    "status": "not_started",
+    "goToChangeover": true,
+    "isLaunching": false
+  },
+  {
+    "raceNumber": 63,
+    "teamA": "silver2",
+    "teamB": "silver1",
+    "league": "Gold",
+    "boats": {
+      "teamA": "blue",
+      "teamB": "white",
+      "setId": "league-2-1748374038517-set-1-1748374038517"
+    },
+    "isKnockout": true,
+    "bestOf": 3,
+    "stage": "semi",
+    "matchNumber": 2,
+    "status": "not_started",
+    "goToChangeover": true,
+    "isLaunching": false
+  },
+  {
+    "raceNumber": 64,
+    "teamA": "gold1",
+    "teamB": "silver1",
+    "league": "Gold",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black",
+      "setId": "league-1-1748374016468-set-1-1748374016468"
+    },
+    "isKnockout": true,
+    "bestOf": 5,
+    "stage": "final",
+    "matchNumber": 1,
+    "status": "not_started"
+  },
+  {
+    "raceNumber": 65,
+    "teamA": "gold1",
+    "teamB": "silver1",
+    "league": "Gold",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black",
+      "setId": "league-1-1748374016468-set-1-1748374016468"
+    },
+    "isKnockout": true,
+    "bestOf": 5,
+    "stage": "final",
+    "matchNumber": 1,
+    "status": "not_started"
+  },
+  {
+    "raceNumber": 66,
+    "teamA": "gold1",
+    "teamB": "silver1",
+    "league": "Gold",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black",
+      "setId": "league-1-1748374016468-set-1-1748374016468"
+    },
+    "isKnockout": true,
+    "bestOf": 5,
+    "stage": "final",
+    "matchNumber": 1,
+    "status": "not_started"
+  },
+  {
+    "raceNumber": 67,
+    "teamA": "gold1",
+    "teamB": "silver1",
+    "league": "Gold",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black",
+      "setId": "league-1-1748374016468-set-1-1748374016468"
+    },
+    "isKnockout": true,
+    "bestOf": 5,
+    "stage": "final",
+    "matchNumber": 1,
+    "status": "not_started"
+  },
+  {
+    "raceNumber": 68,
+    "teamA": "gold1",
+    "teamB": "silver1",
+    "league": "Gold",
+    "boats": {
+      "teamA": "red",
+      "teamB": "black",
+      "setId": "league-1-1748374016468-set-1-1748374016468"
+    },
+    "isKnockout": true,
+    "bestOf": 5,
+    "stage": "final",
+    "matchNumber": 1,
     "status": "not_started"
   }
 ]
