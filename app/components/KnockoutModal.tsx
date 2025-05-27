@@ -271,7 +271,7 @@ export default function KnockoutModal({ isOpen, onClose, leagues, onConfirm, set
     }
   };
 
-  // Update the getPreviousStageWinners function to fix semi-final bracket progression
+  // Update the getPreviousStageWinners function to handle direct semi-to-final progression
   const getPreviousStageWinners = (leagueName: string): Team[] => {
     const previousStage = getPreviousStage(stage || '');
     if (!previousStage || !knockoutWinners[previousStage]) {
@@ -320,11 +320,11 @@ export default function KnockoutModal({ isOpen, onClose, leagues, onConfirm, set
     console.log(`Found ${winnerTeams.length} previous ${previousStage} winners for ${leagueName}:`, 
       winnerTeams.map(t => `${t.team} (seed ${t.place})`));
 
-    // FIXED: Proper bracket progression for semi-finals
-    // Quarter Finals matches: 1(1v8), 2(2v7), 3(3v6), 4(4v5)
-    // Semi Finals should be: Semi1(Winner1 vs Winner4), Semi2(Winner2 vs Winner3)
-
+    // Handle bracket progression based on previous stage
     if (previousStage === 'quarter' && stage === 'semi') {
+      // FIXED: Proper bracket progression for semi-finals after quarter finals
+      // Quarter Finals matches: 1(1v8), 2(2v7), 3(3v6), 4(4v5)
+      // Semi Finals should be: Semi1(Winner1 vs Winner4), Semi2(Winner2 vs Winner3)
       if (winnerTeams.length === 4) {
         console.log('Reordering quarter final winners for semi-finals:');
         console.log('Quarter winners by match:', winnerTeams.map((t, i) => `Match ${i+1}: ${t.team}`));
@@ -344,7 +344,10 @@ export default function KnockoutModal({ isOpen, onClose, leagues, onConfirm, set
         return reorderedWinners;
       }
     } else if (previousStage === 'semi' && stage === 'final') {
-      // For finals, winners are already in the correct order (Semi1 winner, Semi2 winner)
+      // For finals after semis, winners are already in the correct order (Semi1 winner, Semi2 winner)
+      // This works whether the semis came after quarters or were direct from leaderboard
+      console.log('Using semi-final winners for finals:');
+      console.log(`Final: ${winnerTeams[0]?.team} vs ${winnerTeams[1]?.team}`);
       return winnerTeams;
     }
 
@@ -604,15 +607,25 @@ export default function KnockoutModal({ isOpen, onClose, leagues, onConfirm, set
         console.log('  Match 3: 3rd vs 6th');
         console.log('  Match 4: 4th vs 5th');
       } else if (stage === 'semi') {
-        // FIXED: Semi Finals with proper bracket progression
-        // The sortedTeams array from getPreviousStageWinners is already reordered as:
-        // [Winner1, Winner4, Winner2, Winner3]
-        // So pairs [0,1] and [2,3] create the correct matchups
-        pairs = [[0,1], [2,3]];
-        requiredTeams = 4;
-        console.log('Semi Finals bracket (after quarter finals):');
-        console.log('  Semi 1: Winner of Match 1 vs Winner of Match 4');
-        console.log('  Semi 2: Winner of Match 2 vs Winner of Match 3');
+        // Check if we have quarter-final winners or if this is direct semi-finals
+        if (shouldUseWinners && knockoutWinners['quarter']) {
+          // FIXED: Semi Finals with proper bracket progression after quarter finals
+          // The sortedTeams array from getPreviousStageWinners is already reordered as:
+          // [Winner1, Winner4, Winner2, Winner3]
+          // So pairs [0,1] and [2,3] create the correct matchups
+          pairs = [[0,1], [2,3]];
+          requiredTeams = 4;
+          console.log('Semi Finals bracket (after quarter finals):');
+          console.log('  Semi 1: Winner of Match 1 vs Winner of Match 4');
+          console.log('  Semi 2: Winner of Match 2 vs Winner of Match 3');
+        } else {
+          // FIXED: Direct semi-finals from leaderboard - 1st vs 4th, 2nd vs 3rd
+          pairs = [[0,3], [1,2]];
+          requiredTeams = 4;
+          console.log('Direct Semi Finals bracket (from leaderboard):');
+          console.log('  Semi 1: 1st vs 4th');
+          console.log('  Semi 2: 2nd vs 3rd');
+        }
       } else if (stage === 'final') {
         // Finals: Winner of Semi 1 vs Winner of Semi 2
         pairs = [[0,1]];
@@ -637,11 +650,16 @@ export default function KnockoutModal({ isOpen, onClose, leagues, onConfirm, set
           if (stage === 'quarter') {
             matchDescription = `${sortedTeams[a]?.place || '?'} vs ${sortedTeams[b]?.place || '?'}`;
           } else if (stage === 'semi') {
-            // For semis, show which quarter final winners are matched
-            if (pairIndex === 0) {
-              matchDescription = 'QF Winner 1 vs QF Winner 4';
+            if (shouldUseWinners && knockoutWinners['quarter']) {
+              // For semis after quarters, show which quarter final winners are matched
+              if (pairIndex === 0) {
+                matchDescription = 'QF Winner 1 vs QF Winner 4';
+              } else {
+                matchDescription = 'QF Winner 2 vs QF Winner 3';
+              }
             } else {
-              matchDescription = 'QF Winner 2 vs QF Winner 3';
+              // For direct semis, show leaderboard positions
+              matchDescription = `${sortedTeams[a]?.place || '?'} vs ${sortedTeams[b]?.place || '?'}`;
             }
           } else if (stage === 'final') {
             matchDescription = 'Semi Winner 1 vs Semi Winner 2';

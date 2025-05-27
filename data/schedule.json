@@ -1,11 +1,12 @@
 [
   {
     "raceNumber": 1,
-    "teamA": "a",
-    "teamB": "b",
+    "teamA": "gold1",
+    "teamB": "gold2",
+    "league": "Gold",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "red",
+      "teamB": "black"
     },
     "racingFormat": "2v2",
     "result": null,
@@ -13,444 +14,381 @@
   },
   {
     "raceNumber": 2,
-    "teamA": "a",
-    "teamB": "c",
+    "teamA": "gold1",
+    "teamB": "gold3",
+    "league": "Gold",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "red",
+      "teamB": "black"
     },
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 3,
-    "teamA": "a",
-    "teamB": "d",
+    "teamA": "gold1",
+    "teamB": "gold4",
+    "league": "Gold",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "red",
+      "teamB": "black"
     },
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 4,
-    "teamA": "a",
-    "teamB": "e",
+    "teamA": "gold1",
+    "teamB": "gold5",
+    "league": "Gold",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "red",
+      "teamB": "black"
     },
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 5,
-    "teamA": "a",
-    "teamB": "f",
+    "teamA": "gold2",
+    "teamB": "gold3",
+    "league": "Gold",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "red",
+      "teamB": "black"
     },
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 6,
-    "teamA": "a",
-    "teamB": "g",
+    "teamA": "gold2",
+    "teamB": "gold4",
+    "league": "Gold",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "red",
+      "teamB": "black"
     },
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 7,
-    "teamA": "a",
-    "teamB": "h",
+    "teamA": "gold2",
+    "teamB": "gold5",
+    "league": "Gold",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "red",
+      "teamB": "black"
     },
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 8,
-    "teamA": "a",
-    "teamB": "i",
+    "teamA": "gold3",
+    "teamB": "gold4",
+    "league": "Gold",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "red",
+      "teamB": "black"
     },
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 9,
-    "teamA": "b",
-    "teamB": "c",
+    "teamA": "gold3",
+    "teamB": "gold5",
+    "league": "Gold",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "red",
+      "teamB": "black"
     },
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 10,
-    "teamA": "b",
-    "teamB": "d",
+    "teamA": "gold4",
+    "teamB": "gold5",
+    "league": "Gold",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "red",
+      "teamB": "black"
     },
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 11,
-    "teamA": "b",
-    "teamB": "e",
+    "teamA": "silver1",
+    "teamB": "silver2",
+    "league": "Silver",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "blue",
+      "teamB": "white"
     },
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 12,
-    "teamA": "b",
-    "teamB": "f",
+    "teamA": "silver1",
+    "teamB": "silver3",
+    "league": "Silver",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "blue",
+      "teamB": "white"
     },
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 13,
-    "teamA": "b",
-    "teamB": "g",
+    "teamA": "silver1",
+    "teamB": "silver4",
+    "league": "Silver",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "blue",
+      "teamB": "white"
     },
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 14,
-    "teamA": "b",
-    "teamB": "h",
+    "teamA": "silver1",
+    "teamB": "silver5",
+    "league": "Silver",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "blue",
+      "teamB": "white"
     },
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 15,
-    "teamA": "b",
-    "teamB": "i",
+    "teamA": "silver2",
+    "teamB": "silver3",
+    "league": "Silver",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "blue",
+      "teamB": "white"
     },
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 16,
-    "teamA": "c",
-    "teamB": "d",
+    "teamA": "silver2",
+    "teamB": "silver4",
+    "league": "Silver",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "blue",
+      "teamB": "white"
     },
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 17,
-    "teamA": "c",
-    "teamB": "e",
+    "teamA": "silver2",
+    "teamB": "silver5",
+    "league": "Silver",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "blue",
+      "teamB": "white"
     },
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 18,
-    "teamA": "c",
-    "teamB": "f",
+    "teamA": "silver3",
+    "teamB": "silver4",
+    "league": "Silver",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "blue",
+      "teamB": "white"
     },
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 19,
-    "teamA": "c",
-    "teamB": "g",
+    "teamA": "silver3",
+    "teamB": "silver5",
+    "league": "Silver",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "blue",
+      "teamB": "white"
     },
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 20,
-    "teamA": "c",
-    "teamB": "h",
+    "teamA": "silver4",
+    "teamB": "silver5",
+    "league": "Silver",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "blue",
+      "teamB": "white"
     },
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 21,
-    "teamA": "c",
-    "teamB": "i",
+    "teamA": "gold1",
+    "teamB": "gold4",
+    "league": "Gold",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "red",
+      "teamB": "black",
+      "setId": "set-1748387804604"
     },
+    "isKnockout": true,
+    "bestOf": 5,
+    "stage": "semi",
+    "matchNumber": 1,
+    "status": "not_started",
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 22,
-    "teamA": "d",
-    "teamB": "e",
+    "teamA": "gold2",
+    "teamB": "gold3",
+    "league": "Gold",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "blue",
+      "teamB": "white",
+      "setId": "set-1748388106500"
     },
+    "isKnockout": true,
+    "bestOf": 5,
+    "stage": "semi",
+    "matchNumber": 2,
+    "status": "not_started",
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 23,
-    "teamA": "d",
-    "teamB": "f",
+    "teamA": "gold1",
+    "teamB": "gold4",
+    "league": "Gold",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "red",
+      "teamB": "black",
+      "setId": "set-1748387804604"
     },
+    "isKnockout": true,
+    "bestOf": 5,
+    "stage": "semi",
+    "matchNumber": 1,
+    "status": "not_started",
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 24,
-    "teamA": "d",
-    "teamB": "g",
+    "teamA": "gold2",
+    "teamB": "gold3",
+    "league": "Gold",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "blue",
+      "teamB": "white",
+      "setId": "set-1748388106500"
     },
+    "isKnockout": true,
+    "bestOf": 5,
+    "stage": "semi",
+    "matchNumber": 2,
+    "status": "not_started",
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 25,
-    "teamA": "d",
-    "teamB": "h",
+    "teamA": "gold1",
+    "teamB": "gold4",
+    "league": "Gold",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "red",
+      "teamB": "black",
+      "setId": "set-1748387804604"
     },
+    "isKnockout": true,
+    "bestOf": 5,
+    "stage": "semi",
+    "matchNumber": 1,
+    "status": "not_started",
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 26,
-    "teamA": "d",
-    "teamB": "i",
+    "teamA": "gold2",
+    "teamB": "gold3",
+    "league": "Gold",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "blue",
+      "teamB": "white",
+      "setId": "set-1748388106500"
     },
+    "isKnockout": true,
+    "bestOf": 5,
+    "stage": "semi",
+    "matchNumber": 2,
+    "status": "not_started",
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 27,
-    "teamA": "e",
-    "teamB": "f",
+    "teamA": "gold1",
+    "teamB": "gold4",
+    "league": "Gold",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "red",
+      "teamB": "black",
+      "setId": "set-1748387804604"
     },
+    "isKnockout": true,
+    "bestOf": 5,
+    "stage": "semi",
+    "matchNumber": 1,
+    "status": "not_started",
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 28,
-    "teamA": "e",
-    "teamB": "g",
+    "teamA": "gold2",
+    "teamB": "gold3",
+    "league": "Gold",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "blue",
+      "teamB": "white",
+      "setId": "set-1748388106500"
     },
+    "isKnockout": true,
+    "bestOf": 5,
+    "stage": "semi",
+    "matchNumber": 2,
+    "status": "not_started",
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 29,
-    "teamA": "e",
-    "teamB": "h",
+    "teamA": "gold1",
+    "teamB": "gold4",
+    "league": "Gold",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
+      "teamA": "red",
+      "teamB": "black",
+      "setId": "set-1748387804604"
     },
+    "isKnockout": true,
+    "bestOf": 5,
+    "stage": "semi",
+    "matchNumber": 1,
+    "status": "not_started",
     "racingFormat": "2v2"
   },
   {
     "raceNumber": 30,
-    "teamA": "e",
-    "teamB": "i",
+    "teamA": "gold2",
+    "teamB": "gold3",
+    "league": "Gold",
     "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
-    },
-    "racingFormat": "2v2"
-  },
-  {
-    "raceNumber": 31,
-    "teamA": "f",
-    "teamB": "g",
-    "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
-    },
-    "racingFormat": "2v2"
-  },
-  {
-    "raceNumber": 32,
-    "teamA": "f",
-    "teamB": "h",
-    "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
-    },
-    "racingFormat": "2v2"
-  },
-  {
-    "raceNumber": 33,
-    "teamA": "f",
-    "teamB": "i",
-    "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
-    },
-    "racingFormat": "2v2"
-  },
-  {
-    "raceNumber": 34,
-    "teamA": "g",
-    "teamB": "h",
-    "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
-    },
-    "racingFormat": "2v2"
-  },
-  {
-    "raceNumber": 35,
-    "teamA": "g",
-    "teamB": "i",
-    "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
-    },
-    "racingFormat": "2v2"
-  },
-  {
-    "raceNumber": 36,
-    "teamA": "h",
-    "teamB": "i",
-    "boats": {
-      "teamA": "Red",
-      "teamB": "Black"
-    },
-    "racingFormat": "2v2"
-  },
-  {
-    "raceNumber": 37,
-    "teamA": "a",
-    "teamB": "h",
-    "league": "main",
-    "boats": {
-      "teamA": "Red",
-      "teamB": "Black",
-      "setId": "set-1748386663375"
+      "teamA": "blue",
+      "teamB": "white",
+      "setId": "set-1748388106500"
     },
     "isKnockout": true,
-    "bestOf": 1,
-    "stage": "quarter",
-    "matchNumber": 1,
-    "status": "not_started",
-    "racingFormat": "2v2",
-    "result": [
-      1,
-      4,
-      2,
-      3
-    ]
-  },
-  {
-    "raceNumber": 38,
-    "teamA": "b",
-    "teamB": "g",
-    "league": "main",
-    "boats": {
-      "teamA": "Red",
-      "teamB": "Black",
-      "setId": "set-1748386663375"
-    },
-    "isKnockout": true,
-    "bestOf": 1,
-    "stage": "quarter",
+    "bestOf": 5,
+    "stage": "semi",
     "matchNumber": 2,
     "status": "not_started",
-    "racingFormat": "2v2",
-    "result": [
-      1,
-      4,
-      2,
-      3
-    ]
-  },
-  {
-    "raceNumber": 39,
-    "teamA": "c",
-    "teamB": "f",
-    "league": "main",
-    "boats": {
-      "teamA": "Red",
-      "teamB": "Black",
-      "setId": "set-1748386663375"
-    },
-    "isKnockout": true,
-    "bestOf": 1,
-    "stage": "quarter",
-    "matchNumber": 3,
-    "status": "not_started",
-    "racingFormat": "2v2",
-    "result": [
-      1,
-      2,
-      3,
-      4
-    ]
-  },
-  {
-    "raceNumber": 40,
-    "teamA": "d",
-    "teamB": "e",
-    "league": "main",
-    "boats": {
-      "teamA": "Red",
-      "teamB": "Black",
-      "setId": "set-1748386663375"
-    },
-    "isKnockout": true,
-    "bestOf": 1,
-    "stage": "quarter",
-    "matchNumber": 4,
-    "status": "not_started",
-    "racingFormat": "2v2",
-    "result": [
-      1,
-      2,
-      3,
-      4
-    ]
+    "racingFormat": "2v2"
   }
 ]

@@ -1,94 +1,106 @@
 {
-  "main": [
+  "Gold": [
     {
-      "team": "a",
+      "team": "gold1",
       "wins": 0,
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
       "place": 1,
-      "league": "main",
-      "tiebreakNote": "Tied with b, c, d, e, f, g, h, i"
+      "league": "Gold",
+      "tiebreakNote": "Tied with gold2, gold3, gold4, gold5"
     },
     {
-      "team": "b",
+      "team": "gold2",
       "wins": 0,
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
       "place": 1,
-      "league": "main",
-      "tiebreakNote": "Tied with a, c, d, e, f, g, h, i"
+      "league": "Gold",
+      "tiebreakNote": "Tied with gold1, gold3, gold4, gold5"
     },
     {
-      "team": "c",
+      "team": "gold3",
       "wins": 0,
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
       "place": 1,
-      "league": "main",
-      "tiebreakNote": "Tied with a, b, d, e, f, g, h, i"
+      "league": "Gold",
+      "tiebreakNote": "Tied with gold1, gold2, gold4, gold5"
     },
     {
-      "team": "d",
+      "team": "gold4",
       "wins": 0,
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
       "place": 1,
-      "league": "main",
-      "tiebreakNote": "Tied with a, b, c, e, f, g, h, i"
+      "league": "Gold",
+      "tiebreakNote": "Tied with gold1, gold2, gold3, gold5"
     },
     {
-      "team": "e",
+      "team": "gold5",
       "wins": 0,
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
       "place": 1,
-      "league": "main",
-      "tiebreakNote": "Tied with a, b, c, d, f, g, h, i"
+      "league": "Gold",
+      "tiebreakNote": "Tied with gold1, gold2, gold3, gold4"
+    }
+  ],
+  "Silver": [
+    {
+      "team": "silver1",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "Silver",
+      "tiebreakNote": "Tied with silver2, silver3, silver4, silver5"
     },
     {
-      "team": "f",
+      "team": "silver2",
       "wins": 0,
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
       "place": 1,
-      "league": "main",
-      "tiebreakNote": "Tied with a, b, c, d, e, g, h, i"
+      "league": "Silver",
+      "tiebreakNote": "Tied with silver1, silver3, silver4, silver5"
     },
     {
-      "team": "g",
+      "team": "silver3",
       "wins": 0,
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
       "place": 1,
-      "league": "main",
-      "tiebreakNote": "Tied with a, b, c, d, e, f, h, i"
+      "league": "Silver",
+      "tiebreakNote": "Tied with silver1, silver2, silver4, silver5"
     },
     {
-      "team": "h",
+      "team": "silver4",
       "wins": 0,
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
       "place": 1,
-      "league": "main",
-      "tiebreakNote": "Tied with a, b, c, d, e, f, g, i"
+      "league": "Silver",
+      "tiebreakNote": "Tied with silver1, silver2, silver3, silver5"
     },
     {
-      "team": "i",
+      "team": "silver5",
       "wins": 0,
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
       "place": 1,
-      "league": "main",
-      "tiebreakNote": "Tied with a, b, c, d, e, f, g, h"
+      "league": "Silver",
+      "tiebreakNote": "Tied with silver1, silver2, silver3, silver4"
     }
   ]
 }

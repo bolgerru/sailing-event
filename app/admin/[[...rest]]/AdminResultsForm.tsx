@@ -36,7 +36,7 @@ interface BoatSet {
 interface League {
   id: string;
   name: string;
-  teams: string[]; // Store teams as an array of strings
+  teams: string[] | string; // Allow both formats
   boatSets: BoatSet[];
 }
 
@@ -347,10 +347,11 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
   const handleLeagueChange = useCallback((leagueIndex: number, field: keyof League, value: any) => {
     setLeagues(prev => {
       const newLeagues = [...prev];
-      if (field === 'teams' && typeof value === 'string') {
+      if (field === 'teams') {
+        // Store the raw string value directly, don't split until form submission
         newLeagues[leagueIndex] = {
           ...newLeagues[leagueIndex],
-          teams: value.split(',').map(team => team.trim()).filter(team => team.length > 0)
+          teams: value // Store as string instead of splitting immediately
         };
       } else {
         (newLeagues[leagueIndex] as any)[field] = value;
@@ -473,7 +474,6 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     try {
       setShowTeamInput(true);
       // Settings are already loaded in the useEffect, no need to fetch again
-      // If settings are not up-to-date, consider a refresh mechanism if needed
       console.log('Using already loaded settings for team input dialog:', settings);
 
       // Populate form fields based on current `settings` state
@@ -484,7 +484,9 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
         const formattedLeagues = settings.leagues.map(league => ({
           id: league.id || `league-${Date.now()}`,
           name: league.name || '',
-          teams: Array.isArray(league.teams) ? league.teams : [],
+          teams: Array.isArray(league.teams) 
+            ? league.teams.join(', ') // Convert array back to string for editing
+            : league.teams || '', // Keep as string if already string
           boatSets: Array.isArray(league.boatSets) ? league.boatSets.map(set => ({
             id: set.id || `set-${Date.now()}`,
             team1Color: set.team1Color || '',
@@ -495,11 +497,11 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
         setTeamInput(''); // Clear non-league input
         setBoatSets([]);  // Clear non-league boat sets
       } else {
-         setTeamInput(settings.teamInput || '');
+        setTeamInput(settings.teamInput || '');
         if (Array.isArray(settings.boatSets) && settings.boatSets.length > 0) {
           setBoatSets(settings.boatSets);
         } else {
-           // Only set default if boatSets is empty AND not in league mode
+          // Only set default if boatSets is empty AND not in league mode
           if (!settings.useLeagues && boatSets.length === 0) {
             setBoatSets([{ id: `set-1-${Date.now()}`, team1Color: '', team2Color: '' }]);
           } else if (settings.useLeagues) {
@@ -516,14 +518,24 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
   const handleGenerateSchedule = async () => {
     const currentSettingsToSave: Settings = {
       useLeagues,
-      leagues: useLeagues ? leagues : [],
+      leagues: useLeagues ? leagues.map(league => ({
+        ...league,
+        teams: typeof league.teams === 'string' 
+          ? league.teams.split(',').map(team => team.trim()).filter(team => team.length > 0)
+          : league.teams
+      })) : [],
       teamInput: useLeagues ? '' : teamInput,
       boatSets: useLeagues ? [] : boatSets,
       racingFormat
     };
 
     if (useLeagues) {
-      if (leagues.length === 0 || leagues.every(l => l.teams.length === 0)) {
+      if (leagues.length === 0 || leagues.every(l => {
+        const teams = typeof l.teams === 'string' 
+          ? l.teams.split(',').map(t => t.trim()).filter(Boolean)
+          : l.teams;
+        return teams.length === 0;
+      })) {
         alert('Please add at least one league with teams');
         return;
       }
@@ -547,8 +559,29 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     // Proceed with schedule generation
     const endpoint = '/api/schedule/generate';
     const body = useLeagues 
-      ? { leagues: leagues.map(l => ({ ...l, boatSets: l.boatSets.map(bs => ({id: bs.id, team1Color: bs.team1Color, team2Color: bs.team2Color})) })), racingFormat }
-      : { teams: teamInput.split(',').map((t) => t.trim()).filter(Boolean), boatSets: boatSets.map(bs => ({id: bs.id, team1Color: bs.team1Color, team2Color: bs.team2Color})), racingFormat };
+      ? { 
+          leagues: leagues.map(l => ({ 
+            ...l, 
+            teams: typeof l.teams === 'string' 
+              ? l.teams.split(',').map(team => team.trim()).filter(Boolean)
+              : l.teams,
+            boatSets: l.boatSets.map(bs => ({
+              id: bs.id, 
+              team1Color: bs.team1Color, 
+              team2Color: bs.team2Color
+            })) 
+          })), 
+          racingFormat 
+        }
+      : { 
+          teams: teamInput.split(',').map((t) => t.trim()).filter(Boolean), 
+          boatSets: boatSets.map(bs => ({
+            id: bs.id, 
+            team1Color: bs.team1Color, 
+            team2Color: bs.team2Color
+          })), 
+          racingFormat 
+        };
 
     try {
       const scheduleRes = await fetch(endpoint, {
@@ -810,7 +843,7 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
                   <div className="mb-4">
                     <label className="block text-sm mb-2">Teams (comma-separated):</label>
                     <textarea
-                      value={Array.isArray(league.teams) ? league.teams.join(', ') : league.teams}
+                      value={typeof league.teams === 'string' ? league.teams : league.teams.join(', ')}
                       onChange={(e) => handleLeagueChange(leagueIndex, 'teams', e.target.value)}
                       className="w-full border rounded px-2 py-1 h-24"
                       placeholder="Enter team names, separated by commas"
