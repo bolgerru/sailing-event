@@ -17,6 +17,10 @@ type Race = {
   status?: 'not_started' | 'in_progress' | 'finished';
   startTime?: string;
   endTime?: string;
+  isKnockout?: boolean;
+  stage?: string;
+  league?: string;        // Add this line
+  matchNumber?: number;   // Add this line
 };
 
 interface BoatSet {
@@ -99,6 +103,10 @@ const scrollToElement = (id: string) => {
   }
 };
 
+const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
 type Settings = {
   useLeagues: boolean;
   leagues: Array<{
@@ -172,24 +180,21 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
   // Save settings to API
   const saveSettings = async (newSettings: any) => {
     try {
-      const currentResponse = await fetch('/api/settings');
-      const currentSettings = await currentResponse.json();
-
-      // Merge current settings with new settings
-      const mergedSettings = {
-        ...currentSettings,
-        ...newSettings
-      };
-
+      console.log('Saving settings:', newSettings);
+      
       const response = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(mergedSettings)
+        body: JSON.stringify(newSettings)
       });
 
       if (!response.ok) {
         throw new Error('Failed to save settings');
       }
+      
+      // Update the local settings state
+      setSettings(prev => ({ ...prev, ...newSettings }));
+      console.log('Settings saved successfully');
     } catch (error) {
       console.error('Error saving settings:', error);
     }
@@ -199,12 +204,16 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
   useEffect(() => {
     // Debounce the save operation
     const timeoutId = setTimeout(() => {
-      saveSettings({
+      // Always save all settings, regardless of mode
+      const settingsToSave = {
         useLeagues,
-        leagues,
-        teamInput,
-        boatSets
-      });
+        leagues: useLeagues ? leagues : [], // Only save leagues if using league mode
+        teamInput: useLeagues ? '' : teamInput, // Only save teamInput if not using leagues
+        boatSets: useLeagues ? [] : boatSets // Only save global boatSets if not using leagues
+      };
+      
+      console.log('Auto-saving settings:', settingsToSave);
+      saveSettings(settingsToSave);
     }, 1000); // Wait 1 second after changes before saving
 
     return () => clearTimeout(timeoutId);
@@ -527,6 +536,7 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     setLeagues(newLeagues);
   };
 
+  // Update the handleGenerateSchedule function to always save settings
   const handleGenerateSchedule = async () => {
     if (useLeagues) {
       if (leagues.length === 0) {
@@ -572,11 +582,12 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
         body: JSON.stringify({
           useLeagues: true,
           leagues: leagues,
-          teamInput: '',
-          boatSets: []
+          teamInput: '', // Clear team input when using leagues
+          boatSets: [] // Clear global boat sets when using leagues
         })
       });
       
+      alert('League schedule generated successfully');
       setShowTeamInput(false);
       await fetchRaces();
     } else {
@@ -620,22 +631,19 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
         alert('Warning: Failed to reset leaderboard');
       }
 
-      alert('Schedule generated and leaderboard reset successfully');
-      // Clear settings by posting empty default values
+      // FIXED: Save settings for non-league mode too
       await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           useLeagues: false,
-          leagues: [],
-          teamInput: '',
-          boatSets: [{
-            id: `default-set-1-${Date.now()}`, // Add timestamp to default set
-            team1Color: '',
-            team2Color: ''
-          }]
+          leagues: [], // Clear leagues when not using them
+          teamInput: teamInput, // Save the team input
+          boatSets: boatSets // Save the boat sets
         })
       });
+
+      alert('Schedule generated and leaderboard reset successfully');
       setShowTeamInput(false);
       await fetchRaces();
     }
@@ -678,10 +686,35 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     [races, formData]
   );
 
+  // First, look for unfinished knockout races
   useEffect(() => {
-    // Find first race that has no result, regardless of status
-    const unfinishedRace = races.find(race => !race.result);
-    setNextUnfinishedRace(unfinishedRace || null);
+    // Get all unfinished knockout races
+    const unfinishedKnockoutRaces = races.filter(race => race.isKnockout && !race.result);
+    
+    if (unfinishedKnockoutRaces.length > 0) {
+      // Define stage priority (latest stages first)
+      const stagePriority = { 'final': 3, 'semi': 2, 'quarter': 1 };
+      
+      // Sort by stage priority (highest first), then by race number
+      const prioritizedKnockoutRaces = unfinishedKnockoutRaces.sort((a, b) => {
+        const aPriority = stagePriority[a.stage as keyof typeof stagePriority] || 0;
+        const bPriority = stagePriority[b.stage as keyof typeof stagePriority] || 0;
+        
+        // If same stage priority, sort by race number
+        if (aPriority === bPriority) {
+          return a.raceNumber - b.raceNumber;
+        }
+        
+        // Higher priority (later stage) comes first
+        return bPriority - aPriority;
+      });
+      
+      setNextUnfinishedRace(prioritizedKnockoutRaces[0]);
+    } else {
+      // If no unfinished knockout races, find first regular race that has no result
+      const unfinishedRegularRace = races.find(race => !race.isKnockout && !race.result);
+      setNextUnfinishedRace(unfinishedRegularRace || null);
+    }
   }, [races]);
 
   const fetchLeaderboard = async () => {
@@ -702,28 +735,67 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
 
   const handleCreateKnockouts = async (config: KnockoutConfig) => {
     try {
-      const res = await fetch('/api/knockouts/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config)
-      });
-
-      if (!res.ok) {
-        const error = await res.text();
-        throw new Error(`Failed to create knockout schedule: ${error}`);
+      console.log('Creating knockout schedule with config:', config);
+      console.log('Current settings:', settings);
+      
+      // Handle both league and non-league modes properly
+      if (settings.useLeagues) {
+        const availableLeagueNames = settings.leagues.map(l => l.name);
+        const missingLeagues = config.selectedLeagues.filter(league => 
+          !availableLeagueNames.includes(league)
+        );
+        
+        if (missingLeagues.length > 0) {
+          console.warn('Missing league settings for:', missingLeagues);
+          config.selectedLeagues = config.selectedLeagues.filter(league => 
+            availableLeagueNames.includes(league)
+          );
+          
+          if (config.selectedLeagues.length === 0) {
+            throw new Error('No valid leagues selected for knockout creation');
+          }
+        }
+      } else {
+        const availableLeagueNames = Object.keys(leaderboard);
+        console.log('Available leagues from leaderboard:', availableLeagueNames);
+        
+        if (availableLeagueNames.length === 0) {
+          throw new Error('No teams available for knockout creation');
+        }
+        
+        config.selectedLeagues = config.selectedLeagues.filter(league => 
+          availableLeagueNames.includes(league)
+        );
+        
+        if (config.selectedLeagues.length === 0) {
+          config.selectedLeagues = availableLeagueNames;
+        }
       }
 
-      // Close modal first
-      setShowKnockoutModal(false);
+      console.log('Final config being sent:', config);
 
-      // Then refresh everything
-      await Promise.all([
-        fetchRaces(),
-        fetchLeaderboard()
-      ]);
+      // FIXED: Use the correct API endpoint
+      const response = await fetch('/api/knockouts/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(config),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorData}`);
+      }
+
+      const result = await response.json();
+      console.log('Knockout creation result:', result);
+      
+      // Refresh the page to show new races
+      window.location.reload();
     } catch (error) {
       console.error('Error in handleCreateKnockouts:', error);
-      alert('Error creating knockout schedule: ' + (error as Error).message);
+      alert('Failed to create knockout schedule: ' + (error as Error).message);
     }
   };
 
@@ -976,20 +1048,41 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
         </div>
       )}
       
-      {/* Floating button for next unfinished race */}
+      {/* Floating buttons */}
       {nextUnfinishedRace && (
         <button
           onClick={() => scrollToElement(`race-${nextUnfinishedRace.raceNumber}`)}
-          className="fixed bottom-16 right-4 md:bottom-8 md:right-8 bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center gap-2 z-50"
+          className="fixed bottom-28 right-4 md:bottom-20 md:right-8 bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center gap-2 z-50"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
-          <span className="hidden md:inline">Next Unfinished Race</span>
-          <span className="md:hidden">Race</span>
+          <span className="hidden md:inline">
+            {nextUnfinishedRace.isKnockout 
+              ? `Next ${getKnockoutStageDisplayName(nextUnfinishedRace.stage)}` 
+              : 'Next Unfinished Race'
+            }
+          </span>
+          <span className="md:hidden">
+            {nextUnfinishedRace.isKnockout 
+              ? getKnockoutStageDisplayName(nextUnfinishedRace.stage).split(' ')[0] // Show just "Quarter", "Semi", or "Final"
+              : 'Race'
+            }
+          </span>
           {" "}({nextUnfinishedRace.raceNumber})
         </button>
       )}
+
+      {/* Jump to Top button */}
+      <button
+        onClick={scrollToTop}
+        className="fixed bottom-4 right-4 md:bottom-8 md:right-8 bg-green-600 text-white p-3 rounded-full shadow-lg hover:bg-green-700 transition-colors z-50"
+        title="Jump to Top"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+        </svg>
+      </button>
 
       {raceData.map(({ race, result, isTeamAWinning, isTeamBWinning, winner }) => (
         <div 
@@ -998,9 +1091,33 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
           className="p-3 bg-white border rounded-md"
         >
           <div className="flex justify-between items-center mb-3">
-            <p className="text-xl md:text-2xl font-bold text-gray-700">
-              Race {race.raceNumber}
-            </p>
+            <div className="flex items-center gap-2">
+              <p className="text-xl md:text-2xl font-bold text-gray-700">
+                Race {race.raceNumber}
+              </p>
+              
+              {/* League Tag */}
+              {race.league && (
+                <span className={`
+                  inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
+                  ${getLeagueTagColors(race.league)}
+                `}>
+                  {race.league === 'main' ? 'Overall' : `${race.league} League`}
+                </span>
+              )}
+              
+              {/* Knockout Stage Tag */}
+              {race.isKnockout && race.stage && (
+                <span className={`
+                  inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                  ${getKnockoutStageTagColors(race.stage)}
+                `}>
+                  {getKnockoutStageDisplayName(race.stage)}
+                  {race.matchNumber && ` #${race.matchNumber}`}
+                </span>
+              )}
+            </div>
+            
             {race.status === 'in_progress' ? (
               <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm">
                 In Progress
@@ -1017,9 +1134,6 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
           </div>
 
           <div className="mb-3">
-            <p className="text-center text-xl md:text-2xl font-bold text-gray-700 mb-3">
-              Race {race.raceNumber}
-            </p>
             <div className="flex justify-between items-baseline">
               <div className="text-center flex-1">
                 <h3 className="text-base md:text-lg font-semibold">{race.teamA}</h3>
@@ -1039,6 +1153,7 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
             </div>
           )}
 
+          {/* Rest of the race card remains the same... */}
           <div className="space-y-4 md:grid md:grid-cols-2 md:gap-4 md:space-y-0">
             {/* Team A Boats */}
             <div className="space-y-2">
@@ -1100,7 +1215,12 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
         isOpen={showKnockoutModal}
         onClose={() => setShowKnockoutModal(false)}
         leagues={leaderboard}
-        settings={settings}
+        settings={{
+          useLeagues: settings.useLeagues,
+          leagues: settings.leagues,
+          boatSets: settings.boatSets || [] // Add global boat sets
+        }}
+        races={races}
         onConfirm={handleCreateKnockouts}
       />
     </div>
@@ -1116,4 +1236,36 @@ type Team = {
   place: number;
   league: string;
   tiebreakNote?: string;
+};
+
+const getKnockoutStageDisplayName = (stage?: string): string => {
+  switch (stage?.toLowerCase()) {
+    case 'quarter': return 'Quarter Final';
+    case 'semi': return 'Semi Final';
+    case 'final': return 'Final';
+    default: return 'Knockout';
+  }
+};
+
+// Add helper function to get league tag colors
+const getLeagueTagColors = (league?: string): string => {
+  if (!league) return 'bg-gray-100 text-gray-800';
+  
+  switch (league.toLowerCase()) {
+    case 'gold': return 'bg-yellow-100 text-yellow-800';
+    case 'silver': return 'bg-gray-100 text-gray-700';
+    case 'bronze': return 'bg-orange-100 text-orange-800';
+    case 'main': return 'bg-blue-100 text-blue-800';
+    default: return 'bg-purple-100 text-purple-800';
+  }
+};
+
+// Add helper function to get knockout stage tag colors
+const getKnockoutStageTagColors = (stage?: string): string => {
+  switch (stage?.toLowerCase()) {
+    case 'quarter': return 'bg-red-100 text-red-800';
+    case 'semi': return 'bg-orange-100 text-orange-800';
+    case 'final': return 'bg-green-100 text-green-800';
+    default: return 'bg-gray-100 text-gray-800';
+  }
 };

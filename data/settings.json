@@ -2,35 +2,58 @@
   "useLeagues": true,
   "leagues": [
     {
-      "id": "league-1-1748296489204",
+      "id": "league-1-1748374016468",
       "name": "Gold",
       "teams": [
         "gold1",
         "gold2",
         "gold3",
-        "gold4"
+        "gold4",
+        "gold5",
+        "gold6"
       ],
       "boatSets": [
         {
-          "id": "league-1-1748296489204-set-1-1748296489204",
+          "id": "league-1-1748374016468-set-1-1748374016468",
           "team1Color": "red",
           "team2Color": "black"
         }
       ]
     },
     {
-      "id": "league-2-1748296504858",
+      "id": "league-2-1748374038517",
       "name": "Silver",
       "teams": [
-        "slv 1",
-        "slv2",
-        "slv3",
-        "slv4"
+        "silver1",
+        "silver2",
+        "silver3",
+        "silver4",
+        "silver5",
+        "silver6"
       ],
       "boatSets": [
         {
-          "id": "league-2-1748296504858-set-1-1748296504858",
+          "id": "league-2-1748374038517-set-1-1748374038517",
           "team1Color": "blue",
+          "team2Color": "white"
+        }
+      ]
+    },
+    {
+      "id": "league-3-1748374060929",
+      "name": "Bronze",
+      "teams": [
+        "bronze1",
+        "bronze2",
+        "bronze3",
+        "bronze4",
+        "bronze5",
+        "bronze6"
+      ],
+      "boatSets": [
+        {
+          "id": "league-3-1748374060929-set-1-1748374060929",
+          "team1Color": "green",
           "team2Color": "white"
         }
       ]

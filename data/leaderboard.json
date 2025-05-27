@@ -2,22 +2,23 @@
   "Gold": [
     {
       "team": "gold1",
-      "wins": 1,
-      "totalRaces": 1,
+      "wins": 0,
+      "totalRaces": 0,
       "points": 0,
-      "winPercentage": 100,
+      "winPercentage": 0,
       "place": 1,
-      "league": "Gold"
+      "league": "Gold",
+      "tiebreakNote": "Tied with gold2, gold3, gold4, gold5, gold6"
     },
     {
       "team": "gold2",
       "wins": 0,
-      "totalRaces": 1,
+      "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
-      "place": 2,
+      "place": 1,
       "league": "Gold",
-      "tiebreakNote": "Tied with gold3, gold4"
+      "tiebreakNote": "Tied with gold1, gold3, gold4, gold5, gold6"
     },
     {
       "team": "gold3",
@@ -25,9 +26,9 @@
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
-      "place": 2,
+      "place": 1,
       "league": "Gold",
-      "tiebreakNote": "Tied with gold2, gold4"
+      "tiebreakNote": "Tied with gold1, gold2, gold4, gold5, gold6"
     },
     {
       "team": "gold4",
@@ -35,51 +36,153 @@
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
-      "place": 2,
+      "place": 1,
       "league": "Gold",
-      "tiebreakNote": "Tied with gold2, gold3"
+      "tiebreakNote": "Tied with gold1, gold2, gold3, gold5, gold6"
+    },
+    {
+      "team": "gold5",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "Gold",
+      "tiebreakNote": "Tied with gold1, gold2, gold3, gold4, gold6"
+    },
+    {
+      "team": "gold6",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "Gold",
+      "tiebreakNote": "Tied with gold1, gold2, gold3, gold4, gold5"
     }
   ],
   "Silver": [
     {
-      "team": "slv 1",
+      "team": "silver1",
       "wins": 0,
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
       "place": 1,
       "league": "Silver",
-      "tiebreakNote": "Tied with slv2, slv3, slv4"
+      "tiebreakNote": "Tied with silver2, silver3, silver4, silver5, silver6"
     },
     {
-      "team": "slv2",
+      "team": "silver2",
       "wins": 0,
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
       "place": 1,
       "league": "Silver",
-      "tiebreakNote": "Tied with slv 1, slv3, slv4"
+      "tiebreakNote": "Tied with silver1, silver3, silver4, silver5, silver6"
     },
     {
-      "team": "slv3",
+      "team": "silver3",
       "wins": 0,
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
       "place": 1,
       "league": "Silver",
-      "tiebreakNote": "Tied with slv 1, slv2, slv4"
+      "tiebreakNote": "Tied with silver1, silver2, silver4, silver5, silver6"
     },
     {
-      "team": "slv4",
+      "team": "silver4",
       "wins": 0,
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
       "place": 1,
       "league": "Silver",
-      "tiebreakNote": "Tied with slv 1, slv2, slv3"
+      "tiebreakNote": "Tied with silver1, silver2, silver3, silver5, silver6"
+    },
+    {
+      "team": "silver5",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "Silver",
+      "tiebreakNote": "Tied with silver1, silver2, silver3, silver4, silver6"
+    },
+    {
+      "team": "silver6",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "Silver",
+      "tiebreakNote": "Tied with silver1, silver2, silver3, silver4, silver5"
+    }
+  ],
+  "Bronze": [
+    {
+      "team": "bronze1",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "Bronze",
+      "tiebreakNote": "Tied with bronze2, bronze3, bronze4, bronze5, bronze6"
+    },
+    {
+      "team": "bronze2",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "Bronze",
+      "tiebreakNote": "Tied with bronze1, bronze3, bronze4, bronze5, bronze6"
+    },
+    {
+      "team": "bronze3",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "Bronze",
+      "tiebreakNote": "Tied with bronze1, bronze2, bronze4, bronze5, bronze6"
+    },
+    {
+      "team": "bronze4",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "Bronze",
+      "tiebreakNote": "Tied with bronze1, bronze2, bronze3, bronze5, bronze6"
+    },
+    {
+      "team": "bronze5",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "Bronze",
+      "tiebreakNote": "Tied with bronze1, bronze2, bronze3, bronze4, bronze6"
+    },
+    {
+      "team": "bronze6",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "Bronze",
+      "tiebreakNote": "Tied with bronze1, bronze2, bronze3, bronze4, bronze5"
     }
   ]
 }
