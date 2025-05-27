@@ -409,6 +409,58 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     setBoatSets(prev => [...prev, newBoatSet]);
   }, []);
 
+  const handleAddRoundRobin = async () => {
+    try {
+      if (!settings || (!settings.useLeagues && !settings.teamInput)) {
+        alert('No settings found. Please generate an initial schedule first.');
+        return;
+      }
+
+      // Use current settings to add another round robin
+      const endpoint = '/api/schedule/add-round-robin';
+      const body = settings.useLeagues 
+        ? { 
+            leagues: settings.leagues.map(l => ({ 
+              ...l, 
+              boatSets: l.boatSets.map(bs => ({
+                id: bs.id, 
+                team1Color: bs.team1Color, 
+                team2Color: bs.team2Color
+              })) 
+            })), 
+            racingFormat: settings.racingFormat 
+          }
+        : { 
+            teams: settings.teamInput.split(',').map((t) => t.trim()).filter(Boolean), 
+            boatSets: settings.boatSets.map(bs => ({
+              id: bs.id, 
+              team1Color: bs.team1Color, 
+              team2Color: bs.team2Color
+            })), 
+            racingFormat: settings.racingFormat 
+          };
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        alert(`Error adding round robin: ${error}`);
+        return;
+      }
+
+      const result = await response.json();
+      alert(`Round robin added successfully! Added ${result.newRaces} races.`);
+      await fetchRaces(); // Refresh races
+    } catch (error) {
+      console.error('Error adding round robin:', error);
+      alert('An error occurred while adding round robin.');
+    }
+  };
+
   // --- END OF FUNCTION DEFINITIONS ---
 
   // Load saved settings from localStorage on component mount
@@ -758,6 +810,12 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
               className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
             >
               Generate New Schedule
+            </button>
+            <button
+              onClick={handleAddRoundRobin}
+              className="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 transition-colors"
+            >
+              Add Round Robin
             </button>
             <button
               onClick={handleOpenKnockoutModal}
