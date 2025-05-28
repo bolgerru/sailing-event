@@ -28,8 +28,8 @@ async function saveBlobData(fileName: string, data: any) {
 
 interface BoatSet {
   id: string;
-  team1Color: string;
-  team2Color: string;
+  TeamAColor: string;
+  TeamBColor: string;
 }
 
 interface Race {
@@ -75,8 +75,8 @@ function countTeamInLastNRacesOfSet(
   return recentRaces.filter(
     (r) =>
       (r.teamA === team || r.teamB === team) &&
-      r.boats.teamA === boatSet.team1Color &&
-      r.boats.teamB === boatSet.team2Color
+      r.boats.teamA === boatSet.teamAColor &&
+      r.boats.teamB === boatSet.teamBColor
   ).length;
 }
 
@@ -87,8 +87,8 @@ function appearedInBothLast2RacesOfSet(
 ): boolean {
   const racesOfSameSet = races.filter(
     (r) =>
-      (r.boats.teamA === boatSet.team1Color && r.boats.teamB === boatSet.team2Color) ||
-      (r.boats.teamA === boatSet.team2Color && r.boats.teamB === boatSet.team1Color)
+      (r.boats.teamA === boatSet.teamAColor && r.boats.teamB === boatSet.TeamBColor) ||
+      (r.boats.teamA === boatSet.teamBColor && r.boats.teamB === boatSet.TeamAColor)
   );
 
   const lastTwoSameSet = racesOfSameSet.slice(-2);
@@ -99,8 +99,8 @@ function appearedInBothLast2RacesOfSet(
 
   return lastTwoSameSet.every(r => 
     (r.teamA === team || r.teamB === team) && 
-    ((r.boats.teamA === boatSet.team1Color && r.boats.teamB === boatSet.team2Color) ||
-     (r.boats.teamA === boatSet.team2Color && r.boats.teamB === boatSet.team1Color))
+    ((r.boats.teamA === boatSet.TeamAColor && r.boats.teamB === boatSet.TeamBColor) ||
+     (r.boats.teamA === boatSet.TeamBColor && r.boats.teamB === boatSet.TeamAColor))
   );
 }
 
@@ -129,8 +129,8 @@ function selectNextPairing(
   const lastTwoRaces = races.slice(-2);
   const recentOtherBoatSetRaces = lastTwoRaces.filter(
     (r) =>
-      r.boats.teamA !== currentBoatSet.team1Color ||
-      r.boats.teamB !== currentBoatSet.team2Color
+      r.boats.teamA !== currentBoatSet.TeamAColor ||
+      r.boats.teamB !== currentBoatSet.TeamBColor
   );
 
   const recentlyRacedTeams = new Set<string>();
@@ -150,7 +150,7 @@ function selectNextPairing(
   }
 
   const lastRaceOfBoatSet = [...races].reverse().find(
-    (r) => r.boats.teamA === currentBoatSet.team1Color && r.boats.teamB === currentBoatSet.team2Color
+    (r) => r.boats.teamA === currentBoatSet.TeamAColor && r.boats.teamB === currentBoatSet.TeamBColor
   );
 
   const candidatesWithLastRaceTeam = filter1Candidates.filter(
@@ -210,8 +210,8 @@ function selectNextPairing(
 
   const lastRace = [...races].reverse().find(
     (r) =>
-      r.boats.teamA === currentBoatSet.team1Color &&
-      r.boats.teamB === currentBoatSet.team2Color
+      r.boats.teamA === currentBoatSet.TeamAColor &&
+      r.boats.teamB === currentBoatSet.TeamBColor
   );
 
   if (lastRace) {
@@ -296,8 +296,8 @@ export async function POST(request: NextRequest) {
               teamB: selectedTeams.teamB,
               league: queue.name,
               boats: {
-                teamA: currentBoatSet.team1Color,
-                teamB: currentBoatSet.team2Color,
+                teamA: currentBoatSet.TeamAColor,
+                teamB: currentBoatSet.TeamBColor,
               },
               racingFormat: body.racingFormat || '3v3'
             };
@@ -339,8 +339,8 @@ export async function POST(request: NextRequest) {
         teams,
         boatSets: boatSets.map(set => ({
           id: set.id,
-          team1Color: set.team1Color,
-          team2Color: set.team2Color
+          TeamAColor: set.TeamAColor,
+          TeamBColor: set.TeamBColor
         })),
         remainingPairings: generatePairings(teams),
         races: [] as Race[]
@@ -363,8 +363,8 @@ export async function POST(request: NextRequest) {
           teamA: selectedTeams.teamA,
           teamB: selectedTeams.teamB,
           boats: {
-            teamA: currentBoatSet.team1Color,
-            teamB: currentBoatSet.team2Color,
+            teamA: currentBoatSet.TeamAColor,
+            teamB: currentBoatSet.TeamBColor,
           },
           racingFormat: body.racingFormat || '3v3'
         };
@@ -391,7 +391,7 @@ export async function POST(request: NextRequest) {
       const allRaces = [...existingRaces, ...array];
       const boatSetRaces = allRaces.filter(r => 
         r.boats.teamA === race.boats.teamA && 
-        r.boats.teamB === race.boats.team2Color
+        r.boats.teamB === race.boats.TeamBColor
       );
       
       // Find position of current race within its boat set
