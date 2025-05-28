@@ -75,7 +75,7 @@ function countTeamInLastNRacesOfSet(
   return recentRaces.filter(
     (r) =>
       (r.teamA === team || r.teamB === team) &&
-      r.boats.teamA === boatSet.teamAColor &&
+      r.boats.teamA === boatSet.TeamAColor &&
       r.boats.teamB === boatSet.teamBColor
   ).length;
 }
@@ -87,7 +87,7 @@ function appearedInBothLast2RacesOfSet(
 ): boolean {
   const racesOfSameSet = races.filter(
     (r) =>
-      (r.boats.teamA === boatSet.teamAColor && r.boats.teamB === boatSet.TeamBColor) ||
+      (r.boats.teamA === boatSet.TeamAColor && r.boats.teamB === boatSet.TeamBColor) ||
       (r.boats.teamA === boatSet.teamBColor && r.boats.teamB === boatSet.TeamAColor)
   );
 
