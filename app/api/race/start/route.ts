@@ -1,18 +1,35 @@
 import { NextResponse } from 'next/server';
-import { db } from '../../../../lib/db'; // Updated import path
+import { promises as fs } from 'fs';
+import path from 'path';
 
 export async function POST(request: Request) {
   try {
     const { raceNumber, startTime } = await request.json();
 
-    // Update race status in database
-    await db.race.update({
-      where: { raceNumber },
-      data: {
-        status: 'in_progress',
-        startTime
-      }
-    });
+    // Read the current schedule
+    const scheduleFile = path.join(process.cwd(), 'data', 'schedule.json');
+    const scheduleData = await fs.readFile(scheduleFile, 'utf8');
+    const races = JSON.parse(scheduleData);
+
+    // Find and update the race
+    const raceIndex = races.findIndex((race: any) => race.raceNumber === raceNumber);
+    
+    if (raceIndex === -1) {
+      return NextResponse.json(
+        { error: 'Race not found' },
+        { status: 404 }
+      );
+    }
+
+    // Update race status and start time
+    races[raceIndex] = {
+      ...races[raceIndex],
+      status: 'in_progress',
+      startTime: startTime
+    };
+
+    // Write back to file
+    await fs.writeFile(scheduleFile, JSON.stringify(races, null, 2));
 
     return NextResponse.json({ message: 'Race started successfully' });
   } catch (error) {

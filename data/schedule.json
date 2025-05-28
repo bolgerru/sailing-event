@@ -727,10 +727,11 @@
     "bestOf": 5,
     "stage": "semi",
     "matchNumber": 5,
-    "status": "not_started",
+    "status": "in_progress",
     "racingFormat": "3v3",
     "goToChangeover": true,
-    "isLaunching": false
+    "isLaunching": false,
+    "startTime": "2025-05-28T16:20:12.401Z"
   },
   {
     "raceNumber": 52,
