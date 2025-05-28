@@ -403,8 +403,7 @@ export default function SchedulePage() {
       {knockoutRaces.length > 0 && (
         <div className="space-y-6 bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg border-2 border-purple-200">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-purple-800 mb-2">🏆 Knockout Stage</h2>
-            <p className="text-purple-600">Championship elimination rounds</p>
+            <h2 className="text-2xl font-bold text-purple-800 mb-2"> Knockout Stage</h2>
           </div>
 
           {/* Upcoming Knockout Races - Only show races WITHOUT results */}
@@ -442,14 +441,18 @@ export default function SchedulePage() {
                               </span>
                             )}
                           </div>
-                          <div className="mt-2 flex gap-2">
+                          <div className="mt-2 flex gap-2 flex-wrap justify-center">
                             {race.stage && (
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getKnockoutStageTagColors(race.stage)}`}>
                                 {getKnockoutStageDisplayName(race.stage)}
                                 {race.matchNumber && ` #${race.matchNumber}`}
                               </span>
                             )}
-                            {/* Remove StatusTag from here - status is shown prominently in bottom section */}
+                            {race.league && (
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getLeagueTagColors(race.league)}`}>
+                                {race.league === 'main' ? 'Overall' : `${race.league} League`}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -554,14 +557,18 @@ export default function SchedulePage() {
                                 </span>
                               )}
                             </div>
-                            <div className="mt-2 flex gap-2">
+                            <div className="mt-2 flex gap-2 flex-wrap justify-center">
                               {race.stage && (
                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getKnockoutStageTagColors(race.stage)}`}>
                                   {getKnockoutStageDisplayName(race.stage)}
                                   {race.matchNumber && ` #${race.matchNumber}`}
                                 </span>
                               )}
-                              {/* Remove StatusTag from here - status is shown prominently in bottom section */}
+                              {race.league && (
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getLeagueTagColors(race.league)}`}>
+                                  {race.league === 'main' ? 'Overall' : `${race.league} League`}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -828,14 +835,18 @@ export default function SchedulePage() {
                             </span>
                           )}
                         </div>
-                        <div className="mt-2 flex gap-2">
+                        <div className="mt-2 flex gap-2 flex-wrap justify-center">
                           {race.stage && (
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getKnockoutStageTagColors(race.stage)}`}>
                               {getKnockoutStageDisplayName(race.stage)}
                               {race.matchNumber && ` #${race.matchNumber}`}
                             </span>
                           )}
-                          {/* Remove StatusTag from here - status is shown prominently in bottom section */}
+                          {race.league && (
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getLeagueTagColors(race.league)}`}>
+                              {race.league === 'main' ? 'Overall' : `${race.league} League`}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
