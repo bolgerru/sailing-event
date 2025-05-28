@@ -217,6 +217,34 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
       if (response.ok) {
         const data = await response.json();
         setRaces(data);
+        
+        // Initialize form data with stored results whenever races are fetched
+        const formDataFromResults: { [key: number]: (number | '')[] } = {};
+        data.forEach((race: Race) => {
+          if (race.result && Array.isArray(race.result) && race.result.length > 0) {
+            formDataFromResults[race.raceNumber] = [...race.result];
+          }
+        });
+        
+        // Update form data, but preserve any unsaved changes
+        setFormData(prevFormData => {
+          const newFormData = { ...formDataFromResults };
+          
+          // Keep any form data that doesn't have a stored result (user is currently editing)
+          Object.keys(prevFormData).forEach(raceNumberStr => {
+            const raceNumber = parseInt(raceNumberStr);
+            const race = data.find((r: Race) => r.raceNumber === raceNumber);
+            
+            // If there's no stored result, keep the form data
+            if (!race?.result || race.result.length === 0) {
+              newFormData[raceNumber] = prevFormData[raceNumber];
+            }
+          });
+          
+          return newFormData;
+        });
+        
+        console.log('Races fetched and form data updated with stored results');
       } else {
         console.error('Failed to fetch races');
       }
@@ -306,6 +334,12 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
       });
 
       if (response.ok) {
+        // Update form data to reflect the saved result
+        setFormData(prev => ({
+          ...prev,
+          [raceNumber]: [...numericResult] // Keep the saved result in form data
+        }));
+        
         await fetchRaces(); // Refresh races after saving
         alert('Result saved successfully');
       } else {
@@ -327,11 +361,13 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
       });
 
       if (response.ok) {
+        // Clear the form data for this race
         setFormData(prev => {
           const newData = { ...prev };
           delete newData[raceNumber];
           return newData;
         });
+        
         await fetchRaces(); // Refresh races after clearing
         alert('Result cleared successfully');
       } else {
@@ -782,6 +818,28 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     // Fetch initial data on mount
     refreshData();
 
+    // Initialize form data with existing race results
+    const initializeFormData = () => {
+      const initialFormData: { [key: number]: (number | '')[] } = {};
+      
+      races.forEach(race => {
+        if (race.result && Array.isArray(race.result) && race.result.length > 0) {
+          // Convert stored result to form data format
+          initialFormData[race.raceNumber] = [...race.result];
+        }
+      });
+      
+      if (Object.keys(initialFormData).length > 0) {
+        setFormData(initialFormData);
+        console.log('Initialized form data with stored results:', initialFormData);
+      }
+    };
+
+    // Initialize form data after races are loaded
+    if (races.length > 0) {
+      initializeFormData();
+    }
+
     // Periodic refresh only if not showing team input dialog
     let intervalId: NodeJS.Timeout | null = null;
     if (!showTeamInput) {
@@ -790,7 +848,7 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [showTeamInput, refreshData]); // refreshData is now stable due to useCallback
+  }, [showTeamInput, refreshData, races]); // Add races as dependency
 
   // JSX rendering starts here
   return (

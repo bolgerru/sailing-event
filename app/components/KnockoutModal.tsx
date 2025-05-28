@@ -824,15 +824,159 @@ export default function KnockoutModal({ isOpen, onClose, leagues, onConfirm, set
     console.log('Added new matchup:', newMatchup);
   };
 
-  // Update the return JSX to include proper button handlers and disable states
+  // Add these functions after the existing helper functions and before the return statement
+
+  const handleRemoveAllKnockouts = async () => {
+    const knockoutRaces = races.filter(race => race.isKnockout);
+    
+    if (knockoutRaces.length === 0) {
+      alert('No knockout races found to remove');
+      return;
+    }
+
+    const confirm = window.confirm(
+      `Remove ALL ${knockoutRaces.length} knockout races? This action cannot be undone.`
+    );
+    
+    if (!confirm) return;
+
+    try {
+      const response = await fetch('/api/knockouts/remove', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ removeAll: true })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to remove knockout races');
+      }
+
+      const result = await response.json();
+      alert(`Successfully removed ${result.removedCount} knockout races`);
+      
+      // Refresh the page to show updated schedule
+      window.location.reload();
+    } catch (error) {
+      console.error('Error removing all knockouts:', error);
+      alert('Failed to remove knockout races: ' + (error as Error).message);
+    }
+  };
+
+  const handleRemoveUnsailedKnockouts = async () => {
+    const unsailedKnockouts = races.filter(race => 
+      race.isKnockout && (!race.result || race.result.length === 0)
+    );
+    
+    if (unsailedKnockouts.length === 0) {
+      alert('No unsailed knockout races found to remove');
+      return;
+    }
+
+    const sailedKnockouts = races.filter(race => 
+      race.isKnockout && race.result && race.result.length > 0
+    );
+
+    let confirmMessage = `Remove ${unsailedKnockouts.length} unsailed knockout races?`;
+    if (sailedKnockouts.length > 0) {
+      confirmMessage += ` This will keep ${sailedKnockouts.length} completed knockout races.`;
+    }
+    confirmMessage += ' This action cannot be undone.';
+
+    const confirm = window.confirm(confirmMessage);
+    
+    if (!confirm) return;
+
+    try {
+      const response = await fetch('/api/knockouts/remove', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ removeUnsailedOnly: true })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to remove unsailed knockout races');
+      }
+
+      const result = await response.json();
+      alert(`Successfully removed ${result.removedCount} unsailed knockout races. ${result.keptCount} completed races were kept.`);
+      
+      // Refresh the page to show updated schedule
+      window.location.reload();
+    } catch (error) {
+      console.error('Error removing unsailed knockouts:', error);
+      alert('Failed to remove unsailed knockout races: ' + (error as Error).message);
+    }
+  };
+
+  // Update the return JSX to include the new buttons in the header section
+  // Add this section after the modal title and before the existing content
+
   return (
     <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 ${
       isOpen ? '' : 'hidden'
     }`}>
       <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <h2 className="text-2xl font-bold mb-4">Create Knockout Stage</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold">Create Knockout Stage</h2>
+          
+          {/* Knockout Management Buttons */}
+          <div className="flex gap-2">
+            {races.some(race => race.isKnockout && (!race.result || race.result.length === 0)) && (
+              <button
+                onClick={handleRemoveUnsailedKnockouts}
+                className="px-3 py-1 text-sm bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors"
+                title="Remove only knockout races that haven't been sailed yet"
+              >
+                Remove Unsailed
+              </button>
+            )}
+            
+            {races.some(race => race.isKnockout) && (
+              <button
+                onClick={handleRemoveAllKnockouts}
+                className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                title="Remove all knockout races (including completed ones)"
+              >
+                Remove All Knockouts
+              </button>
+            )}
+          </div>
+        </div>
         
         <div className="space-y-6">
+          {/* Show current knockout race status */}
+          {races.some(race => race.isKnockout) && (
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+              <h4 className="font-medium text-gray-800 mb-2">Current Knockout Status:</h4>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-gray-600">Total Knockout Races:</span>
+                  <span className="ml-2 font-medium">{races.filter(race => race.isKnockout).length}</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Completed:</span>
+                  <span className="ml-2 font-medium text-green-600">
+                    {races.filter(race => race.isKnockout && race.result && race.result.length > 0).length}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Unsailed:</span>
+                  <span className="ml-2 font-medium text-yellow-600">
+                    {races.filter(race => race.isKnockout && (!race.result || race.result.length === 0)).length}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Stages Present:</span>
+                  <span className="ml-2 font-medium">
+                    {[...new Set(races.filter(race => race.isKnockout).map(race => race.stage))].join(', ')}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Show previous knockout winners if any exist */}
           {Object.keys(knockoutWinners).length > 0 && (
             <div>
