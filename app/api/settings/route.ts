@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { put } from '@vercel/blob';
 
 type RacingFormat = '2v2' | '3v3' | '4v4';
 
@@ -23,47 +22,66 @@ type Settings = {
     team2Color: string;
   }>;
   racingFormat: RacingFormat;
-  eventName: string; // Add this field
+  eventName: string;
 };
+
+async function getBlobData(fileName: string) {
+  try {
+    const blobUrl = `https://${process.env.BLOB_READ_WRITE_TOKEN?.split('vercel_blob_rw_')[1]?.split('_')[0]}.public.blob.vercel-storage.com/${fileName}`;
+    const response = await fetch(blobUrl);
+    if (response.ok) {
+      return await response.json();
+    }
+    return null;
+  } catch (error) {
+    console.log(`${fileName} not found in blob`);
+    return null;
+  }
+}
+
+async function saveBlobData(fileName: string, data: any) {
+  const blob = await put(fileName, JSON.stringify(data, null, 2), {
+    access: 'public',
+    contentType: 'application/json',
+  });
+  return blob;
+}
 
 export async function GET() {
   try {
-    const settingsFile = path.join(process.cwd(), 'data', 'settings.json');
+    let settings: Settings | null = await getBlobData('settings.json');
     
-    let settings: Settings;
-    try {
-      const data = await fs.readFile(settingsFile, 'utf8');
-      settings = JSON.parse(data);
-      
-      // Ensure racingFormat is set (backward compatibility)
-      if (!settings.racingFormat) {
-        settings.racingFormat = '3v3';
-      }
-      
-      // Ensure eventName is set (backward compatibility)
-      if (!settings.eventName) {
-        settings.eventName = 'IUSA Event 1';
-      }
-    } catch (error) {
-      // If file doesn't exist, return default settings
-      console.log('Settings file not found, using defaults');
+    if (!settings) {
+      // Default settings if none exist
       settings = {
         useLeagues: false,
         leagues: [],
         teamInput: '',
         boatSets: [],
         racingFormat: '3v3',
-        eventName: 'IUSA Event 1' // Default event name
+        eventName: 'IUSA Event 1'
       };
+    }
+
+    // Ensure backward compatibility
+    if (!settings.racingFormat) {
+      settings.racingFormat = '3v3';
+    }
+    if (!settings.eventName) {
+      settings.eventName = 'IUSA Event 1';
     }
 
     return NextResponse.json(settings);
   } catch (error) {
-    console.error('Error loading settings:', error);
-    return NextResponse.json(
-      { error: 'Failed to load settings' },
-      { status: 500 }
-    );
+    console.error('Error loading settings from Blob:', error);
+    return NextResponse.json({
+      useLeagues: false,
+      leagues: [],
+      teamInput: '',
+      boatSets: [],
+      racingFormat: '3v3',
+      eventName: 'IUSA Event 1'
+    });
   }
 }
 
@@ -80,23 +98,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Ensure all fields are set
     const settings: Settings = {
       useLeagues: body.useLeagues ?? false,
       leagues: body.leagues ?? [],
       teamInput: body.teamInput ?? '',
       boatSets: body.boatSets ?? [],
       racingFormat: body.racingFormat ?? '3v3',
-      eventName: body.eventName ?? 'IUSA Event 1' // Default if not provided
+      eventName: body.eventName ?? 'IUSA Event 1'
     };
 
-    const settingsFile = path.join(process.cwd(), 'data', 'settings.json');
-    await fs.writeFile(settingsFile, JSON.stringify(settings, null, 2));
-
-    console.log('Settings saved successfully:', settings);
+    await saveBlobData('settings.json', settings);
+    console.log('Settings saved successfully to Blob:', settings);
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error saving settings:', error);
+    console.error('Error saving settings to Blob:', error);
     return NextResponse.json(
       { error: 'Failed to save settings' },
       { status: 500 }

@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
+import { put } from '@vercel/blob';
 
 export async function POST() {
   try {
-    const leaderboardPath = path.join(process.cwd(), 'data', 'leaderboard.json');
-    
-    // Write empty leaderboard
-    await fs.writeFile(leaderboardPath, JSON.stringify([], null, 2));
+    // Write empty leaderboard to Blob
+    await put('leaderboard.json', JSON.stringify({}, null, 2), {
+      access: 'public',
+      contentType: 'application/json',
+    });
 
     return NextResponse.json({ 
       success: true,

@@ -1,0 +1,33 @@
+{
+  "name": "sailing-event-blob",
+  "version": "1.0.0",
+  "description": "A project for managing sailing event data using blob storage.",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "typescript": "latest",
+    "fs": "latest"
+  },
+  "devDependencies": {
+    "@types/react": "latest",
+    "@types/node": "latest",
+    "eslint": "latest",
+    "eslint-config-next": "latest"
+  },
+  "keywords": [
+    "sailing",
+    "blob",
+    "storage",
+    "event"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

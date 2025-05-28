@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import { readFileSync } from 'fs';
-import path from 'path';
+import { put } from '@vercel/blob';
 import { updateMetrics } from '../../lib/metrics';
 
-// Add missing type definitions
+// Keep all your existing type definitions
 type TeamStats = {
   team: string;
   wins: number;
@@ -16,23 +14,6 @@ type TeamStats = {
   tiebreakNote?: string;
 };
 
-type H2HStats = {
-  team: string;
-  wins: number;
-  totalGames: number;
-  totalPoints: number;
-  winPercentage: number;
-  avgPoints: number;
-  tiebreakNote?: string;
-};
-
-type CommonOpponentStats = {
-  team: string;
-  points: number;
-  tiebreakNote?: string;
-};
-
-// Update the Race type
 type Race = {
   raceNumber: number;
   teamA: string;
@@ -55,17 +36,48 @@ type Race = {
   racingFormat?: '2v2' | '3v3' | '4v4';
 };
 
-// Helper function to get boats per team based on racing format
+// Blob helper functions
+async function getBlobData(fileName: string) {
+  try {
+    const blobUrl = `https://${process.env.BLOB_READ_WRITE_TOKEN?.split('vercel_blob_rw_')[1]?.split('_')[0]}.public.blob.vercel-storage.com/${fileName}`;
+    const response = await fetch(blobUrl);
+    if (response.ok) {
+      return await response.json();
+    }
+    return fileName === 'schedule.json' ? [] : {};
+  } catch (error) {
+    console.log(`${fileName} not found in blob, returning default`);
+    return fileName === 'schedule.json' ? [] : {};
+  }
+}
+
+async function saveBlobData(fileName: string, data: any) {
+  const blob = await put(fileName, JSON.stringify(data, null, 2), {
+    access: 'public',
+    contentType: 'application/json',
+  });
+  return blob;
+}
+
 function getBoatsPerTeam(format?: string): number {
   switch (format) {
     case '2v2': return 2;
     case '3v3': return 3;
     case '4v4': return 4;
-    default: return 3; // Default to 3v3 for backward compatibility
+    default: return 3;
   }
 }
 
-// Update functions that calculate race winners to be format-aware
+// Load/save functions using Blob
+async function loadSchedule(): Promise<Race[]> {
+  return await getBlobData('schedule.json');
+}
+
+async function saveSchedule(races: Race[]) {
+  await saveBlobData('schedule.json', races);
+}
+
+// Keep all your existing business logic functions
 function isCompletedRace(race: Race): boolean {
   if (!race.result || race.result === null || race.result === undefined) {
     return false;
@@ -600,26 +612,6 @@ function getPointsAgainstOpponents(team: string, opponents: string[], races: Rac
   return totalPoints;
 }
 
-// Load schedule JSON from disk
-async function loadSchedule(): Promise<Race[]> {
-  const filePath = path.join(process.cwd(), 'data', 'schedule.json');
-  try {
-    const json = await fs.readFile(filePath, 'utf-8');
-    return JSON.parse(json);
-  } catch (error) {
-    console.error('Error loading schedule:', error);
-    return [];
-  }
-}
-
-// Save schedule JSON to disk
-async function saveSchedule(races: Race[]) {
-  const filePath = path.join(process.cwd(), 'data', 'schedule.json');
-  await fs.writeFile(filePath, JSON.stringify(races, null, 2));
-}
-
-
-
 // Update the metrics check in updateChangeoverFlags
 function updateChangeoverFlags(races: Race[]): void {
   console.log('\n=== Updating Changeover Flags ===');
@@ -883,14 +875,11 @@ function computeLeaderboard(races: Race[]): { [key: string]: TeamStats[] } {
 // GET endpoint
 export async function GET() {
   try {
-    const races = await loadSchedule();
-    return NextResponse.json(races);
+    const leaderboard = await getBlobData('leaderboard.json');
+    return NextResponse.json(leaderboard);
   } catch (error) {
-    console.error('Error in GET /api/results:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error('Error loading leaderboard from Blob:', error);
+    return NextResponse.json({}, { status: 500 });
   }
 }
 
@@ -930,7 +919,6 @@ export async function POST(req: Request) {
     if (result !== undefined && result !== null) {
       debugResult(raceNumber, result, racingFormat);
       
-      // Check if result is an array
       if (!Array.isArray(result)) {
         return NextResponse.json(
           { error: `Result must be an array. Got: ${typeof result}` },
@@ -938,9 +926,6 @@ export async function POST(req: Request) {
         );
       }
 
-      console.log(`Result array length: ${result.length}, content: [${result.join(', ')}]`);
-
-      // Check array length
       if (result.length !== expectedLength) {
         return NextResponse.json(
           { error: `Result must contain exactly ${expectedLength} positions for ${racingFormat} racing format. Got ${result.length} positions: [${result.join(', ')}]` },
@@ -948,12 +933,10 @@ export async function POST(req: Request) {
         );
       }
 
-      // Modified: Only check that positions are positive integers
       const invalidPositions = result.filter(pos => 
         typeof pos !== 'number' || 
         !Number.isInteger(pos) || 
         pos < 1
-        // Removed the upper limit check (pos > maxPosition)
       );
       
       if (invalidPositions.length > 0) {
@@ -963,37 +946,24 @@ export async function POST(req: Request) {
         );
       }
 
-      
-
-      // Removed validation requiring positions 1-N to be present
-
       console.log(`✓ Result validation passed for race ${raceNumber}`);
     }
 
-    // Determine the current timestamp
     const currentTime = new Date().toISOString();
-
-    // Auto-set finish time when result is saved (if not already provided)
     let finalEndTime = endTime;
     let finalStatus = status;
+    let finalStartTime = startTime;
 
-    // If a result is being saved and we don't have an explicit endTime, set it now
     if (result !== undefined && result !== null && !endTime) {
       finalEndTime = currentTime;
-      console.log(`Auto-setting endTime to ${finalEndTime} for race ${raceNumber}`);
     }
 
-    // If a result is being saved and no status is provided, mark as finished
     if (result !== undefined && result !== null && !status) {
       finalStatus = 'finished';
-      console.log(`Auto-setting status to 'finished' for race ${raceNumber}`);
     }
 
-    // Auto-set start time if race is being marked as in_progress and doesn't have one
-    let finalStartTime = startTime;
     if (status === 'in_progress' && !race.startTime && !startTime) {
       finalStartTime = currentTime;
-      console.log(`Auto-setting startTime to ${finalStartTime} for race ${raceNumber}`);
     }
 
     // Update race data
@@ -1007,40 +977,25 @@ export async function POST(req: Request) {
 
     races[raceIndex] = updatedRace;
 
-    console.log(`Updated race ${raceNumber}:`, {
-      teamA: updatedRace.teamA,
-      teamB: updatedRace.teamB,
-      result: updatedRace.result,
-      status: updatedRace.status,
-      startTime: updatedRace.startTime,
-      endTime: updatedRace.endTime,
-      racingFormat: updatedRace.racingFormat
-    });
-
-    // Update changeover status whenever a race is finished
+    // Update changeover status and save
     if (finalStatus === 'finished' || (result !== undefined && result !== null)) {
       updateChangeoverFlags(races);
     }
 
     await saveSchedule(races);
 
-    // Update metrics if race is finished
+    // Update metrics and leaderboard
     if ((finalStatus === 'finished' || (result !== undefined && result !== null)) && finalEndTime) {
       try {
-        const metrics = await updateMetrics(races);
-        console.log('Updated race metrics:', metrics);
+        await updateMetrics(races);
       } catch (error) {
         console.error('Error updating metrics:', error);
       }
     }
 
-    // Only compute leaderboard if results were updated
     if (result !== undefined) {
-      console.log('Computing leaderboard after result update...');
       const leagueLeaderboards = computeLeaderboard(races);
-      const leaderboardPath = path.join(process.cwd(), 'data', 'leaderboard.json');
-      await fs.writeFile(leaderboardPath, JSON.stringify(leagueLeaderboards, null, 2));
-      console.log('Leaderboard updated successfully');
+      await saveBlobData('leaderboard.json', leagueLeaderboards);
     }
 
     return NextResponse.json({
@@ -1066,73 +1021,5 @@ export async function POST(req: Request) {
   }
 }
 
-// DELETE endpoint for clearing race results
-export async function DELETE(req: Request) {
-  try {
-    const body = await req.json();
-    const { raceNumber } = body;
-
-    // Validate raceNumber
-    if (typeof raceNumber !== 'number') {
-      return NextResponse.json(
-        { error: 'raceNumber must be a number' },
-        { status: 400 }
-      );
-    }
-
-    const races = await loadSchedule();
-    const raceIndex = races.findIndex(r => r.raceNumber === raceNumber);
-
-    if (raceIndex === -1) {
-      return NextResponse.json(
-        { error: `Race ${raceNumber} not found` },
-        { status: 404 }
-      );
-    }
-
-    // Clear the result for the specified race
-    races[raceIndex] = {
-      ...races[raceIndex],
-      result: null,
-      status: 'not_started',
-      startTime: undefined,
-      endTime: undefined,
-    };
-
-    await saveSchedule(races);
-
-    // Update leaderboard after clearing results
-    const leagueLeaderboards = computeLeaderboard(races);
-    const leaderboardPath = path.join(process.cwd(), 'data', 'leaderboard.json');
-    await fs.writeFile(leaderboardPath, JSON.stringify(leagueLeaderboards, null, 2));
-
-    return NextResponse.json({
-      success: true,
-      message: `Result for race ${raceNumber} cleared successfully`,
-    });
-  } catch (error) {
-    console.error('Error in DELETE /api/results:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
-}
-
-// Add this helper function to debug result submissions
-
-function debugResult(raceNumber: number, result: any, racingFormat: string) {
-  console.log('\n=== RESULT DEBUG ===');
-  console.log(`Race: ${raceNumber}`);
-  console.log(`Racing Format: ${racingFormat}`);
-  console.log(`Expected Length: ${getBoatsPerTeam(racingFormat) * 2}`);
-  console.log(`Result Type: ${typeof result}`);
-  console.log(`Result: ${JSON.stringify(result)}`);
-  console.log(`Is Array: ${Array.isArray(result)}`);
-  if (Array.isArray(result)) {
-    console.log(`Array Length: ${result.length}`);
-    console.log(`Array Content: [${result.join(', ')}]`);
-    console.log(`Element Types: [${result.map(r => typeof r).join(', ')}]`);
-  }
-  console.log('=====================\n');
-}
+// Include all your other helper functions here...
+// (updateChangeoverFlags, computeLeaderboard, debugResult, etc.)

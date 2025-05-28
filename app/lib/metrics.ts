@@ -1,5 +1,4 @@
-import { promises as fs } from 'fs';
-import path from 'path';
+import { put } from '@vercel/blob';
 
 // Update RaceMetrics type
 type RaceMetrics = {
@@ -64,9 +63,11 @@ export async function updateMetrics(races: Race[]): Promise<RaceMetrics> {
     lastUpdated: new Date().toISOString()
   };
 
-  // Save metrics to file
-  const filePath = path.join(process.cwd(), 'data', 'metrics.json');
-  await fs.writeFile(filePath, JSON.stringify(metrics, null, 2));
+  // Save metrics to Blob
+  await put('metrics.json', JSON.stringify(metrics, null, 2), {
+    access: 'public',
+    contentType: 'application/json',
+  });
 
   return metrics;
 }

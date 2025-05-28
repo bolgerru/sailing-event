@@ -1,16 +1,35 @@
 import { NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { put } from '@vercel/blob';
+
+async function getBlobData(fileName: string) {
+  try {
+    const blobUrl = `https://${process.env.BLOB_READ_WRITE_TOKEN?.split('vercel_blob_rw_')[1]?.split('_')[0]}.public.blob.vercel-storage.com/${fileName}`;
+    const response = await fetch(blobUrl);
+    if (response.ok) {
+      return await response.json();
+    }
+    return null;
+  } catch (error) {
+    console.log(`${fileName} not found in blob`);
+    return null;
+  }
+}
 
 export async function GET() {
   try {
-    const filePath = path.join(process.cwd(), 'data', 'metrics.json');
-    const fileContents = await fs.readFile(filePath, 'utf-8');
-    const metrics = JSON.parse(fileContents);
+    const metrics = await getBlobData('metrics.json');
 
-    // If old format metrics, add the ms value
+    if (!metrics) {
+      return NextResponse.json({
+        averageRaceLength: '0m 0s',
+        timeBetweenRaces: '3m 0s',
+        timeBetweenRacesMs: 180000,
+        lastUpdated: new Date().toISOString()
+      });
+    }
+
+    // Ensure backward compatibility
     if (!metrics.timeBetweenRacesMs) {
-      // Parse the string format "Xm Ys" to milliseconds
       const [min, sec] = metrics.timeBetweenRaces
         .replace('m', '')
         .replace('s', '')
@@ -22,11 +41,11 @@ export async function GET() {
 
     return NextResponse.json(metrics);
   } catch (error) {
-    console.error('Error reading metrics:', error);
+    console.error('Error reading metrics from Blob:', error);
     return NextResponse.json({
       averageRaceLength: '0m 0s',
-      timeBetweenRaces: '0m 0s',
-      timeBetweenRacesMs: 180000, // 3 minutes default
+      timeBetweenRaces: '3m 0s',
+      timeBetweenRacesMs: 180000,
       lastUpdated: new Date().toISOString()
     });
   }
