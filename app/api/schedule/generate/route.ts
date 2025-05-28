@@ -1,6 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { put } from '@vercel/blob';
+
+// Blob helper functions
+async function getBlobData(fileName: string) {
+  try {
+    const blobUrl = `https://${process.env.BLOB_READ_WRITE_TOKEN?.split('vercel_blob_rw_')[1]?.split('_')[0]}.public.blob.vercel-storage.com/${fileName}`;
+    const response = await fetch(blobUrl);
+    if (response.ok) {
+      return await response.json();
+    }
+    return fileName === 'settings.json' ? null : [];
+  } catch (error) {
+    console.log(`${fileName} not found in blob, returning default`);
+    return fileName === 'settings.json' ? null : [];
+  }
+}
+
+async function saveBlobData(fileName: string, data: any) {
+  const blob = await put(fileName, JSON.stringify(data, null, 2), {
+    access: 'public',
+    contentType: 'application/json',
+  });
+  return blob;
+}
 
 interface BoatSet {
   id: string;
@@ -243,18 +265,20 @@ export async function POST(req: NextRequest) {
       };
     });
 
-    // Write processed schedule to file
-    const outputPath = path.join(process.cwd(), 'data', 'schedule.json');
-    await fs.writeFile(outputPath, JSON.stringify(processedRaces, null, 2));
+    // Save processed schedule to Blob instead of file system
+    await saveBlobData('schedule.json', processedRaces);
 
-    // Reset metrics
-    const metricsPath = path.join(process.cwd(), 'data', 'metrics.json');
+    // Reset metrics in Blob
     const initialMetrics = {
       averageRaceLength: '0m 0s',
       timeBetweenRaces: '0m 0s',
+      timeBetweenRacesMs: 180000,
       lastUpdated: new Date().toISOString()
     };
-    await fs.writeFile(metricsPath, JSON.stringify(initialMetrics, null, 2));
+    await saveBlobData('metrics.json', initialMetrics);
+
+    // Reset leaderboard in Blob
+    await saveBlobData('leaderboard.json', {});
 
     console.log(`Schedule generated successfully with ${processedRaces.length} races in ${racingFormat} format`);
 

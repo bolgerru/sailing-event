@@ -1,8 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { put } from '@vercel/blob';
 
 type RacingFormat = '2v2' | '3v3' | '4v4';
+
+// Blob helper functions
+async function getBlobData(fileName: string) {
+  try {
+    const blobUrl = `https://${process.env.BLOB_READ_WRITE_TOKEN?.split('vercel_blob_rw_')[1]?.split('_')[0]}.public.blob.vercel-storage.com/${fileName}`;
+    const response = await fetch(blobUrl);
+    if (response.ok) {
+      return await response.json();
+    }
+    return [];
+  } catch (error) {
+    console.log(`${fileName} not found in blob, returning empty array`);
+    return [];
+  }
+}
+
+async function saveBlobData(fileName: string, data: any) {
+  const blob = await put(fileName, JSON.stringify(data, null, 2), {
+    access: 'public',
+    contentType: 'application/json',
+  });
+  return blob;
+}
 
 interface BoatSet {
   id: string;
@@ -221,17 +243,8 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
-    // Load existing schedule
-    const dataFile = path.join(process.cwd(), 'data', 'schedule.json');
-    let existingRaces: Race[] = [];
-    
-    try {
-      const data = await fs.readFile(dataFile, 'utf8');
-      existingRaces = JSON.parse(data);
-    } catch (error) {
-      // If file doesn't exist, start with empty array
-      existingRaces = [];
-    }
+    // Load existing schedule from Blob
+    let existingRaces: Race[] = await getBlobData('schedule.json');
 
     // Find the highest race number to continue numbering
     let globalRaceNumber = existingRaces.length > 0 
@@ -378,7 +391,7 @@ export async function POST(request: NextRequest) {
       const allRaces = [...existingRaces, ...array];
       const boatSetRaces = allRaces.filter(r => 
         r.boats.teamA === race.boats.teamA && 
-        r.boats.teamB === race.boats.teamB
+        r.boats.teamB === race.boats.team2Color
       );
       
       // Find position of current race within its boat set
@@ -394,8 +407,8 @@ export async function POST(request: NextRequest) {
     // Combine existing and new races
     const allRaces = [...existingRaces, ...processedNewRaces];
 
-    // Write updated schedule to file
-    await fs.writeFile(dataFile, JSON.stringify(allRaces, null, 2));
+    // Save updated schedule to Blob instead of file system
+    await saveBlobData('schedule.json', allRaces);
 
     return NextResponse.json({ 
       message: `Added ${newRaces.length} races to the schedule`,
