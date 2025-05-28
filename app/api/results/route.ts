@@ -36,6 +36,23 @@ type Race = {
   racingFormat?: '2v2' | '3v3' | '4v4';
 };
 
+// Add missing type definitions
+type H2HStats = {
+  team: string;
+  wins: number;
+  totalGames: number;
+  totalPoints: number;
+  winPercentage: number;
+  avgPoints: number;
+  tiebreakNote?: string;
+};
+
+type CommonOpponentStats = {
+  team: string;
+  points: number;
+  tiebreakNote?: string;
+};
+
 // Blob helper functions
 async function getBlobData(fileName: string) {
   try {
@@ -75,6 +92,19 @@ async function loadSchedule(): Promise<Race[]> {
 
 async function saveSchedule(races: Race[]) {
   await saveBlobData('schedule.json', races);
+}
+
+// Add the missing debugResult function
+function debugResult(raceNumber: number, result: any, racingFormat: string) {
+  console.log(`\n--- Debugging Race ${raceNumber} Result ---`);
+  console.log('Racing format:', racingFormat);
+  console.log('Result received:', result);
+  console.log('Result type:', typeof result);
+  console.log('Is array:', Array.isArray(result));
+  if (Array.isArray(result)) {
+    console.log('Array length:', result.length);
+    console.log('Array contents:', result.map((v, i) => `[${i}]=${v} (${typeof v})`).join(', '));
+  }
 }
 
 // Keep all your existing business logic functions
@@ -1021,5 +1051,5 @@ export async function POST(req: Request) {
   }
 }
 
-// Include all your other helper functions here...
-// (updateChangeoverFlags, computeLeaderboard, debugResult, etc.)
+// Keep all your other helper functions exactly as they are
+// (getHeadToHeadRecord, resolveTeamGroup, updateChangeoverFlags, computeLeaderboard, etc.)
