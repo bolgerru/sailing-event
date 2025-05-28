@@ -221,6 +221,43 @@ function getKnockoutStageDisplayName(stage: string): string {
   }
 }
 
+// Add helper function to calculate match series status
+function getMatchSeriesStatus(races: Race[], teamA: string, teamB: string, stage: string, matchNumber?: number) {
+  // Find all races for this specific match
+  const matchRaces = races.filter(race => 
+    race.isKnockout && 
+    race.stage === stage && 
+    race.matchNumber === matchNumber &&
+    ((race.teamA === teamA && race.teamB === teamB) || 
+     (race.teamA === teamB && race.teamB === teamA))
+  );
+
+  const completedRaces = matchRaces.filter(race => isValidResult(race.result));
+  const totalRaces = matchRaces.length;
+  
+  // Count wins for each team
+  let teamAWins = 0;
+  let teamBWins = 0;
+  
+  completedRaces.forEach(race => {
+    const winner = getWinner(race.result, race.teamA, race.teamB);
+    if (winner === teamA) teamAWins++;
+    if (winner === teamB) teamBWins++;
+  });
+
+  const racesToWin = Math.ceil(totalRaces / 2); // Best of X format
+  
+  return {
+    teamAWins,
+    teamBWins,
+    completedRaces: completedRaces.length,
+    totalRaces,
+    racesToWin,
+    seriesWinner: teamAWins >= racesToWin ? teamA : teamBWins >= racesToWin ? teamB : null,
+    isSeriesComplete: teamAWins >= racesToWin || teamBWins >= racesToWin
+  };
+}
+
 export default function SchedulePage() {
   const [races, setRaces] = useState<Race[]>([]);
   const [filter, setFilter] = useState<string>('all');
@@ -520,120 +557,121 @@ export default function SchedulePage() {
             </div>
           )}
 
-          {/* Completed Knockout Results - This should be the ONLY one with the ref */}
+          
+
+          {/* Knockout Match Series Status - Shows who's winning/won the best-of matches */}
           {completedKnockoutRaces.length > 0 && (
-            <div className="space-y-4" ref={knockoutResultsRef}>
+            <div className="space-y-4">
               <h3 className="text-lg font-semibold text-purple-700 border-b border-purple-300 pb-2">
-                ✅ Knockout Results
+                🏆 Match Series Status
               </h3>
               <div className="grid gap-4">
-                {completedKnockoutRaces.map((race) => {
-                  const winner = getWinner(race.result, race.teamA, race.teamB);
+                {/* Group knockout races by match */}
+                {Array.from(new Set(completedKnockoutRaces.map(race => 
+                  `${race.stage}-${race.matchNumber}-${race.teamA}-${race.teamB}`
+                ))).map(matchKey => {
+                  // Parse the match key to get details - FIXED PARSING
+                  const parts = matchKey.split('-');
+                  const stage = parts[0];
+                  const matchNumber = parseInt(parts[1]);
+                  const teamA = parts[2];
+                  const teamB = parts[3];
+                  
+                  // Find a representative race for this match
+                  const representativeRace = completedKnockoutRaces.find(race => 
+                    race.stage === stage && 
+                    race.matchNumber === matchNumber &&
+                    ((race.teamA === teamA && race.teamB === teamB) || 
+                     (race.teamA === teamB && race.teamB === teamA))
+                  );
+
+                  if (!representativeRace) return null;
+
+                  const seriesStatus = getMatchSeriesStatus(races, teamA, teamB, stage, matchNumber);
 
                   return (
                     <div
-                      key={race.raceNumber}
-                      className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
-                      onClick={() => setExpandedRace(expandedRace === race.raceNumber ? null : race.raceNumber)}
+                      key={matchKey}
+                      className="bg-white shadow-lg rounded-lg overflow-hidden border-l-4 border-purple-500"
                     >
-                      <div className="flex items-center border-b border-gray-100">
-                        <div className="w-16 md:w-24 h-16 md:h-24 flex items-center justify-center bg-green-600 text-white">
-                          <span className="text-2xl md:text-4xl font-bold">
-                            {race.raceNumber}
-                          </span>
-                        </div>
-                        <div className="flex-1 p-3">
-                          <div className="flex flex-col items-center">
-                            <div className="text-base md:text-lg font-semibold text-center w-full">
-                              <span className="text-purple-600">{race.teamA}</span>
-                              <span className="mx-1 md:mx-2 text-gray-400">vs</span>
-                              <span className="text-purple-600">{race.teamB}</span>
-                            </div>
-                            <div className="text-xs md:text-sm text-gray-500 text-center mt-1">
-                              ({race.boats.teamA}) vs ({race.boats.teamB})
-                              {race.result && (
-                                <span className="ml-2 text-blue-600 font-medium">
-                                  [{getRaceFormat(race.result)}]
-                                </span>
-                              )}
-                            </div>
-                            <div className="mt-2 flex gap-2 flex-wrap justify-center">
-                              {race.stage && (
-                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getKnockoutStageTagColors(race.stage)}`}>
-                                  {getKnockoutStageDisplayName(race.stage)}
-                                  {race.matchNumber && ` #${race.matchNumber}`}
-                                </span>
-                              )}
-                              {race.league && (
-                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getLeagueTagColors(race.league)}`}>
-                                  {race.league === 'main' ? 'Overall' : `${race.league} League`}
-                                </span>
-                              )}
-                            </div>
+                      <div className="p-4">
+                        <div className="flex justify-between items-center mb-4">
+                          <div className="flex gap-2 flex-wrap">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getKnockoutStageTagColors(stage)}`}>
+                              {getKnockoutStageDisplayName(stage)} #{matchNumber}
+                            </span>
+                            {representativeRace.league && (
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getLeagueTagColors(representativeRace.league)}`}>
+                                {representativeRace.league === 'main' ? 'Overall' : `${representativeRace.league} League`}
+                              </span>
+                            )}
                           </div>
+                          
+                          {seriesStatus.isSeriesComplete && (
+                            <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                              ✅ Series Complete
+                            </span>
+                          )}
                         </div>
-                      </div>
 
-                      {expandedRace === race.raceNumber && (
-                        <div className="p-4 bg-green-50 border-t border-green-100">
-                          <div className="space-y-2 text-sm">
-                            {race.startTime && (
-                              <p className="text-gray-600">
-                                Started: {new Date(race.startTime).toLocaleString()}
-                              </p>
-                            )}
-                            {race.endTime && (
-                              <p className="text-gray-600">
-                                Finished: {new Date(race.endTime).toLocaleString()}
-                              </p>
-                            )}
-                            {race.startTime && race.endTime && (
-                              <p className="text-gray-600">
-                                Duration: {formatDuration(new Date(race.endTime).getTime() - new Date(race.startTime).getTime())}
-                              </p>
-                            )}
+                        {/* Teams and Series Score */}
+                        <div className="flex justify-between items-center mb-4">
+                          <div className="text-center flex-1">
+                            <h3 className={`text-lg font-bold ${seriesStatus.seriesWinner === teamA ? 'text-green-600' : 'text-gray-800'}`}>
+                              {teamA}
+                            </h3>
+                            <div className={`text-3xl font-bold ${seriesStatus.seriesWinner === teamA ? 'text-green-600' : 'text-gray-600'}`}>
+                              {seriesStatus.teamAWins}
+                            </div>
+                          </div>
+                          
+                          <div className="px-4 text-center">
+                            <div className="text-gray-400 font-bold text-sm">BEST OF {seriesStatus.totalRaces}</div>
+                            <div className="text-gray-400 font-bold text-lg">-</div>
+                            <div className="text-xs text-gray-500">
+                              ({seriesStatus.completedRaces}/{seriesStatus.totalRaces} races)
+                            </div>
+                          </div>
+                          
+                          <div className="text-center flex-1">
+                            <h3 className={`text-lg font-bold ${seriesStatus.seriesWinner === teamB ? 'text-green-600' : 'text-gray-800'}`}>
+                              {teamB}
+                            </h3>
+                            <div className={`text-3xl font-bold ${seriesStatus.seriesWinner === teamB ? 'text-green-600' : 'text-gray-600'}`}>
+                              {seriesStatus.teamBWins}
+                            </div>
                           </div>
                         </div>
-                      )}
 
-                      <div className="p-4 bg-green-50">
-                        <div className="text-center mb-4">
-                          <h3 className="text-lg font-semibold text-green-600">
-                            🏆 Winner: {winner}
-                          </h3>
-                        </div>
-                        <div className="flex justify-around">
-                          <div className="flex-1 text-center">
-                            <h4 className="font-semibold text-green-600">{race.teamA}</h4>
-                            <div className="flex justify-center gap-2 mt-2">
-                              {race.result!.slice(0, race.result!.length / 2).map((pos, i) => (
-                                <div
-                                  key={i}
-                                  className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-bold ${
-                                    winner === race.teamA ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                  }`}
-                                >
-                                  {pos}
-                                </div>
-                              ))}
+                        {/* Series Winner */}
+                        {seriesStatus.seriesWinner && (
+                          <div className="text-center bg-green-50 p-3 rounded-md">
+                            <h4 className="text-lg font-semibold text-green-600">
+                              🏆 Match Winner: {seriesStatus.seriesWinner}
+                            </h4>
+                            <p className="text-sm text-gray-600 mt-1">
+                              Won {seriesStatus.seriesWinner === teamA ? seriesStatus.teamAWins : seriesStatus.teamBWins} out of {seriesStatus.racesToWin} races needed
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Progress Bar */}
+                        {!seriesStatus.isSeriesComplete && (
+                          <div className="mt-4">
+                            <div className="flex justify-between text-xs text-gray-600 mb-1">
+                              <span>{teamA} needs {seriesStatus.racesToWin - seriesStatus.teamAWins} more</span>
+                              <span>{teamB} needs {seriesStatus.racesToWin - seriesStatus.teamBWins} more</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div 
+                                className="bg-green-600 h-2 rounded-full transition-all duration-300" 
+                                style={{
+                                  width: `${Math.max(seriesStatus.teamAWins, seriesStatus.teamBWins) / seriesStatus.racesToWin * 100}%`
+                                }}
+                              ></div>
                             </div>
                           </div>
-                          <div className="flex-1 text-center">
-                            <h4 className="font-semibold text-green-600">{race.teamB}</h4>
-                            <div className="flex justify-center gap-2 mt-2">
-                              {race.result!.slice(race.result!.length / 2).map((pos, i) => (
-                                <div
-                                  key={i}
-                                  className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-bold ${
-                                    winner === race.teamB ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                  }`}
-                                >
-                                  {pos}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
+                        )}
                       </div>
                     </div>
                   );
