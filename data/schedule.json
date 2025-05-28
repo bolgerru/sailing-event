@@ -9,17 +9,8 @@
       "teamB": "Black"
     },
     "racingFormat": "2v2",
-    "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-28T15:33:15.377Z",
-    "endTime": "2025-05-28T15:33:36.259Z",
-    "result": [
-      1,
-      2,
-      3,
-      4
-    ]
+    "isLaunching": true,
+    "goToChangeover": false
   },
   {
     "raceNumber": 2,
@@ -31,17 +22,8 @@
       "teamB": "White"
     },
     "racingFormat": "2v2",
-    "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "startTime": "2025-05-28T15:33:23.390Z",
-    "endTime": "2025-05-28T15:33:47.466Z",
-    "result": [
-      1,
-      2,
-      3,
-      4
-    ]
+    "isLaunching": true,
+    "goToChangeover": false
   },
   {
     "raceNumber": 3,
@@ -54,15 +36,7 @@
     },
     "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false,
-    "status": "finished",
-    "endTime": "2025-05-28T15:33:52.847Z",
-    "result": [
-      1,
-      2,
-      3,
-      4
-    ]
+    "goToChangeover": true
   },
   {
     "raceNumber": 4,
@@ -88,7 +62,7 @@
     },
     "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": true
+    "goToChangeover": false
   },
   {
     "raceNumber": 6,
@@ -101,7 +75,7 @@
     },
     "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": true
+    "goToChangeover": false
   },
   {
     "raceNumber": 7,
@@ -114,7 +88,7 @@
     },
     "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": true
+    "goToChangeover": false
   },
   {
     "raceNumber": 8,
@@ -180,274 +154,5 @@
     "racingFormat": "2v2",
     "isLaunching": false,
     "goToChangeover": false
-  },
-  {
-    "raceNumber": 13,
-    "teamA": "gold1",
-    "teamB": "gold4",
-    "league": "Gold",
-    "boats": {
-      "teamA": "Red",
-      "teamB": "Black",
-      "setId": "set-1748446337904"
-    },
-    "isKnockout": true,
-    "bestOf": 3,
-    "stage": "semi",
-    "matchNumber": 1,
-    "status": "finished",
-    "racingFormat": "2v2",
-    "endTime": "2025-05-28T15:37:28.443Z",
-    "result": [
-      1,
-      2,
-      3,
-      4
-    ],
-    "goToChangeover": false,
-    "isLaunching": false
-  },
-  {
-    "raceNumber": 14,
-    "teamA": "gold2",
-    "teamB": "gold3",
-    "league": "Gold",
-    "boats": {
-      "teamA": "Blue",
-      "teamB": "White",
-      "setId": "set-1748446355295"
-    },
-    "isKnockout": true,
-    "bestOf": 3,
-    "stage": "semi",
-    "matchNumber": 2,
-    "status": "finished",
-    "racingFormat": "2v2",
-    "goToChangeover": false,
-    "isLaunching": false,
-    "endTime": "2025-05-28T15:37:32.686Z",
-    "result": [
-      1,
-      2,
-      3,
-      4
-    ]
-  },
-  {
-    "raceNumber": 15,
-    "teamA": "gold1",
-    "teamB": "gold4",
-    "league": "Gold",
-    "boats": {
-      "teamA": "Red",
-      "teamB": "Black",
-      "setId": "set-1748446337904"
-    },
-    "isKnockout": true,
-    "bestOf": 3,
-    "stage": "semi",
-    "matchNumber": 1,
-    "status": "finished",
-    "racingFormat": "2v2",
-    "goToChangeover": false,
-    "isLaunching": false,
-    "startTime": "2025-05-28T15:37:40.440Z",
-    "endTime": "2025-05-28T15:38:03.471Z",
-    "result": [
-      1,
-      2,
-      3,
-      4
-    ]
-  },
-  {
-    "raceNumber": 16,
-    "teamA": "gold2",
-    "teamB": "gold3",
-    "league": "Gold",
-    "boats": {
-      "teamA": "Blue",
-      "teamB": "White",
-      "setId": "set-1748446355295"
-    },
-    "isKnockout": true,
-    "bestOf": 3,
-    "stage": "semi",
-    "matchNumber": 2,
-    "status": "finished",
-    "racingFormat": "2v2",
-    "goToChangeover": false,
-    "isLaunching": false,
-    "result": [
-      3,
-      4,
-      1,
-      2
-    ],
-    "endTime": "2025-05-28T15:39:02.025Z"
-  },
-  {
-    "raceNumber": 17,
-    "teamA": "gold1",
-    "teamB": "gold4",
-    "league": "Gold",
-    "boats": {
-      "teamA": "Red",
-      "teamB": "Black",
-      "setId": "set-1748446337904"
-    },
-    "isKnockout": true,
-    "bestOf": 3,
-    "stage": "semi",
-    "matchNumber": 1,
-    "status": "not_started",
-    "racingFormat": "2v2",
-    "goToChangeover": true,
-    "isLaunching": false
-  },
-  {
-    "raceNumber": 18,
-    "teamA": "gold2",
-    "teamB": "gold3",
-    "league": "Gold",
-    "boats": {
-      "teamA": "Blue",
-      "teamB": "White",
-      "setId": "set-1748446355295"
-    },
-    "isKnockout": true,
-    "bestOf": 3,
-    "stage": "semi",
-    "matchNumber": 2,
-    "status": "finished",
-    "racingFormat": "2v2",
-    "goToChangeover": false,
-    "isLaunching": false,
-    "endTime": "2025-05-28T15:39:20.331Z",
-    "result": [
-      3,
-      4,
-      1,
-      2
-    ]
-  },
-  {
-    "raceNumber": 19,
-    "teamA": "gold1",
-    "teamB": "gold3",
-    "league": "Gold",
-    "boats": {
-      "teamA": "Red",
-      "teamB": "Black",
-      "setId": "set-1748446337904"
-    },
-    "isKnockout": true,
-    "bestOf": 5,
-    "stage": "final",
-    "matchNumber": 1,
-    "status": "finished",
-    "racingFormat": "2v2",
-    "startTime": "2025-05-28T15:40:00.940Z",
-    "endTime": "2025-05-28T15:40:44.482Z",
-    "result": [
-      1,
-      2,
-      3,
-      4
-    ],
-    "goToChangeover": false,
-    "isLaunching": false
-  },
-  {
-    "raceNumber": 20,
-    "teamA": "gold1",
-    "teamB": "gold3",
-    "league": "Gold",
-    "boats": {
-      "teamA": "Red",
-      "teamB": "Black",
-      "setId": "set-1748446337904"
-    },
-    "isKnockout": true,
-    "bestOf": 5,
-    "stage": "final",
-    "matchNumber": 1,
-    "status": "finished",
-    "racingFormat": "2v2",
-    "startTime": "2025-05-28T15:40:14.675Z",
-    "goToChangeover": false,
-    "isLaunching": false,
-    "endTime": "2025-05-28T15:40:48.555Z",
-    "result": [
-      1,
-      2,
-      3,
-      4
-    ]
-  },
-  {
-    "raceNumber": 21,
-    "teamA": "gold1",
-    "teamB": "gold3",
-    "league": "Gold",
-    "boats": {
-      "teamA": "Red",
-      "teamB": "Black",
-      "setId": "set-1748446337904"
-    },
-    "isKnockout": true,
-    "bestOf": 5,
-    "stage": "final",
-    "matchNumber": 1,
-    "status": "finished",
-    "racingFormat": "2v2",
-    "startTime": "2025-05-28T15:40:31.969Z",
-    "goToChangeover": false,
-    "isLaunching": false,
-    "endTime": "2025-05-28T15:40:53.213Z",
-    "result": [
-      1,
-      2,
-      3,
-      4
-    ]
-  },
-  {
-    "raceNumber": 22,
-    "teamA": "gold1",
-    "teamB": "gold3",
-    "league": "Gold",
-    "boats": {
-      "teamA": "Red",
-      "teamB": "Black",
-      "setId": "set-1748446337904"
-    },
-    "isKnockout": true,
-    "bestOf": 5,
-    "stage": "final",
-    "matchNumber": 1,
-    "status": "not_started",
-    "racingFormat": "2v2",
-    "goToChangeover": true,
-    "isLaunching": false
-  },
-  {
-    "raceNumber": 23,
-    "teamA": "gold1",
-    "teamB": "gold3",
-    "league": "Gold",
-    "boats": {
-      "teamA": "Red",
-      "teamB": "Black",
-      "setId": "set-1748446337904"
-    },
-    "isKnockout": true,
-    "bestOf": 5,
-    "stage": "final",
-    "matchNumber": 1,
-    "status": "not_started",
-    "racingFormat": "2v2",
-    "goToChangeover": true,
-    "isLaunching": false
   }
 ]
