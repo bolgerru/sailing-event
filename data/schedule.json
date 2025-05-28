@@ -8,8 +8,15 @@
       "teamA": "red",
       "teamB": "black"
     },
+    "racingFormat": "2v2",
     "isLaunching": true,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      2,
+      3,
+      4
+    ]
   },
   {
     "raceNumber": 2,
@@ -20,8 +27,15 @@
       "teamA": "blue",
       "teamB": "white"
     },
+    "racingFormat": "2v2",
     "isLaunching": true,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      3,
+      2,
+      4
+    ]
   },
   {
     "raceNumber": 3,
@@ -32,8 +46,15 @@
       "teamA": "red",
       "teamB": "black"
     },
+    "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": true
+    "goToChangeover": true,
+    "result": [
+      1,
+      3,
+      2,
+      4
+    ]
   },
   {
     "raceNumber": 4,
@@ -44,8 +65,15 @@
       "teamA": "blue",
       "teamB": "white"
     },
+    "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": true
+    "goToChangeover": true,
+    "result": [
+      1,
+      2,
+      3,
+      4
+    ]
   },
   {
     "raceNumber": 5,
@@ -56,8 +84,15 @@
       "teamA": "red",
       "teamB": "black"
     },
+    "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      4,
+      2,
+      3
+    ]
   },
   {
     "raceNumber": 6,
@@ -68,8 +103,15 @@
       "teamA": "blue",
       "teamB": "white"
     },
+    "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      2,
+      3,
+      4
+    ]
   },
   {
     "raceNumber": 7,
@@ -80,8 +122,15 @@
       "teamA": "red",
       "teamB": "black"
     },
+    "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      2,
+      3,
+      4
+    ]
   },
   {
     "raceNumber": 8,
@@ -92,8 +141,15 @@
       "teamA": "blue",
       "teamB": "white"
     },
+    "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      2,
+      3,
+      4
+    ]
   },
   {
     "raceNumber": 9,
@@ -104,8 +160,15 @@
       "teamA": "red",
       "teamB": "black"
     },
+    "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      2,
+      3,
+      4
+    ]
   },
   {
     "raceNumber": 10,
@@ -116,8 +179,15 @@
       "teamA": "blue",
       "teamB": "white"
     },
+    "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      2,
+      3,
+      4
+    ]
   },
   {
     "raceNumber": 11,
@@ -128,8 +198,15 @@
       "teamA": "red",
       "teamB": "black"
     },
+    "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      4,
+      2,
+      3
+    ]
   },
   {
     "raceNumber": 12,
@@ -140,8 +217,15 @@
       "teamA": "blue",
       "teamB": "white"
     },
+    "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      2,
+      3,
+      4
+    ]
   },
   {
     "raceNumber": 13,
@@ -152,8 +236,15 @@
       "teamA": "red",
       "teamB": "black"
     },
+    "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      2,
+      3,
+      4
+    ]
   },
   {
     "raceNumber": 14,
@@ -164,8 +255,15 @@
       "teamA": "blue",
       "teamB": "white"
     },
+    "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      2,
+      3,
+      4
+    ]
   },
   {
     "raceNumber": 15,
@@ -176,8 +274,15 @@
       "teamA": "red",
       "teamB": "black"
     },
+    "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      2,
+      3,
+      4
+    ]
   },
   {
     "raceNumber": 16,
@@ -188,8 +293,15 @@
       "teamA": "blue",
       "teamB": "white"
     },
+    "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      2,
+      3,
+      4
+    ]
   },
   {
     "raceNumber": 17,
@@ -200,8 +312,15 @@
       "teamA": "red",
       "teamB": "black"
     },
+    "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      2,
+      3,
+      4
+    ]
   },
   {
     "raceNumber": 18,
@@ -212,8 +331,15 @@
       "teamA": "blue",
       "teamB": "white"
     },
+    "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      2,
+      3,
+      4
+    ]
   },
   {
     "raceNumber": 19,
@@ -224,8 +350,15 @@
       "teamA": "red",
       "teamB": "black"
     },
+    "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      2,
+      3,
+      4
+    ]
   },
   {
     "raceNumber": 20,
@@ -236,8 +369,15 @@
       "teamA": "blue",
       "teamB": "white"
     },
+    "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      2,
+      3,
+      4
+    ]
   },
   {
     "raceNumber": 21,
@@ -250,7 +390,13 @@
     },
     "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      2,
+      3,
+      4
+    ]
   },
   {
     "raceNumber": 22,
@@ -263,7 +409,13 @@
     },
     "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      3,
+      2,
+      4
+    ]
   },
   {
     "raceNumber": 23,
@@ -276,7 +428,13 @@
     },
     "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      3,
+      2,
+      4
+    ]
   },
   {
     "raceNumber": 24,
@@ -289,7 +447,13 @@
     },
     "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      3,
+      2,
+      4
+    ]
   },
   {
     "raceNumber": 25,
@@ -302,7 +466,13 @@
     },
     "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      3,
+      2,
+      4
+    ]
   },
   {
     "raceNumber": 26,
@@ -315,7 +485,13 @@
     },
     "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      3,
+      2,
+      4
+    ]
   },
   {
     "raceNumber": 27,
@@ -328,7 +504,13 @@
     },
     "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      3,
+      2,
+      4
+    ]
   },
   {
     "raceNumber": 28,
@@ -341,7 +523,13 @@
     },
     "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      3,
+      2,
+      4
+    ]
   },
   {
     "raceNumber": 29,
@@ -354,7 +542,13 @@
     },
     "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      3,
+      2,
+      4
+    ]
   },
   {
     "raceNumber": 30,
@@ -367,7 +561,13 @@
     },
     "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      3,
+      2,
+      4
+    ]
   },
   {
     "raceNumber": 31,
@@ -380,7 +580,13 @@
     },
     "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": false,
+    "result": [
+      1,
+      3,
+      2,
+      4
+    ]
   },
   {
     "raceNumber": 32,

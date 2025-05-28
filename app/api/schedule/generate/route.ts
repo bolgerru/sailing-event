@@ -23,6 +23,7 @@ interface Race {
   startTime?: string;       // Optional: add if you track timing
   endTime?: string;         // Optional: add if you track timing
   status?: string;         // Optional: add if you track status
+  racingFormat?: '2v2' | '3v3' | '4v4'; // Add this field
 }
 
 interface League {
@@ -86,8 +87,11 @@ function totalRacesPlayed(team: string, races: Race[]): number {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    const racingFormat = body.racingFormat || '3v3'; // Get racing format from request
     const allRaces: Race[] = [];
     let globalRaceNumber = 1;
+
+    console.log(`Generating schedule with ${racingFormat} racing format`);
 
     if (body.leagues) {
       const leagueQueues = body.leagues.map((league: League) => ({
@@ -122,7 +126,7 @@ export async function POST(req: NextRequest) {
               currentBoatSet
             );
 
-            // Add race
+            // Add race with racingFormat
             const race: Race = {
               raceNumber: globalRaceNumber++,
               teamA: selectedTeams.teamA,
@@ -131,7 +135,8 @@ export async function POST(req: NextRequest) {
               boats: {
                 teamA: currentBoatSet.team1Color,
                 teamB: currentBoatSet.team2Color,
-              }
+              },
+              racingFormat: racingFormat as '2v2' | '3v3' | '4v4' // Include racing format
             };
 
             queue.races.push(race);
@@ -201,7 +206,8 @@ export async function POST(req: NextRequest) {
           boats: {
             teamA: currentBoatSet.team1Color,
             teamB: currentBoatSet.team2Color,
-          }
+          },
+          racingFormat: racingFormat as '2v2' | '3v3' | '4v4' // Include racing format
         };
 
         leagueQueue.races.push(race);
@@ -215,6 +221,8 @@ export async function POST(req: NextRequest) {
         );
       }
     }
+
+    console.log(`Generated ${allRaces.length} races with ${racingFormat} format`);
 
     // After schedule is generated, before writing to file, add launching/changeover tags
     const processedRaces = allRaces.map((race, index, array) => {
@@ -230,7 +238,8 @@ export async function POST(req: NextRequest) {
       return {
         ...race,
         isLaunching: positionInSet === 0,     // First race of the set
-        goToChangeover: positionInSet === 1    // Second race of the set
+        goToChangeover: positionInSet === 1,   // Second race of the set
+        racingFormat: racingFormat as '2v2' | '3v3' | '4v4' // Ensure format is preserved
       };
     });
 
@@ -247,7 +256,12 @@ export async function POST(req: NextRequest) {
     };
     await fs.writeFile(metricsPath, JSON.stringify(initialMetrics, null, 2));
 
-    return NextResponse.json({ schedule: processedRaces });
+    console.log(`Schedule generated successfully with ${processedRaces.length} races in ${racingFormat} format`);
+
+    return NextResponse.json({ 
+      schedule: processedRaces,
+      message: `Generated ${processedRaces.length} races in ${racingFormat} format`
+    });
   } catch (error) {
     console.error('Error generating schedule:', error);
     return NextResponse.json(
