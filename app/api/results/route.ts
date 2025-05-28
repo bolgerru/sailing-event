@@ -948,53 +948,60 @@ export async function POST(req: Request) {
         );
       }
 
-      // Validate all positions are numbers within valid range
-      const maxPosition = expectedLength;
+      // Modified: Only check that positions are positive integers
       const invalidPositions = result.filter(pos => 
         typeof pos !== 'number' || 
         !Number.isInteger(pos) || 
-        pos < 1 || 
-        pos > maxPosition
+        pos < 1
+        // Removed the upper limit check (pos > maxPosition)
       );
       
       if (invalidPositions.length > 0) {
         return NextResponse.json(
-          { error: `All positions must be integers between 1 and ${maxPosition} for ${racingFormat} format. Invalid positions: [${invalidPositions.join(', ')}]. Got: [${result.join(', ')}]` },
+          { error: `All positions must be positive integers. Invalid positions: [${invalidPositions.join(', ')}]. Got: [${result.join(', ')}]` },
           { status: 400 }
         );
       }
 
-      // Validate no duplicate positions
-      const uniquePositions = new Set(result);
-      if (uniquePositions.size !== result.length) {
-        const duplicates = result.filter((pos, index) => result.indexOf(pos) !== index);
-        return NextResponse.json(
-          { error: `Each position must be unique. Duplicate positions found: [${[...new Set(duplicates)].join(', ')}]. Got: [${result.join(', ')}]` },
-          { status: 400 }
-        );
-      }
-
-      // Validate all positions from 1 to maxPosition are present
-      const sortedResult = [...result].sort((a, b) => a - b);
-      const expectedPositions = Array.from({ length: maxPosition }, (_, i) => i + 1);
-      const missingPositions = expectedPositions.filter(pos => !result.includes(pos));
       
-      if (missingPositions.length > 0) {
-        return NextResponse.json(
-          { error: `Result must contain all positions from 1 to ${maxPosition}. Missing positions: [${missingPositions.join(', ')}]. Got: [${result.join(', ')}]` },
-          { status: 400 }
-        );
-      }
+
+      // Removed validation requiring positions 1-N to be present
 
       console.log(`✓ Result validation passed for race ${raceNumber}`);
+    }
+
+    // Determine the current timestamp
+    const currentTime = new Date().toISOString();
+
+    // Auto-set finish time when result is saved (if not already provided)
+    let finalEndTime = endTime;
+    let finalStatus = status;
+
+    // If a result is being saved and we don't have an explicit endTime, set it now
+    if (result !== undefined && result !== null && !endTime) {
+      finalEndTime = currentTime;
+      console.log(`Auto-setting endTime to ${finalEndTime} for race ${raceNumber}`);
+    }
+
+    // If a result is being saved and no status is provided, mark as finished
+    if (result !== undefined && result !== null && !status) {
+      finalStatus = 'finished';
+      console.log(`Auto-setting status to 'finished' for race ${raceNumber}`);
+    }
+
+    // Auto-set start time if race is being marked as in_progress and doesn't have one
+    let finalStartTime = startTime;
+    if (status === 'in_progress' && !race.startTime && !startTime) {
+      finalStartTime = currentTime;
+      console.log(`Auto-setting startTime to ${finalStartTime} for race ${raceNumber}`);
     }
 
     // Update race data
     const updatedRace = {
       ...races[raceIndex],
-      ...(status && { status }),
-      ...(startTime && { startTime }),
-      ...(endTime && { endTime }),
+      ...(finalStatus && { status: finalStatus }),
+      ...(finalStartTime && { startTime: finalStartTime }),
+      ...(finalEndTime && { endTime: finalEndTime }),
       ...(result !== undefined && { result })
     };
 
@@ -1005,18 +1012,20 @@ export async function POST(req: Request) {
       teamB: updatedRace.teamB,
       result: updatedRace.result,
       status: updatedRace.status,
+      startTime: updatedRace.startTime,
+      endTime: updatedRace.endTime,
       racingFormat: updatedRace.racingFormat
     });
 
     // Update changeover status whenever a race is finished
-    if (status === 'finished') {
+    if (finalStatus === 'finished' || (result !== undefined && result !== null)) {
       updateChangeoverFlags(races);
     }
 
     await saveSchedule(races);
 
     // Update metrics if race is finished
-    if (status === 'finished' && endTime) {
+    if ((finalStatus === 'finished' || (result !== undefined && result !== null)) && finalEndTime) {
       try {
         const metrics = await updateMetrics(races);
         console.log('Updated race metrics:', metrics);
@@ -1043,6 +1052,8 @@ export async function POST(req: Request) {
         teamB: updatedRace.teamB,
         result: updatedRace.result,
         status: updatedRace.status,
+        startTime: updatedRace.startTime,
+        endTime: updatedRace.endTime,
         racingFormat: updatedRace.racingFormat
       }
     });

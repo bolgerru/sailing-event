@@ -132,16 +132,34 @@ const BoatInputs = memo(({
   startIndex, 
   formData, 
   onchange,
-  format = '3v3' // Default format
+  format = '3v3'
 }: { 
   raceNumber: number;
   startIndex: number;
   formData: { [key: number]: (number | '')[] };
-  onchange: (raceNumber: number, index: number, value: number) => void;
+  onchange: (raceNumber: number, index: number, value: number | '') => void; // Changed to accept number | ''
   format?: RacingFormat;
 }) => {
   const validPositions = getValidPositions(format);
   const boatIndices = getBoatIndices(format);
+
+  const handleInputChange = (index: number, value: string) => {
+    const numValue = parseInt(value);
+    if (!isNaN(numValue) && numValue >= 1) {
+      onchange(raceNumber, index, numValue);
+    }
+  };
+
+  const handleInputBlur = (index: number, value: string) => {
+    const numValue = parseInt(value);
+    if (isNaN(numValue) || numValue < 1) {
+      // Clear invalid input
+      onchange(raceNumber, index, ''); // Now this is allowed by the type
+    }
+  };
+
+  // Add console log to debug state updates
+  console.log(`BoatInputs for race ${raceNumber}, formData:`, formData[raceNumber]);
 
   return (
     <>
@@ -157,7 +175,10 @@ const BoatInputs = memo(({
             {validPositions.map((num: number) => (
               <button
                 key={num}
-                onClick={() => onchange(raceNumber, i + startIndex, num)}
+                onClick={() => {
+                  console.log(`Clicked ${num} for race ${raceNumber}, boat ${i + 1}`);
+                  onchange(raceNumber, i + startIndex, num);
+                }}
                 className={`flex-1 h-8 text-sm rounded border ${
                   formData[raceNumber]?.[i + startIndex] === num
                     ? 'bg-blue-600 border-blue-700 text-white' 
@@ -170,14 +191,9 @@ const BoatInputs = memo(({
             <input
               type="number"
               min={1}
-              max={validPositions.length}
               value={formData[raceNumber]?.[i + startIndex] || ''}
-              onChange={(e) => {
-                const value = parseInt(e.target.value);
-                if (!isNaN(value) && value >= 1 && value <= validPositions.length) {
-                  onchange(raceNumber, i + startIndex, value);
-                }
-              }}
+              onChange={(e) => handleInputChange(i + startIndex, e.target.value)}
+              onBlur={(e) => handleInputBlur(i + startIndex, e.target.value)}
               className="w-14 h-8 text-sm border rounded text-center"
               placeholder="..."
             />
@@ -277,16 +293,29 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     return firstPlaceIndex < boatsPerTeam ? race.teamB : race.teamA;
   }, [racingFormat]);
 
-  const handleChange = useCallback((raceNumber: number, index: number, value: number) => {
-    setFormData(prev => ({
-      ...prev,
-      [raceNumber]: {
-        ...prev[raceNumber],
-        [index]: value
+  // Fix the handleChange function to work with arrays instead of objects
+  const handleChange = useCallback((raceNumber: number, index: number, value: number | '') => {
+    setFormData(prev => {
+      const currentRaceData = prev[raceNumber] || [];
+      const newRaceData = [...currentRaceData];
+      
+      // Ensure the array is long enough
+      const format = races.find(r => r.raceNumber === raceNumber)?.racingFormat || racingFormat || '3v3';
+      const totalBoats = getBoatsPerTeam(format) * 2;
+      while (newRaceData.length < totalBoats) {
+        newRaceData.push('');
       }
-    }));
-  }, []);
+      
+      newRaceData[index] = value;
+      
+      return {
+        ...prev,
+        [raceNumber]: newRaceData
+      };
+    });
+  }, [races, racingFormat]);
 
+  // Update the handleSubmit function to be less strict about validation
   const handleSubmit = useCallback(async (raceNumber: number) => {
     const resultInput = formData[raceNumber];
     if (!resultInput) {
@@ -315,33 +344,49 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     }
 
     const numericResult = resultArray.map(pos => parseInt(pos.toString()));
-    if (numericResult.some(pos => isNaN(pos) || pos < 1 || pos > totalBoats)) {
-      alert(`All positions must be numbers between 1 and ${totalBoats}`);
+    
+    // Only check that positions are positive integers
+    if (numericResult.some(pos => isNaN(pos) || pos < 1)) {
+      alert('All positions must be positive numbers');
       return;
     }
 
-    const uniquePositions = new Set(numericResult);
-    if (uniquePositions.size !== numericResult.length) {
-      alert('Each position can only be used once');
-      return;
+    
+
+    // Warn if positions are not consecutive from 1, but allow saving
+    const sortedPositions = [...numericResult].sort((a, b) => a - b);
+    const expectedPositions = Array.from({ length: totalBoats }, (_, i) => i + 1);
+    const isConsecutive = sortedPositions.every((pos, index) => pos === expectedPositions[index]);
+    
+    if (!isConsecutive) {
+      const confirm = window.confirm(
+        `Warning: Positions are not consecutive from 1-${totalBoats}. Got: [${sortedPositions.join(', ')}]. Do you want to save anyway?`
+      );
+      if (!confirm) return;
     }
 
     try {
       const response = await fetch('/api/results', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ raceNumber, result: numericResult }),
+        body: JSON.stringify({ 
+          raceNumber, 
+          result: numericResult
+        }),
       });
 
       if (response.ok) {
+        const responseData = await response.json();
+        console.log('Race saved with timing:', responseData.race);
+        
         // Update form data to reflect the saved result
         setFormData(prev => ({
           ...prev,
-          [raceNumber]: [...numericResult] // Keep the saved result in form data
+          [raceNumber]: [...numericResult]
         }));
         
-        await fetchRaces(); // Refresh races after saving
-        alert('Result saved successfully');
+        await fetchRaces();
+        alert(`Result saved successfully at ${new Date(responseData.race.endTime).toLocaleTimeString()}`);
       } else {
         const errorData = await response.text();
         alert(`Failed to save result: ${errorData}`);
@@ -691,7 +736,7 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
       
       alert('Schedule generated successfully');
       setShowTeamInput(false);
-      await fetchRaces(); // Refresh races
+      window.location.reload();
     } catch (error) {
       console.error('Error in schedule generation process:', error);
       alert('An error occurred during schedule generation.');
@@ -818,13 +863,12 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     // Fetch initial data on mount
     refreshData();
 
-    // Initialize form data with existing race results
-    const initializeFormData = () => {
+    // Initialize form data - but only once on initial load
+    if (races.length > 0 && Object.keys(formData).length === 0) {
       const initialFormData: { [key: number]: (number | '')[] } = {};
       
       races.forEach(race => {
         if (race.result && Array.isArray(race.result) && race.result.length > 0) {
-          // Convert stored result to form data format
           initialFormData[race.raceNumber] = [...race.result];
         }
       });
@@ -833,22 +877,17 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
         setFormData(initialFormData);
         console.log('Initialized form data with stored results:', initialFormData);
       }
-    };
-
-    // Initialize form data after races are loaded
-    if (races.length > 0) {
-      initializeFormData();
     }
 
-    // Periodic refresh only if not showing team input dialog
+    // Periodic refresh only if not showing team input dialog - but use a longer interval
     let intervalId: NodeJS.Timeout | null = null;
     if (!showTeamInput) {
-      intervalId = setInterval(refreshData, 30000); // Refresh every 30 seconds
+      intervalId = setInterval(refreshData, 60000); // Refresh every minute instead of 30s
     }
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [showTeamInput, refreshData, races]); // Add races as dependency
+  }, [showTeamInput, refreshData]); // Remove races dependency to prevent constant reinitializing
 
   // JSX rendering starts here
   return (
