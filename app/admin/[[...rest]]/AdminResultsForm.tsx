@@ -893,30 +893,30 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
   return (
     <div className="space-y-6">
       {/* Add link to Race Control at the top */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-start"> {/* Changed items-center to items-start */}
         {!showTeamInput && (
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto"> {/* Added flex-col for mobile */}
             <Link
               href="/race-control"
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
+              className="bg-green-600 text-white px-3 py-2 sm:px-4 rounded hover:bg-green-700 transition-colors text-center text-sm sm:text-base"
             >
               Race Control
             </Link>
             <button
               onClick={handleShowTeamInput}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+              className="bg-blue-600 text-white px-3 py-2 sm:px-4 rounded hover:bg-blue-700 transition-colors text-sm sm:text-base whitespace-nowrap"
             >
               Generate New Schedule
             </button>
             <button
               onClick={handleAddRoundRobin}
-              className="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 transition-colors"
+              className="bg-orange-600 text-white px-3 py-2 sm:px-4 rounded hover:bg-orange-700 transition-colors text-sm sm:text-base whitespace-nowrap"
             >
               Add Round Robin
             </button>
             <button
               onClick={handleOpenKnockoutModal}
-              className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors"
+              className="bg-purple-600 text-white px-3 py-2 sm:px-4 rounded hover:bg-purple-700 transition-colors text-sm sm:text-base whitespace-nowrap"
             >
               Create Knockout Stage
             </button>

@@ -1,78 +1,31 @@
 {
-  "Gold": [
+  "main": [
     {
-      "team": "Gold1",
-      "wins": 3,
-      "totalRaces": 3,
+      "team": "SB20s",
+      "wins": 2,
+      "totalRaces": 2,
       "points": 0,
       "winPercentage": 100,
       "place": 1,
-      "league": "Gold"
+      "league": "main"
     },
     {
-      "team": "gold3",
-      "wins": 2,
-      "totalRaces": 3,
-      "points": 0,
-      "winPercentage": 66.66666666666666,
-      "place": 2,
-      "league": "Gold"
-    },
-    {
-      "team": "gold2",
+      "team": "Lasers",
       "wins": 1,
-      "totalRaces": 3,
+      "totalRaces": 2,
       "points": 0,
-      "winPercentage": 33.33333333333333,
-      "place": 3,
-      "league": "Gold"
+      "winPercentage": 50,
+      "place": 2,
+      "league": "main"
     },
     {
-      "team": "gold4b",
+      "team": "Hazy Blues",
       "wins": 0,
-      "totalRaces": 3,
+      "totalRaces": 2,
       "points": 0,
       "winPercentage": 0,
-      "place": 4,
-      "league": "Gold"
-    }
-  ],
-  "Silver ": [
-    {
-      "team": "silver4",
-      "wins": 3,
-      "totalRaces": 3,
-      "points": 0,
-      "winPercentage": 100,
-      "place": 1,
-      "league": "Silver "
-    },
-    {
-      "team": "silver2",
-      "wins": 2,
-      "totalRaces": 3,
-      "points": 0,
-      "winPercentage": 66.66666666666666,
-      "place": 2,
-      "league": "Silver "
-    },
-    {
-      "team": "Silver1",
-      "wins": 1,
-      "totalRaces": 3,
-      "points": 0,
-      "winPercentage": 33.33333333333333,
       "place": 3,
-      "league": "Silver "
-    },
-    {
-      "team": "silver3",
-      "wins": 0,
-      "totalRaces": 3,
-      "points": 0,
-      "winPercentage": 0,
-      "place": 4,
-      "league": "Silver "
+      "league": "main"
     }
   ]
 }

@@ -37,7 +37,8 @@ function isValidResult(result: number[] | null): boolean {
   );
 }
 
-// Update the getWinner function to work with all race formats
+// Update the getWinner function to correctly award victory to the team with 1st place
+
 function getWinner(result: number[] | null, teamA: string, teamB: string): string | null {
   if (!isValidResult(result)) return null;
 
@@ -50,8 +51,13 @@ function getWinner(result: number[] | null, teamA: string, teamB: string): strin
   if (teamAPoints < teamBPoints) return teamA;
   if (teamBPoints < teamAPoints) return teamB;
 
-  // If tied, winner is team with the first-place finish
-  return result!.indexOf(1) < halfLength ? teamA : teamB;
+  // If tied, winner is team WITHOUT the first-place finish (1st place LOSES the tiebreaker)
+  const firstPlaceIndex = result!.indexOf(1);
+  if (firstPlaceIndex < halfLength) {
+    return teamB; // TeamA has 1st place, so TeamB WINS
+  } else {
+    return teamA; // TeamB has 1st place, so TeamA WINS
+  }
 }
 
 // Add helper function to get race format from result length

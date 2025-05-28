@@ -1,42 +1,13 @@
 {
-  "useLeagues": true,
-  "leagues": [
+  "useLeagues": false,
+  "leagues": [],
+  "teamInput": "Lasers, SB20s, Hazy Blues",
+  "boatSets": [
     {
-      "id": "league-1748430226742",
-      "name": "Gold",
-      "teams": [
-        "Gold1",
-        "gold2",
-        "gold3",
-        "gold4b"
-      ],
-      "boatSets": [
-        {
-          "id": "set-1748430226742",
-          "team1Color": "Red",
-          "team2Color": "Black"
-        }
-      ]
-    },
-    {
-      "id": "league-1748430250941",
-      "name": "Silver ",
-      "teams": [
-        "Silver1",
-        "silver2",
-        "silver3",
-        "silver4"
-      ],
-      "boatSets": [
-        {
-          "id": "set-1748430250941",
-          "team1Color": "Blue",
-          "team2Color": "White"
-        }
-      ]
+      "id": "set-1748438824538",
+      "team1Color": "",
+      "team2Color": ""
     }
   ],
-  "teamInput": "",
-  "boatSets": [],
-  "racingFormat": "3v3"
+  "racingFormat": "2v2"
 }
