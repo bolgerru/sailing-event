@@ -901,13 +901,118 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     };
   }, [showTeamInput, refreshData]); // Remove races dependency to prevent constant reinitializing
 
+  // Helper functions
+  function isValidResult(result: number[] | null): boolean {
+    if (!Array.isArray(result)) return false;
+    
+    const validLengths = [4, 6, 8];
+    
+    return (
+      validLengths.includes(result.length) &&
+      result.every((pos) => typeof pos === 'number' && pos > 0) &&
+      result.length % 2 === 0
+    );
+  }
+
+  function getWinner(result: number[] | null, teamA: string, teamB: string): string | null {
+    if (!isValidResult(result)) return null;
+
+    const halfLength = result!.length / 2;
+    
+    const teamAPoints = result!.slice(0, halfLength).reduce((a, b) => a + b, 0);
+    const teamBPoints = result!.slice(halfLength).reduce((a, b) => a + b, 0);
+
+    if (teamAPoints < teamBPoints) return teamA;
+    if (teamBPoints < teamAPoints) return teamB;
+
+    const firstPlaceIndex = result!.indexOf(1);
+    if (firstPlaceIndex < halfLength) {
+      return teamB; // TeamA has 1st place, so TeamB WINS
+    } else {
+      return teamA; // TeamB has 1st place, so TeamA WINS
+    }
+  }
+
+  function getMatchSeriesStatus(races: Race[], teamA: string, teamB: string, stage: string, matchNumber?: number) {
+    const matchRaces = races.filter(race => 
+      race.isKnockout && 
+      race.stage === stage && 
+      race.matchNumber === matchNumber &&
+      ((race.teamA === teamA && race.teamB === teamB) || 
+       (race.teamA === teamB && race.teamB === teamA))
+    );
+
+    const completedRaces = matchRaces.filter(race => isValidResult(race.result || null));
+    const totalRaces = matchRaces.length;
+    
+    let teamAWins = 0;
+    let teamBWins = 0;
+    
+    completedRaces.forEach(race => {
+      const winner = getWinner(race.result || null, race.teamA, race.teamB);
+      if (winner === teamA) teamAWins++;
+      if (winner === teamB) teamBWins++;
+    });
+
+    const racesToWin = Math.ceil(totalRaces / 2);
+    
+    return {
+      teamAWins,
+      teamBWins,
+      completedRaces: completedRaces.length,
+      totalRaces,
+      racesToWin,
+      seriesWinner: teamAWins >= racesToWin ? teamA : teamBWins >= racesToWin ? teamB : null,
+      isSeriesComplete: teamAWins >= racesToWin || teamBWins >= racesToWin
+    };
+  }
+
+  // Update the useEffect that finds the next unfinished race
+  useEffect(() => {
+    // Find all races without results (not finished)
+    const upcomingRaces = races.filter(r => 
+      !r.result || r.result.length === 0 || !isValidResult(r.result)
+    );
+
+    let nextUpcomingRace = null;
+
+    if (upcomingRaces.length > 0) {
+      // Check if there are knockout races
+      const knockoutRaces = races.filter((race: Race) => race.isKnockout);
+      
+      if (knockoutRaces.length > 0) {
+        // For knockouts: find next race from a match that doesn't have a winner
+        for (const race of upcomingRaces.filter((r: Race) => r.isKnockout)) {
+          const seriesStatus = getMatchSeriesStatus(races, race.teamA, race.teamB, race.stage!, race.matchNumber);
+          if (!seriesStatus.isSeriesComplete) {
+            nextUpcomingRace = race;
+            break;
+          }
+        }
+        
+        // If no knockout races available, fall back to regular races
+        if (!nextUpcomingRace) {
+          const regularUpcoming = upcomingRaces.filter((r: Race) => !r.isKnockout);
+          if (regularUpcoming.length > 0) {
+            nextUpcomingRace = regularUpcoming[0];
+          }
+        }
+      } else {
+        // No knockouts: just get the next race in the schedule
+        nextUpcomingRace = upcomingRaces[0];
+      }
+    }
+
+    setNextUnfinishedRace(nextUpcomingRace);
+  }, [races]);
+
   // JSX rendering starts here
   return (
     <div className="space-y-6">
       {/* Add link to Race Control at the top */}
-      <div className="flex justify-between items-start"> {/* Changed items-center to items-start */}
+      <div className="flex justify-between items-start">
         {!showTeamInput && (
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto"> {/* Added flex-col for mobile */}
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
             <Link
               href="/race-control"
               className="bg-green-600 text-white px-3 py-2 sm:px-4 rounded hover:bg-green-700 transition-colors text-center text-sm sm:text-base"
@@ -945,14 +1050,13 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
                 checked={useLeagues}
                 onChange={(e) => {
                   setUseLeagues(e.target.checked);
-                  // When switching modes, reset the other mode's data
                   if (e.target.checked) {
                     setTeamInput('');
                     setBoatSets([]);
-                    if (leagues.length === 0) handleAddLeague(); // Add a default league
+                    if (leagues.length === 0) handleAddLeague();
                   } else {
                     setLeagues([]);
-                     if (boatSets.length === 0) handleAddBoatSet(); // Add a default boat set
+                     if (boatSets.length === 0) handleAddBoatSet();
                   }
                 }}
                 className="rounded text-blue-600"
@@ -1185,7 +1289,7 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
           <span className="hidden md:inline">
             {nextUnfinishedRace.isKnockout 
               ? `Next ${getKnockoutStageDisplayName(nextUnfinishedRace.stage)}` 
-              : 'Next Unfinished Race'
+              : 'Next Relevant Race'
             }
           </span>
           <span className="md:hidden">
@@ -1303,14 +1407,14 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
       <KnockoutModal
         isOpen={showKnockoutModal}
         onClose={() => setShowKnockoutModal(false)}
-        leagues={leaderboard} // Pass the fetched leaderboard data
-        settings={settings || { // Add fallback for undefined settings
+        leagues={leaderboard}
+        settings={settings || {
           useLeagues: false,
           leagues: [],
           boatSets: [],
           racingFormat: '3v3'
         }}
-        races={races} // Pass current races
+        races={races}
         onConfirm={handleCreateKnockouts}
       />
     </div>

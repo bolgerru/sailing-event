@@ -24,6 +24,72 @@ type Race = {
   goToChangeover?: boolean;
 };
 
+// Add these helper functions
+function isValidResult(result: number[] | null): boolean {
+  if (!Array.isArray(result)) return false;
+  
+  const validLengths = [4, 6, 8];
+  
+  return (
+    validLengths.includes(result.length) &&
+    result.every((pos) => typeof pos === 'number' && pos > 0) &&
+    result.length % 2 === 0
+  );
+}
+
+function getWinner(result: number[] | null, teamA: string, teamB: string): string | null {
+  if (!isValidResult(result)) return null;
+
+  const halfLength = result!.length / 2;
+  
+  const teamAPoints = result!.slice(0, halfLength).reduce((a, b) => a + b, 0);
+  const teamBPoints = result!.slice(halfLength).reduce((a, b) => a + b, 0);
+
+  if (teamAPoints < teamBPoints) return teamA;
+  if (teamBPoints < teamAPoints) return teamB;
+
+  const firstPlaceIndex = result!.indexOf(1);
+  if (firstPlaceIndex < halfLength) {
+    return teamB; // TeamA has 1st place, so TeamB WINS
+  } else {
+    return teamA; // TeamB has 1st place, so TeamA WINS
+  }
+}
+
+function getMatchSeriesStatus(races: Race[], teamA: string, teamB: string, stage: string, matchNumber?: number) {
+  const matchRaces = races.filter(race => 
+    race.isKnockout && 
+    race.stage === stage && 
+    race.matchNumber === matchNumber &&
+    ((race.teamA === teamA && race.teamB === teamB) || 
+     (race.teamA === teamB && race.teamB === teamA))
+  );
+
+  const completedRaces = matchRaces.filter(race => isValidResult(race.result || null));
+  const totalRaces = matchRaces.length;
+  
+  let teamAWins = 0;
+  let teamBWins = 0;
+  
+  completedRaces.forEach(race => {
+    const winner = getWinner(race.result || null, race.teamA, race.teamB);
+    if (winner === teamA) teamAWins++;
+    if (winner === teamB) teamBWins++;
+  });
+
+  const racesToWin = Math.ceil(totalRaces / 2);
+  
+  return {
+    teamAWins,
+    teamBWins,
+    completedRaces: completedRaces.length,
+    totalRaces,
+    racesToWin,
+    seriesWinner: teamAWins >= racesToWin ? teamA : teamBWins >= racesToWin ? teamB : null,
+    isSeriesComplete: teamAWins >= racesToWin || teamBWins >= racesToWin
+  };
+}
+
 const getKnockoutStageDisplayName = (stage?: string): string => {
   switch (stage?.toLowerCase()) {
     case 'quarter': return 'Quarter Final';
@@ -84,22 +150,43 @@ export function RaceControl({ races: initialRaces }: { races: Race[] }) {
     return () => clearInterval(interval);
   }, []);
 
-  // Find next unfinished race
+  // Update the next race finding logic to match homepage
   useEffect(() => {
-    const unfinishedKnockouts = races.filter(r => r.isKnockout && !r.result);
-    if (unfinishedKnockouts.length > 0) {
-      const stagePriority = { 'final': 3, 'semi': 2, 'quarter': 1 } as const;
-      unfinishedKnockouts.sort((a, b) => {
-        const priorityA = stagePriority[a.stage as keyof typeof stagePriority] || 0;
-        const priorityB = stagePriority[b.stage as keyof typeof stagePriority] || 0;
-        if (priorityA !== priorityB) return priorityB - priorityA;
-        return (a.matchNumber || 0) - (b.matchNumber || 0) || a.raceNumber - b.raceNumber;
-      });
-      setNextUnfinishedRace(unfinishedKnockouts[0]);
-    } else {
-      const unfinishedRegular = races.find(r => !r.isKnockout && !r.result);
-      setNextUnfinishedRace(unfinishedRegular || null);
+    // Find all races without results (not finished)
+    const upcomingRaces = races.filter(r => 
+      !r.result || r.result.length === 0 || !isValidResult(r.result)
+    );
+
+    let nextUpcomingRace = null;
+
+    if (upcomingRaces.length > 0) {
+      // Check if there are knockout races
+      const knockoutRaces = races.filter((race: Race) => race.isKnockout);
+      
+      if (knockoutRaces.length > 0) {
+        // For knockouts: find next race from a match that doesn't have a winner
+        for (const race of upcomingRaces.filter((r: Race) => r.isKnockout)) {
+          const seriesStatus = getMatchSeriesStatus(races, race.teamA, race.teamB, race.stage!, race.matchNumber);
+          if (!seriesStatus.isSeriesComplete) {
+            nextUpcomingRace = race;
+            break;
+          }
+        }
+        
+        // If no knockout races available, fall back to regular races
+        if (!nextUpcomingRace) {
+          const regularUpcoming = upcomingRaces.filter((r: Race) => !r.isKnockout);
+          if (regularUpcoming.length > 0) {
+            nextUpcomingRace = regularUpcoming[0];
+          }
+        }
+      } else {
+        // No knockouts: just get the next race in the schedule
+        nextUpcomingRace = upcomingRaces[0];
+      }
     }
+
+    setNextUnfinishedRace(nextUpcomingRace);
   }, [races]);
 
   const fetchRaces = async () => {
@@ -154,7 +241,7 @@ export function RaceControl({ races: initialRaces }: { races: Race[] }) {
         </div>
       </div>
 
-      {/* Jump to Next Unfinished Race Button - Mobile Optimized */}
+      {/* Jump to Next Relevant Race Button - Updated Logic */}
       {nextUnfinishedRace && (
         <button
           onClick={() => scrollToElement(`race-${nextUnfinishedRace.raceNumber}`)}
@@ -166,19 +253,20 @@ export function RaceControl({ races: initialRaces }: { races: Race[] }) {
           <span className="hidden sm:inline">
             {nextUnfinishedRace.isKnockout 
               ? `Next ${getKnockoutStageDisplayName(nextUnfinishedRace.stage)}` 
-              : 'Next Unfinished Race'
+              : 'Next Relevant Race'
             }
           </span>
           <span className="sm:hidden">
             {nextUnfinishedRace.isKnockout 
               ? getKnockoutStageDisplayName(nextUnfinishedRace.stage).split(' ')[0]
-              : 'Race'
+              : 'Next'
             }
           </span>
           <span className="font-bold">#{nextUnfinishedRace.raceNumber}</span>
         </button>
       )}
 
+      {/* Rest of the component remains the same... */}
       <div className="grid gap-3 sm:gap-4">
         {races.map((race) => (
           <div 
@@ -225,12 +313,22 @@ export function RaceControl({ races: initialRaces }: { races: Race[] }) {
                     {race.matchNumber && ` #${race.matchNumber}`}
                   </span>
                 )}
+
+                {/* Show if race is from a completed series */}
+                {race.isKnockout && (() => {
+                  const seriesStatus = getMatchSeriesStatus(races, race.teamA, race.teamB, race.stage!, race.matchNumber);
+                  return seriesStatus.isSeriesComplete && !isValidResult(race.result || null) ? (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
+                      Series Complete
+                    </span>
+                  ) : null;
+                })()}
               </div>
 
               {/* Status and Action - Mobile Stacked */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
                 <div className="text-xs sm:text-sm">
-                  {race.status === 'finished' ? (
+                  {race.status === 'finished' || isValidResult(race.result || null) ? (
                     <div className="text-green-600">
                       <span className="font-medium block">✅ Completed</span>
                       {race.startTime && race.endTime && (
@@ -262,7 +360,7 @@ export function RaceControl({ races: initialRaces }: { races: Race[] }) {
                   )}
                 </div>
                 
-                {(!race.status || race.status === 'not_started') && (
+                {(!race.status || race.status === 'not_started') && !isValidResult(race.result || null) && (
                   <button
                     onClick={() => handleStartRace(race.raceNumber)}
                     className="bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 transition-colors text-xs sm:text-sm whitespace-nowrap w-full sm:w-auto"
@@ -291,6 +389,29 @@ export function RaceControl({ races: initialRaces }: { races: Race[] }) {
                 </div>
               </div>
             </div>
+
+            {/* Show series status for knockout races */}
+            {race.isKnockout && (() => {
+              const seriesStatus = getMatchSeriesStatus(races, race.teamA, race.teamB, race.stage!, race.matchNumber);
+              return (
+                <div className="bg-purple-50 p-2 sm:p-3 rounded-md mb-2">
+                  <h4 className="text-xs sm:text-sm font-medium text-purple-700 mb-1">🏆 Series Status</h4>
+                  <div className="text-xs sm:text-sm text-gray-600">
+                    <span className="font-medium">{race.teamA}: {seriesStatus.teamAWins}</span>
+                    {' - '}
+                    <span className="font-medium">{race.teamB}: {seriesStatus.teamBWins}</span>
+                    <span className="text-gray-500 ml-2">
+                      (Best of {seriesStatus.totalRaces} - First to {seriesStatus.racesToWin})
+                    </span>
+                    {seriesStatus.seriesWinner && (
+                      <div className="text-green-600 font-medium mt-1">
+                        Series Winner: {seriesStatus.seriesWinner}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Timing Information - Mobile Optimized */}
             {(race.startTime || race.endTime) && (
@@ -333,6 +454,14 @@ export function RaceControl({ races: initialRaces }: { races: Race[] }) {
                     <span className="font-medium">{race.teamB}:</span> {race.result.slice(race.result.length / 2).join(', ')}
                   </div>
                 </div>
+                {(() => {
+                  const winner = getWinner(race.result, race.teamA, race.teamB);
+                  return winner ? (
+                    <div className="text-green-700 font-medium text-xs mt-1">
+                      Race Winner: {winner}
+                    </div>
+                  ) : null;
+                })()}
               </div>
             )}
           </div>

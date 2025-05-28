@@ -1,86 +1,82 @@
 {
   "Gold": [
     {
-      "team": "gold1",
-      "wins": 0,
-      "totalRaces": 0,
-      "points": 0,
-      "winPercentage": 0,
-      "place": 1,
-      "league": "Gold",
-      "tiebreakNote": "Tied with gold2, gold3, gold4 (all tiebreakers exhausted)"
-    },
-    {
       "team": "gold2",
-      "wins": 0,
-      "totalRaces": 0,
+      "wins": 2,
+      "totalRaces": 3,
       "points": 0,
-      "winPercentage": 0,
+      "winPercentage": 66.66666666666666,
       "place": 1,
       "league": "Gold",
-      "tiebreakNote": "Tied with gold1, gold3, gold4 (all tiebreakers exhausted)"
+      "tiebreakNote": "Beat gold1 in head-to-head (1/1 = 100.0%)"
     },
     {
-      "team": "gold3",
-      "wins": 0,
-      "totalRaces": 0,
+      "team": "gold1",
+      "wins": 2,
+      "totalRaces": 3,
       "points": 0,
-      "winPercentage": 0,
-      "place": 1,
+      "winPercentage": 66.66666666666666,
+      "place": 2,
       "league": "Gold",
-      "tiebreakNote": "Tied with gold1, gold2, gold4 (all tiebreakers exhausted)"
+      "tiebreakNote": "Lost to gold2 in head-to-head (0/1 = 0.0%)"
     },
     {
       "team": "gold4",
-      "wins": 0,
-      "totalRaces": 0,
+      "wins": 1,
+      "totalRaces": 3,
       "points": 0,
-      "winPercentage": 0,
-      "place": 1,
+      "winPercentage": 33.33333333333333,
+      "place": 3,
       "league": "Gold",
-      "tiebreakNote": "Tied with gold1, gold2, gold3 (all tiebreakers exhausted)"
+      "tiebreakNote": "Beat gold3 in head-to-head (1/1 = 100.0%)"
+    },
+    {
+      "team": "gold3",
+      "wins": 1,
+      "totalRaces": 3,
+      "points": 0,
+      "winPercentage": 33.33333333333333,
+      "place": 4,
+      "league": "Gold",
+      "tiebreakNote": "Lost to gold4 in head-to-head (0/1 = 0.0%)"
     }
   ],
   "Silver": [
     {
-      "team": "silver1",
-      "wins": 0,
-      "totalRaces": 0,
-      "points": 0,
-      "winPercentage": 0,
-      "place": 1,
-      "league": "Silver",
-      "tiebreakNote": "Tied with silver2, silver3, silver4 (all tiebreakers exhausted)"
-    },
-    {
       "team": "silver2",
-      "wins": 0,
-      "totalRaces": 0,
+      "wins": 3,
+      "totalRaces": 3,
       "points": 0,
-      "winPercentage": 0,
+      "winPercentage": 100,
       "place": 1,
-      "league": "Silver",
-      "tiebreakNote": "Tied with silver1, silver3, silver4 (all tiebreakers exhausted)"
+      "league": "Silver"
     },
     {
       "team": "silver3",
-      "wins": 0,
-      "totalRaces": 0,
+      "wins": 2,
+      "totalRaces": 3,
       "points": 0,
-      "winPercentage": 0,
-      "place": 1,
-      "league": "Silver",
-      "tiebreakNote": "Tied with silver1, silver2, silver4 (all tiebreakers exhausted)"
+      "winPercentage": 66.66666666666666,
+      "place": 2,
+      "league": "Silver"
+    },
+    {
+      "team": "silver1",
+      "wins": 1,
+      "totalRaces": 3,
+      "points": 0,
+      "winPercentage": 33.33333333333333,
+      "place": 3,
+      "league": "Silver"
     },
     {
       "team": "silver4",
       "wins": 0,
-      "totalRaces": 0,
+      "totalRaces": 3,
       "points": 0,
       "winPercentage": 0,
-      "place": 1,
-      "league": "Silver",
-      "tiebreakNote": "Tied with silver1, silver2, silver3 (all tiebreakers exhausted)"
+      "place": 4,
+      "league": "Silver"
     }
   ]
 }
