@@ -142,7 +142,8 @@ function getLeagueTagColors(league: string): string {
 }
 
 export default function HomePage() {
-  const [currentRace, setCurrentRace] = useState<Race | null>(null);
+  const [racesInProgress, setRacesInProgress] = useState<Race[]>([]);
+  const [nextRace, setNextRace] = useState<Race | null>(null);
   const [loading, setLoading] = useState(true);
   const [eventName, setEventName] = useState<string>('IUSA Event 1');
   const [races, setRaces] = useState<Race[]>([]);
@@ -165,9 +166,45 @@ export default function HomePage() {
           setEventName(settingsData.eventName || 'IUSA Event 1');
         }
 
-        // Find current race
-        const inProgressRace = racesData.find((r: Race) => r.status === 'in_progress');
-        setCurrentRace(inProgressRace || null);
+        // Find all races in progress
+        const inProgressRaces = racesData.filter((r: Race) => r.status === 'in_progress');
+        setRacesInProgress(inProgressRaces);
+
+        // Find next race
+        const upcomingRaces = racesData.filter((r: Race) => 
+          r.status === 'not_started' || (!r.status && !isValidResult(r.result))
+        );
+
+        let nextUpcomingRace = null;
+
+        if (upcomingRaces.length > 0) {
+          // Check if there are knockout races
+          const knockoutRaces = racesData.filter((race: Race) => race.isKnockout);
+          
+          if (knockoutRaces.length > 0) {
+            // For knockouts: find next race from a match that doesn't have a winner
+            for (const race of upcomingRaces.filter((r: Race) => r.isKnockout)) {
+              const seriesStatus = getMatchSeriesStatus(racesData, race.teamA, race.teamB, race.stage!, race.matchNumber);
+              if (!seriesStatus.isSeriesComplete) {
+                nextUpcomingRace = race;
+                break;
+              }
+            }
+            
+            // If no knockout races available, fall back to regular races
+            if (!nextUpcomingRace) {
+              const regularUpcoming = upcomingRaces.filter((r: Race) => !r.isKnockout);
+              if (regularUpcoming.length > 0) {
+                nextUpcomingRace = regularUpcoming[0];
+              }
+            }
+          } else {
+            // No knockouts: just get the next race in the schedule
+            nextUpcomingRace = upcomingRaces[0];
+          }
+        }
+
+        setNextRace(nextUpcomingRace);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -182,7 +219,6 @@ export default function HomePage() {
 
   // Get knockout match series status
   const knockoutRaces = races.filter(race => race.isKnockout);
-  const completedKnockoutRaces = knockoutRaces.filter(race => isValidResult(race.result || null));
 
   if (loading) {
     return (
@@ -202,27 +238,76 @@ export default function HomePage() {
         <p className="text-gray-600">Live Results and Schedule</p>
       </div>
 
-      {/* Current Race Status */}
-      {currentRace ? (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
-          <h2 className="text-xl font-semibold text-blue-800 mb-2">
-            Race In Progress
+      {/* Current Race(s) Status */}
+      {racesInProgress.length > 0 ? (
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-blue-800 text-center">
+            {racesInProgress.length === 1 ? 'Race In Progress' : `${racesInProgress.length} Races In Progress`}
           </h2>
-          <div className="text-lg">
-            {currentRace.teamA} vs {currentRace.teamB}
-          </div>
-          <div className="text-sm text-gray-600 mt-1">
-            Race {currentRace.raceNumber} • {currentRace.boats.teamA} vs {currentRace.boats.teamB}
-          </div>
-          {currentRace.startTime && (
-            <div className="text-sm text-gray-600 mt-2">
-              Started: {new Date(currentRace.startTime).toLocaleTimeString()}
+          {racesInProgress.map((race) => (
+            <div key={race.raceNumber} className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+              <div className="text-lg font-semibold">
+                {race.teamA} vs {race.teamB}
+              </div>
+              <div className="text-sm text-gray-600 mt-1">
+                Race {race.raceNumber} • {race.boats.teamA} vs {race.boats.teamB}
+              </div>
+              {race.isKnockout && (
+                <div className="mt-2">
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getKnockoutStageTagColors(race.stage!)}`}>
+                    {getKnockoutStageDisplayName(race.stage!)} #{race.matchNumber}
+                  </span>
+                  {race.league && (
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ml-2 ${getLeagueTagColors(race.league)}`}>
+                      {race.league === 'main' ? 'Overall' : `${race.league} League`}
+                    </span>
+                  )}
+                </div>
+              )}
+              {race.startTime && (
+                <div className="text-sm text-gray-600 mt-2">
+                  Started: {new Date(race.startTime).toLocaleTimeString()}
+                </div>
+              )}
             </div>
-          )}
+          ))}
         </div>
       ) : (
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
           <p className="text-gray-600">No race currently in progress</p>
+        </div>
+      )}
+
+      {/* Next Race */}
+      {nextRace && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+          <h2 className="text-xl font-semibold text-green-800 mb-2">
+            Next Race
+          </h2>
+          <div className="text-lg font-semibold">
+            {nextRace.teamA} vs {nextRace.teamB}
+          </div>
+          <div className="text-sm text-gray-600 mt-1">
+            Race {nextRace.raceNumber} • {nextRace.boats.teamA} vs {nextRace.boats.teamB}
+          </div>
+          {nextRace.isKnockout && (
+            <div className="mt-2">
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getKnockoutStageTagColors(nextRace.stage!)}`}>
+                {getKnockoutStageDisplayName(nextRace.stage!)} #{nextRace.matchNumber}
+              </span>
+              {nextRace.league && (
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ml-2 ${getLeagueTagColors(nextRace.league)}`}>
+                  {nextRace.league === 'main' ? 'Overall' : `${nextRace.league} League`}
+                </span>
+              )}
+              <div className="text-xs text-gray-500 mt-1">
+                {(() => {
+                  const seriesStatus = getMatchSeriesStatus(races, nextRace.teamA, nextRace.teamB, nextRace.stage!, nextRace.matchNumber);
+                  return `Series: ${seriesStatus.teamAWins}-${seriesStatus.teamBWins} (Best of ${seriesStatus.totalRaces})`;
+                })()}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

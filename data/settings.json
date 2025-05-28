@@ -1,14 +1,43 @@
 {
-  "useLeagues": false,
-  "leagues": [],
-  "teamInput": "sb20s, lasers, cruisers, j80s",
-  "boatSets": [
+  "useLeagues": true,
+  "leagues": [
     {
-      "id": "set-1748445090856",
-      "team1Color": "1&2",
-      "team2Color": "3&4"
+      "id": "league-1748446337904",
+      "name": "Gold",
+      "teams": [
+        "gold1",
+        "gold2",
+        "gold3",
+        "gold4"
+      ],
+      "boatSets": [
+        {
+          "id": "set-1748446337904",
+          "team1Color": "Red",
+          "team2Color": "Black"
+        }
+      ]
+    },
+    {
+      "id": "league-1748446355295",
+      "name": "Silver",
+      "teams": [
+        "silver1",
+        "silver2",
+        "silver3",
+        "silver4"
+      ],
+      "boatSets": [
+        {
+          "id": "set-1748446355295",
+          "team1Color": "Blue",
+          "team2Color": "White"
+        }
+      ]
     }
   ],
+  "teamInput": "",
+  "boatSets": [],
   "racingFormat": "2v2",
-  "eventName": "Team Racing Clinic"
+  "eventName": "Iusa event"
 }

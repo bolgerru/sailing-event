@@ -1,44 +1,84 @@
 {
-  "main": [
+  "Gold": [
     {
-      "team": "sb20s",
-      "wins": 0,
-      "totalRaces": 0,
+      "team": "gold1",
+      "wins": 2,
+      "totalRaces": 2,
       "points": 0,
-      "winPercentage": 0,
+      "winPercentage": 100,
       "place": 1,
-      "league": "main",
-      "tiebreakNote": "Tied with lasers, cruisers, j80s (all tiebreakers exhausted)"
+      "league": "Gold"
     },
     {
-      "team": "lasers",
+      "team": "gold2",
       "wins": 0,
-      "totalRaces": 0,
+      "totalRaces": 1,
       "points": 0,
       "winPercentage": 0,
-      "place": 1,
-      "league": "main",
-      "tiebreakNote": "Tied with sb20s, cruisers, j80s (all tiebreakers exhausted)"
+      "place": 2,
+      "league": "Gold",
+      "tiebreakNote": "Tied with gold3, gold4 (all tiebreakers exhausted)"
     },
     {
-      "team": "cruisers",
+      "team": "gold3",
       "wins": 0,
-      "totalRaces": 0,
+      "totalRaces": 1,
       "points": 0,
       "winPercentage": 0,
-      "place": 1,
-      "league": "main",
-      "tiebreakNote": "Tied with sb20s, lasers, j80s (all tiebreakers exhausted)"
+      "place": 2,
+      "league": "Gold",
+      "tiebreakNote": "Tied with gold2, gold4 (all tiebreakers exhausted)"
     },
     {
-      "team": "j80s",
+      "team": "gold4",
       "wins": 0,
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
+      "place": 2,
+      "league": "Gold",
+      "tiebreakNote": "Tied with gold2, gold3 (all tiebreakers exhausted)"
+    }
+  ],
+  "Silver": [
+    {
+      "team": "silver1",
+      "wins": 1,
+      "totalRaces": 1,
+      "points": 0,
+      "winPercentage": 100,
       "place": 1,
-      "league": "main",
-      "tiebreakNote": "Tied with sb20s, lasers, cruisers (all tiebreakers exhausted)"
+      "league": "Silver"
+    },
+    {
+      "team": "silver2",
+      "wins": 0,
+      "totalRaces": 1,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 2,
+      "league": "Silver",
+      "tiebreakNote": "Tied with silver3, silver4 (all tiebreakers exhausted)"
+    },
+    {
+      "team": "silver3",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 2,
+      "league": "Silver",
+      "tiebreakNote": "Tied with silver2, silver4 (all tiebreakers exhausted)"
+    },
+    {
+      "team": "silver4",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 2,
+      "league": "Silver",
+      "tiebreakNote": "Tied with silver2, silver3 (all tiebreakers exhausted)"
     }
   ]
 }
