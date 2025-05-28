@@ -1,1 +1,44 @@
-[]
+{
+  "main": [
+    {
+      "team": "sb20s",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "main",
+      "tiebreakNote": "Tied with lasers, cruisers, j80s (all tiebreakers exhausted)"
+    },
+    {
+      "team": "lasers",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "main",
+      "tiebreakNote": "Tied with sb20s, cruisers, j80s (all tiebreakers exhausted)"
+    },
+    {
+      "team": "cruisers",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "main",
+      "tiebreakNote": "Tied with sb20s, lasers, j80s (all tiebreakers exhausted)"
+    },
+    {
+      "team": "j80s",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "main",
+      "tiebreakNote": "Tied with sb20s, lasers, cruisers (all tiebreakers exhausted)"
+    }
+  ]
+}

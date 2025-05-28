@@ -578,14 +578,14 @@ export default function SchedulePage() {
           
 
           {/* Knockout Match Series Status - Shows who's winning/won the best-of matches */}
-          {completedKnockoutRaces.length > 0 && (
+          {knockoutRaces.length > 0 && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-purple-700 border-b border-purple-300 pb-2">
                 🏆 Match Series Status
               </h3>
               <div className="grid gap-4">
-                {/* Group knockout races by match */}
-                {Array.from(new Set(completedKnockoutRaces.map(race => 
+                {/* Group ALL knockout races by match (not just completed ones) */}
+                {Array.from(new Set(knockoutRaces.map(race => 
                   `${race.stage}-${race.matchNumber}-${race.teamA}-${race.teamB}`
                 ))).map(matchKey => {
                   // Parse the match key to get details - FIXED PARSING
@@ -596,7 +596,7 @@ export default function SchedulePage() {
                   const teamB = parts[3];
                   
                   // Find a representative race for this match
-                  const representativeRace = completedKnockoutRaces.find(race => 
+                  const representativeRace = knockoutRaces.find(race => 
                     race.stage === stage && 
                     race.matchNumber === matchNumber &&
                     ((race.teamA === teamA && race.teamB === teamB) || 
@@ -625,9 +625,17 @@ export default function SchedulePage() {
                             )}
                           </div>
                           
-                          {seriesStatus.isSeriesComplete && (
+                          {seriesStatus.isSeriesComplete ? (
                             <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
                               ✅ Series Complete
+                            </span>
+                          ) : seriesStatus.completedRaces === 0 ? (
+                            <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                              📅 Upcoming
+                            </span>
+                          ) : (
+                            <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+                              ⚡ In Progress
                             </span>
                           )}
                         </div>
@@ -662,13 +670,31 @@ export default function SchedulePage() {
                         </div>
 
                         {/* Series Winner */}
-                        {seriesStatus.seriesWinner && (
+                        {seriesStatus.seriesWinner ? (
                           <div className="text-center bg-green-50 p-3 rounded-md">
                             <h4 className="text-lg font-semibold text-green-600">
                               🏆 Match Winner: {seriesStatus.seriesWinner}
                             </h4>
                             <p className="text-sm text-gray-600 mt-1">
                               Won {seriesStatus.seriesWinner === teamA ? seriesStatus.teamAWins : seriesStatus.teamBWins} out of {seriesStatus.racesToWin} races needed
+                            </p>
+                          </div>
+                        ) : seriesStatus.completedRaces === 0 ? (
+                          <div className="text-center bg-blue-50 p-3 rounded-md">
+                            <h4 className="text-lg font-semibold text-blue-600">
+                              📅 Match Not Started
+                            </h4>
+                            <p className="text-sm text-gray-600 mt-1">
+                              Best of {seriesStatus.totalRaces} series • First to {seriesStatus.racesToWin} wins
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="text-center bg-yellow-50 p-3 rounded-md">
+                            <h4 className="text-lg font-semibold text-yellow-600">
+                              ⚡ Match In Progress
+                            </h4>
+                            <p className="text-sm text-gray-600 mt-1">
+                              First to {seriesStatus.racesToWin} wins advances
                             </p>
                           </div>
                         )}
