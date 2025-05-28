@@ -1,5 +1,6 @@
 {
   "averageRaceLength": "0m 0s",
   "timeBetweenRaces": "0m 0s",
-  "lastUpdated": "2025-05-28T20:19:16.933Z"
+  "timeBetweenRacesMs": 180000,
+  "lastUpdated": "2025-05-28T20:20:10.985Z"
 }

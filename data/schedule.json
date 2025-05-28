@@ -9,8 +9,10 @@
       "teamB": "Black"
     },
     "racingFormat": "2v2",
-    "isLaunching": true,
-    "goToChangeover": false
+    "isLaunching": false,
+    "goToChangeover": false,
+    "status": "not_started",
+    "result": null
   },
   {
     "raceNumber": 2,
@@ -62,7 +64,7 @@
     },
     "racingFormat": "2v2",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": true
   },
   {
     "raceNumber": 6,
