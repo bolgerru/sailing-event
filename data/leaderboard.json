@@ -53,13 +53,12 @@
   "Silver": [
     {
       "team": "silver1",
-      "wins": 0,
-      "totalRaces": 0,
+      "wins": 1,
+      "totalRaces": 1,
       "points": 0,
-      "winPercentage": 0,
+      "winPercentage": 100,
       "place": 1,
-      "league": "Silver",
-      "tiebreakNote": "Tied with silver2, silver3, silver4, silver5 (all tiebreakers exhausted)"
+      "league": "Silver"
     },
     {
       "team": "silver2",
@@ -67,19 +66,19 @@
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
-      "place": 1,
+      "place": 2,
       "league": "Silver",
-      "tiebreakNote": "Tied with silver1, silver3, silver4, silver5 (all tiebreakers exhausted)"
+      "tiebreakNote": "Tied with silver3, silver4, silver5 (all tiebreakers exhausted)"
     },
     {
       "team": "silver3",
       "wins": 0,
-      "totalRaces": 0,
+      "totalRaces": 1,
       "points": 0,
       "winPercentage": 0,
-      "place": 1,
+      "place": 2,
       "league": "Silver",
-      "tiebreakNote": "Tied with silver1, silver2, silver4, silver5 (all tiebreakers exhausted)"
+      "tiebreakNote": "Tied with silver2, silver4, silver5 (all tiebreakers exhausted)"
     },
     {
       "team": "silver4",
@@ -87,9 +86,9 @@
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
-      "place": 1,
+      "place": 2,
       "league": "Silver",
-      "tiebreakNote": "Tied with silver1, silver2, silver3, silver5 (all tiebreakers exhausted)"
+      "tiebreakNote": "Tied with silver2, silver3, silver5 (all tiebreakers exhausted)"
     },
     {
       "team": "silver5",
@@ -97,9 +96,9 @@
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
-      "place": 1,
+      "place": 2,
       "league": "Silver",
-      "tiebreakNote": "Tied with silver1, silver2, silver3, silver4 (all tiebreakers exhausted)"
+      "tiebreakNote": "Tied with silver2, silver3, silver4 (all tiebreakers exhausted)"
     }
   ]
 }

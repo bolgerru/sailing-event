@@ -48,7 +48,9 @@
     },
     "racingFormat": "3v3",
     "isLaunching": false,
-    "goToChangeover": true
+    "goToChangeover": true,
+    "status": "in_progress",
+    "startTime": "2025-05-28T10:53:01.040Z"
   },
   {
     "raceNumber": 4,
@@ -61,7 +63,18 @@
     },
     "racingFormat": "3v3",
     "isLaunching": false,
-    "goToChangeover": true
+    "goToChangeover": false,
+    "status": "finished",
+    "startTime": "2025-05-28T10:55:29.696Z",
+    "endTime": "2025-05-28T10:56:00.231Z",
+    "result": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
   },
   {
     "raceNumber": 5,
@@ -113,7 +126,7 @@
     },
     "racingFormat": "3v3",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": true
   },
   {
     "raceNumber": 9,
