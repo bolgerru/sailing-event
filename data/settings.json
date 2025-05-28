@@ -1,13 +1,14 @@
 {
   "useLeagues": false,
   "leagues": [],
-  "teamInput": "Lasers, SB20s, Hazy Blues",
+  "teamInput": "sb20s, lasers, cruisers, j80s",
   "boatSets": [
     {
-      "id": "set-1748438824538",
-      "team1Color": "",
-      "team2Color": ""
+      "id": "set-1748445090856",
+      "team1Color": "1&2",
+      "team2Color": "3&4"
     }
   ],
-  "racingFormat": "2v2"
+  "racingFormat": "2v2",
+  "eventName": "Team Racing Clinic"
 }

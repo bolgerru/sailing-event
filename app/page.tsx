@@ -15,15 +15,31 @@ interface Race {
   startTime?: string;
 }
 
+interface Settings {
+  eventName: string;
+}
+
 export default function HomePage() {
   const [currentRace, setCurrentRace] = useState<Race | null>(null);
   const [loading, setLoading] = useState(true);
+  const [eventName, setEventName] = useState<string>('IUSA Event 1');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/schedule');
-        const racesData = await response.json();
+        // Fetch both races and settings
+        const [racesResponse, settingsResponse] = await Promise.all([
+          fetch('/api/schedule'),
+          fetch('/api/settings')
+        ]);
+
+        const racesData = await racesResponse.json();
+        
+        // Load event name from settings
+        if (settingsResponse.ok) {
+          const settingsData: Settings = await settingsResponse.json();
+          setEventName(settingsData.eventName || 'IUSA Event 1');
+        }
 
         // Find current race
         const inProgressRace = racesData.find((r: Race) => r.status === 'in_progress');
@@ -53,7 +69,7 @@ export default function HomePage() {
       {/* Header */}
       <div className="text-center space-y-4">
         <h1 className="text-3xl md:text-4xl font-bold text-gray-800">
-          IUSA Event 1
+          {eventName}
         </h1>
         <p className="text-gray-600">Live Results and Schedule</p>
       </div>

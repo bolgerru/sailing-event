@@ -22,7 +22,8 @@ type Settings = {
     team1Color: string;
     team2Color: string;
   }>;
-  racingFormat: RacingFormat; // Add this field
+  racingFormat: RacingFormat;
+  eventName: string; // Add this field
 };
 
 export async function GET() {
@@ -38,6 +39,11 @@ export async function GET() {
       if (!settings.racingFormat) {
         settings.racingFormat = '3v3';
       }
+      
+      // Ensure eventName is set (backward compatibility)
+      if (!settings.eventName) {
+        settings.eventName = 'IUSA Event 1';
+      }
     } catch (error) {
       // If file doesn't exist, return default settings
       console.log('Settings file not found, using defaults');
@@ -46,7 +52,8 @@ export async function GET() {
         leagues: [],
         teamInput: '',
         boatSets: [],
-        racingFormat: '3v3' // Default racing format
+        racingFormat: '3v3',
+        eventName: 'IUSA Event 1' // Default event name
       };
     }
 
@@ -73,13 +80,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Ensure racingFormat is set
+    // Ensure all fields are set
     const settings: Settings = {
       useLeagues: body.useLeagues ?? false,
       leagues: body.leagues ?? [],
       teamInput: body.teamInput ?? '',
       boatSets: body.boatSets ?? [],
-      racingFormat: body.racingFormat ?? '3v3' // Default to 3v3 if not provided
+      racingFormat: body.racingFormat ?? '3v3',
+      eventName: body.eventName ?? 'IUSA Event 1' // Default if not provided
     };
 
     const settingsFile = path.join(process.cwd(), 'data', 'settings.json');

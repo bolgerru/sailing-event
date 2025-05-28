@@ -58,6 +58,7 @@ type Settings = {
   teamInput: string;
   boatSets: BoatSet[];
   racingFormat: RacingFormat;
+  eventName: string; // Add this field
 };
 
 // Get the number of boats per team based on racing format
@@ -221,9 +222,11 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
     leagues: [],
     teamInput: '',
     boatSets: [],
-    racingFormat: '3v3'
+    racingFormat: '3v3',
+    eventName: 'IUSA Event 1' // Add this field
   });
   const [racingFormat, setRacingFormat] = useState<RacingFormat>('3v3');
+  const [eventName, setEventName] = useState<string>('IUSA Event 1'); // Add this state
 
   // --- START OF FUNCTION DEFINITIONS ---
 
@@ -559,6 +562,7 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
         if (data) {
           setUseLeagues(data.useLeagues ?? false);
           setRacingFormat(data.racingFormat || '3v3');
+          setEventName(data.eventName || 'IUSA Event 1'); // Add this line
           
           if (data.useLeagues) {
             if (Array.isArray(data.leagues)) {
@@ -612,6 +616,7 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
       // Populate form fields based on current `settings` state
       setUseLeagues(settings.useLeagues);
       setRacingFormat(settings.racingFormat || '3v3');
+      setEventName(settings.eventName || 'IUSA Event 1'); // Add this line
 
       if (settings.useLeagues && Array.isArray(settings.leagues)) {
         const formattedLeagues = settings.leagues.map(league => ({
@@ -649,6 +654,12 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
   };
 
   const handleGenerateSchedule = async () => {
+    // Validate event name
+    if (!eventName.trim()) {
+      alert('Please enter an event name');
+      return;
+    }
+
     const currentSettingsToSave: Settings = {
       useLeagues,
       leagues: useLeagues ? leagues.map(league => ({
@@ -659,7 +670,8 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
       })) : [],
       teamInput: useLeagues ? '' : teamInput,
       boatSets: useLeagues ? [] : boatSets,
-      racingFormat
+      racingFormat,
+      eventName: eventName.trim() // Add this field
     };
 
     if (useLeagues) {
@@ -970,6 +982,23 @@ export default function AdminResultsForm({ races: initialRaces }: { races: Race[
             </div>
             <p className="text-xs text-gray-500 mt-1">
               {racingFormat} = {getBoatsPerTeam(racingFormat)} boats per team, {getBoatsPerTeam(racingFormat) * 2} boats total per race
+            </p>
+          </div>
+
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Event Name
+            </label>
+            <input
+              type="text"
+              value={eventName}
+              onChange={(e) => setEventName(e.target.value)}
+              className="w-full border rounded px-3 py-2"
+              placeholder="Enter event name (e.g., IUSA Event 1, Spring Championship)"
+              required
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              This name will appear on the home page and throughout the event
             </p>
           </div>
 
