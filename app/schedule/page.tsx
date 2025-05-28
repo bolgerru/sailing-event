@@ -443,15 +443,27 @@ export default function SchedulePage() {
             <h2 className="text-2xl font-bold text-purple-800 mb-2"> Knockout Stage</h2>
           </div>
 
-          {/* Upcoming Knockout Races - Only show races WITHOUT results */}
-          {upcomingKnockoutRaces.filter(race => !isValidResult(race.result)).length > 0 && (
+          {/* Upcoming Knockout Races - Only show races WITHOUT results AND from incomplete series */}
+          {upcomingKnockoutRaces.filter(race => {
+            if (isValidResult(race.result)) return false; // Exclude races with results
+            
+            // Check if this race's series is already complete
+            const seriesStatus = getMatchSeriesStatus(races, race.teamA, race.teamB, race.stage!, race.matchNumber);
+            return !seriesStatus.isSeriesComplete; // Only show if series is NOT complete
+          }).length > 0 && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-purple-700 border-b border-purple-300 pb-2">
-                🔥 Next Knockout Matches
+                Next Knockout Matches
               </h3>
               <div className="grid gap-4">
                 {upcomingKnockoutRaces
-                  .filter(race => !isValidResult(race.result)) // Exclude races with results
+                  .filter(race => {
+                    if (isValidResult(race.result)) return false; // Exclude races with results
+                    
+                    // Check if this race's series is already complete
+                    const seriesStatus = getMatchSeriesStatus(races, race.teamA, race.teamB, race.stage!, race.matchNumber);
+                    return !seriesStatus.isSeriesComplete; // Only show if series is NOT complete
+                  })
                   .map((race) => (
                   <div key={race.raceNumber} 
                     className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer border-l-4 border-purple-500"
@@ -840,7 +852,7 @@ export default function SchedulePage() {
       {completedKnockoutRaces.length > 0 && (
         <div className="space-y-4" ref={knockoutResultsRef}>
           <h3 className="text-lg font-semibold text-purple-700 border-b border-purple-300 pb-2">
-            ✅ Knockout Results
+            Knockout Race Results
           </h3>
           <div className="grid gap-4">
             {completedKnockoutRaces.map((race) => {
