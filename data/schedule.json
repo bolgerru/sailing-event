@@ -9,8 +9,18 @@
       "teamB": "black"
     },
     "racingFormat": "3v3",
-    "isLaunching": true,
-    "goToChangeover": false
+    "isLaunching": false,
+    "goToChangeover": false,
+    "status": "finished",
+    "endTime": "2025-05-28T10:32:42.814Z",
+    "result": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
   },
   {
     "raceNumber": 2,
@@ -62,7 +72,7 @@
     },
     "racingFormat": "3v3",
     "isLaunching": false,
-    "goToChangeover": false
+    "goToChangeover": true
   },
   {
     "raceNumber": 6,

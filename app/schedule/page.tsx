@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 
-// First update the Race type to include racingFormat
+// Update the Race type to include knockout properties
 type Race = {
   raceNumber: number;
   teamA: string;
@@ -20,43 +20,46 @@ type Race = {
   isLaunching?: boolean;
   isKnockout?: boolean;
   stage?: string;
-  racingFormat?: '2v2' | '3v3' | '4v4';
+  matchNumber?: number;
 };
 
-// Helper function to get boats per team based on racing format
-function getBoatsPerTeam(format?: string): number {
-  switch (format) {
-    case '2v2': return 2;
-    case '3v3': return 3;
-    case '4v4': return 4;
-    default: return 3; // Default to 3v3 for backward compatibility
-  }
-}
-
-function isValidResult(result: number[] | null, racingFormat?: string): boolean {
+// Update the isValidResult function to handle all race formats (2v2, 3v3, 4v4)
+function isValidResult(result: number[] | null): boolean {
   if (!Array.isArray(result)) return false;
   
-  const boatsPerTeam = getBoatsPerTeam(racingFormat);
-  const expectedLength = boatsPerTeam * 2;
+  // Valid formats: 2v2 (4 positions), 3v3 (6 positions), 4v4 (8 positions)
+  const validLengths = [4, 6, 8];
   
   return (
-    result.length === expectedLength &&
-    result.every((pos) => typeof pos === 'number' && pos > 0 && pos <= expectedLength)
+    validLengths.includes(result.length) &&
+    result.every((pos) => typeof pos === 'number' && pos > 0) &&
+    result.length % 2 === 0 // Must be even number (equal teams)
   );
 }
 
-function getWinner(result: number[] | null, teamA: string, teamB: string, racingFormat?: string): string | null {
-  if (!isValidResult(result, racingFormat)) return null;
+// Update the getWinner function to work with all race formats
+function getWinner(result: number[] | null, teamA: string, teamB: string): string | null {
+  if (!isValidResult(result)) return null;
 
-  const boatsPerTeam = getBoatsPerTeam(racingFormat);
-  const teamAPoints = result!.slice(0, boatsPerTeam).reduce((a, b) => a + b, 0);
-  const teamBPoints = result!.slice(boatsPerTeam, boatsPerTeam * 2).reduce((a, b) => a + b, 0);
+  const halfLength = result!.length / 2;
+  
+  // First half positions belong to teamA, second half to teamB
+  const teamAPoints = result!.slice(0, halfLength).reduce((a, b) => a + b, 0);
+  const teamBPoints = result!.slice(halfLength).reduce((a, b) => a + b, 0);
 
   if (teamAPoints < teamBPoints) return teamA;
   if (teamBPoints < teamAPoints) return teamB;
 
-  // Tie-breaker: team WITHOUT first place wins (team with 1st place loses)
-  return result!.indexOf(1) < boatsPerTeam ? teamB : teamA;
+  // If tied, winner is team with the first-place finish
+  return result!.indexOf(1) < halfLength ? teamA : teamB;
+}
+
+// Add helper function to get race format from result length
+function getRaceFormat(result: number[] | null): string {
+  if (!isValidResult(result)) return 'Unknown';
+  
+  const halfLength = result!.length / 2;
+  return `${halfLength}v${halfLength}`;
 }
 
 function getLeagueTagColors(league: string): string {
@@ -72,39 +75,12 @@ function getLeagueTagColors(league: string): string {
   }
 }
 
-// First add a helper function to get the stage display name
-function getKnockoutStageName(stage: string): string {
-  switch (stage?.toLowerCase()) {
-    case 'semi':
-      return 'Semi Final';
-    case 'quarter':
-      return 'Quarter Final';
-    case 'final':
-      return 'Final';
-    default:
-      return stage;
-  }
-}
-
-// Update the StatusTag component to include knockout information
-function StatusTag({ status, isKnockout, stage }: { 
-  status?: string, 
-  isKnockout?: boolean, 
-  stage?: string 
-}) {
-  if (isKnockout) {
-    return (
-      <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs font-medium">
-        {getKnockoutStageName(stage || '')}
-      </span>
-    );
-  }
-
+function StatusTag({ status }: { status?: string }) {
   if (!status || status === 'not_started') return null;
   
   return status === 'in_progress' ? (
-    <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">
-      In Progress
+    <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
+      Finished
     </span>
   ) : (
     <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium">
@@ -143,32 +119,48 @@ type Metrics = {
   lastUpdated: string;
 };
 
+// Update the EstimatedStartTime component with the new logic
 function EstimatedStartTime({ race, lastStartedRace, timeBetweenRaces }: { 
   race: Race; 
   lastStartedRace: Race | null;
-  timeBetweenRaces: number;
+  timeBetweenRaces?: number;
 }) {
   const [timeUntilStart, setTimeUntilStart] = useState<string>('');
 
   useEffect(() => {
     function updateCountdown() {
-      if (!lastStartedRace?.startTime) return;
+      if (!lastStartedRace?.startTime) {
+        setTimeUntilStart('Calculating...');
+        return;
+      }
 
       const lastStartTime = new Date(lastStartedRace.startTime);
       const racesBetween = race.raceNumber - lastStartedRace.raceNumber;
-      const estimatedStart = new Date(lastStartTime.getTime() + (racesBetween * timeBetweenRaces));
+      
+      // Use provided timeBetweenRaces or default to 3 minutes (180000ms)
+      const timeBetweenRacesMs = timeBetweenRaces || 180000; // 3 minutes default
+      
+      const estimatedStart = new Date(lastStartTime.getTime() + (racesBetween * timeBetweenRacesMs));
       
       const now = new Date();
       const diff = estimatedStart.getTime() - now.getTime();
       
-      if (diff < 0) {
+      // If countdown has passed, show "Starting soon"
+      if (diff <= 0) {
         setTimeUntilStart('Starting soon');
         return;
       }
 
       const minutes = Math.floor(diff / 60000);
       const seconds = Math.floor((diff % 60000) / 1000);
-      setTimeUntilStart(`~${minutes}m ${seconds}s`);
+      
+      if (minutes > 60) {
+        const hours = Math.floor(minutes / 60);
+        const remainingMinutes = minutes % 60;
+        setTimeUntilStart(`~${hours}h ${remainingMinutes}m`);
+      } else {
+        setTimeUntilStart(`~${minutes}m ${seconds}s`);
+      }
     }
 
     const interval = setInterval(updateCountdown, 1000);
@@ -177,44 +169,56 @@ function EstimatedStartTime({ race, lastStartedRace, timeBetweenRaces }: {
     return () => clearInterval(interval);
   }, [race, lastStartedRace, timeBetweenRaces]);
 
+  if (!lastStartedRace?.startTime) {
+    return null;
+  }
+
   return (
-    <div className="text-gray-500 text-sm">
-      {timeUntilStart ? (
-        <span className="flex items-center gap-1">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          {timeUntilStart}
-        </span>
-      ) : (
-        'Calculating...'
-      )}
+    <div className="text-gray-500 text-sm flex items-center justify-center gap-1">
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span className="font-medium">{timeUntilStart}</span>
     </div>
   );
 }
 
-// First, create a new component for displaying race results to avoid repetition
-function RaceResults({ race, isWinner, team, positions }: { 
-  race: Race;
-  isWinner: boolean;
-  team: string;
-  positions: number[];
-}) {
-  return (
-    <div className={`flex-1 ${isWinner ? 'text-green-600' : 'text-red-600'}`}>
-      <p className="font-semibold mb-1 text-sm md:text-base">{team}</p>
-      <div className="flex justify-center gap-1 md:gap-3">
-        {positions.map((pos, i) => (
-          <span 
-            key={i} 
-            className="bg-gray-100 rounded-full w-6 h-6 md:w-8 md:h-8 flex items-center justify-center text-sm"
-          >
-            {pos}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
+// Add helper function for knockout stage colors
+function getKnockoutStageTagColors(stage: string): string {
+  switch (stage.toLowerCase()) {
+    case 'final':
+      return 'bg-yellow-100 text-yellow-800';
+    case 'semi-final':
+    case 'semifinal':
+      return 'bg-orange-100 text-orange-800';
+    case 'quarter-final':
+    case 'quarterfinal':
+      return 'bg-red-100 text-red-800';
+    case 'round-16':
+    case 'round of 16':
+      return 'bg-purple-100 text-purple-800';
+    default:
+      return 'bg-indigo-100 text-indigo-800';
+  }
+}
+
+// Add helper function for knockout stage display names
+function getKnockoutStageDisplayName(stage: string): string {
+  switch (stage.toLowerCase()) {
+    case 'final':
+      return 'Final';
+    case 'semi-final':
+    case 'semifinal':
+      return 'Semi-Final';
+    case 'quarter-final':
+    case 'quarterfinal':
+      return 'Quarter-Final';
+    case 'round-16':
+    case 'round of 16':
+      return 'Round of 16';
+    default:
+      return stage.charAt(0).toUpperCase() + stage.slice(1);
+  }
 }
 
 export default function SchedulePage() {
@@ -224,6 +228,7 @@ export default function SchedulePage() {
   const [expandedRace, setExpandedRace] = useState<number | null>(null);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const knockoutResultsRef = useRef<HTMLDivElement>(null);
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   
   const lastStartedRace = useMemo(() => {
@@ -278,7 +283,6 @@ export default function SchedulePage() {
     return Array.from(options);
   }, [races]);
 
-  // Update the filteredRaces useMemo to use the new isValidResult function
   const filteredRaces = useMemo(() => {
     if (filter === 'all') return races;
 
@@ -295,15 +299,36 @@ export default function SchedulePage() {
     });
   }, [races, filter]);
 
-  // Update the race separation logic
-  const { knockoutRaces, regularRaces } = useMemo(() => {
-    const knockout = filteredRaces.filter(race => race.isKnockout && !isValidResult(race.result, race.racingFormat));
-    const regular = filteredRaces.filter(race => !race.isKnockout && !isValidResult(race.result, race.racingFormat));
-    return { knockoutRaces: knockout, regularRaces: regular };
-  }, [filteredRaces]);
+  const completedRaces = filteredRaces.filter(race => isValidResult(race.result));
+  const upcomingRaces = filteredRaces.filter(race => !isValidResult(race.result));
 
-  const completedRaces = filteredRaces.filter(race => isValidResult(race.result, race.racingFormat));
-  const upcomingRaces = filteredRaces.filter(race => !isValidResult(race.result, race.racingFormat));
+  // Add knockout races filtering
+  const knockoutRaces = useMemo(() => {
+    return races.filter(race => race.isKnockout);
+  }, [races]);
+
+  const regularRaces = useMemo(() => {
+    if (filter === 'all') return races.filter(race => !race.isKnockout);
+
+    const [type, value] = filter.split(':');
+    
+    return races.filter((race: Race) => {
+      if (race.isKnockout) return false; // Exclude knockout races from regular filtering
+      
+      if (type === 'league') {
+        return race.league === value;
+      }
+      if (type === 'team') {
+        return race.teamA === value || race.teamB === value;
+      }
+      return true;
+    });
+  }, [races, filter]);
+
+  const completedKnockoutRaces = knockoutRaces.filter(race => isValidResult(race.result));
+  const upcomingKnockoutRaces = knockoutRaces.filter(race => !isValidResult(race.result));
+  const completedRegularRaces = regularRaces.filter(race => isValidResult(race.result));
+  const upcomingRegularRaces = regularRaces.filter(race => !isValidResult(race.result));
 
   useEffect(() => {
     const handleScroll = () => {
@@ -332,6 +357,10 @@ export default function SchedulePage() {
 
   const scrollToResults = () => {
     resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const scrollToKnockoutResults = () => {
+    knockoutResultsRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const scrollToTop = () => {
@@ -370,9 +399,248 @@ export default function SchedulePage() {
         </div>
       )}
 
+      {/* KNOCKOUT RACES SECTION - Fixed all JSX syntax errors */}
+      {knockoutRaces.length > 0 && (
+        <div className="space-y-6 bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg border-2 border-purple-200">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-purple-800 mb-2">🏆 Knockout Stage</h2>
+            <p className="text-purple-600">Championship elimination rounds</p>
+          </div>
+
+          {/* Upcoming Knockout Races - Only show races WITHOUT results */}
+          {upcomingKnockoutRaces.filter(race => !isValidResult(race.result)).length > 0 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-purple-700 border-b border-purple-300 pb-2">
+                🔥 Next Knockout Matches
+              </h3>
+              <div className="grid gap-4">
+                {upcomingKnockoutRaces
+                  .filter(race => !isValidResult(race.result)) // Exclude races with results
+                  .map((race) => (
+                  <div key={race.raceNumber} 
+                    className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer border-l-4 border-purple-500"
+                    onClick={() => setExpandedRace(expandedRace === race.raceNumber ? null : race.raceNumber)}
+                  >
+                    <div className="flex items-center border-b border-gray-100">
+                      <div className="w-16 md:w-24 h-16 md:h-24 flex items-center justify-center bg-purple-600 text-white">
+                        <span className="text-2xl md:text-4xl font-bold">
+                          {race.raceNumber}
+                        </span>
+                      </div>
+                      <div className="flex-1 p-3">
+                        <div className="flex flex-col items-center">
+                          <div className="text-base md:text-lg font-semibold text-center w-full">
+                            <span className="text-purple-600">{race.teamA}</span>
+                            <span className="mx-1 md:mx-2 text-gray-400">vs</span>
+                            <span className="text-purple-600">{race.teamB}</span>
+                          </div>
+                          <div className="text-xs md:text-sm text-gray-500 text-center mt-1">
+                            ({race.boats.teamA}) vs ({race.boats.teamB})
+                            {race.result && (
+                              <span className="ml-2 text-blue-600 font-medium">
+                                [{getRaceFormat(race.result)}]
+                              </span>
+                            )}
+                          </div>
+                          <div className="mt-2 flex gap-2">
+                            {race.stage && (
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getKnockoutStageTagColors(race.stage)}`}>
+                                {getKnockoutStageDisplayName(race.stage)}
+                                {race.matchNumber && ` #${race.matchNumber}`}
+                              </span>
+                            )}
+                            {/* Remove StatusTag from here - status is shown prominently in bottom section */}
+                          </div>
+                        </div>
+                      </div>
+                      {/* Add estimated start time to the right side for knockout races */}
+                      {!isValidResult(race.result) && race.status !== 'in_progress' && (
+                        <div className="w-24 md:w-32 p-2 text-center border-l border-gray-100">
+                          <div className="text-xs text-gray-500 mb-1">Expected:</div>
+                          <EstimatedStartTime 
+                            race={race} 
+                            lastStartedRace={lastStartedRace} 
+                            timeBetweenRaces={metrics?.timeBetweenRacesMs} 
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {expandedRace === race.raceNumber && (
+                      <div className="p-4 bg-purple-50 border-t border-purple-100">
+                        <div className="space-y-2 text-sm">
+                          {race.startTime && (
+                            <p className="text-gray-600">
+                              Started: {new Date(race.startTime).toLocaleString()}
+                            </p>
+                          )}
+                          {race.endTime && (
+                            <p className="text-gray-600">
+                              Finished: {new Date(race.endTime).toLocaleString()}
+                            </p>
+                          )}
+                          {race.status === 'in_progress' && race.startTime && (
+                            <p className="text-yellow-600 font-semibold">
+                              ⏱️ Live Duration: <LiveDuration startTime={race.startTime} />
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="p-3 bg-purple-50">
+                      {/* Remove isValidResult check since these races shouldn't have results */}
+                      <div className="text-center">
+                        {/* Prioritize "in_progress" status over launching/changeover tags */}
+                        {race.status === 'in_progress' ? (
+                          <span className="bg-yellow-100 text-yellow-800 px-4 py-3 rounded-full text-base font-medium inline-block">
+                            🏁 Race in Progress
+                          </span>
+                        ) : race.isLaunching ? (
+                          <span className="bg-purple-100 text-purple-800 px-4 py-3 rounded-full text-base font-medium inline-block">
+                            🚀 You Are Launching
+                          </span>
+                        ) : race.goToChangeover ? (
+                          <span className="bg-orange-100 text-orange-800 px-4 py-3 rounded-full text-base font-medium inline-block">
+                            ⛵ Go to Changeover
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 italic text-sm">
+                            Waiting to start
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Completed Knockout Results - This should be the ONLY one with the ref */}
+          {completedKnockoutRaces.length > 0 && (
+            <div className="space-y-4" ref={knockoutResultsRef}>
+              <h3 className="text-lg font-semibold text-purple-700 border-b border-purple-300 pb-2">
+                ✅ Knockout Results
+              </h3>
+              <div className="grid gap-4">
+                {completedKnockoutRaces.map((race) => {
+                  const winner = getWinner(race.result, race.teamA, race.teamB);
+
+                  return (
+                    <div
+                      key={race.raceNumber}
+                      className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
+                      onClick={() => setExpandedRace(expandedRace === race.raceNumber ? null : race.raceNumber)}
+                    >
+                      <div className="flex items-center border-b border-gray-100">
+                        <div className="w-16 md:w-24 h-16 md:h-24 flex items-center justify-center bg-green-600 text-white">
+                          <span className="text-2xl md:text-4xl font-bold">
+                            {race.raceNumber}
+                          </span>
+                        </div>
+                        <div className="flex-1 p-3">
+                          <div className="flex flex-col items-center">
+                            <div className="text-base md:text-lg font-semibold text-center w-full">
+                              <span className="text-purple-600">{race.teamA}</span>
+                              <span className="mx-1 md:mx-2 text-gray-400">vs</span>
+                              <span className="text-purple-600">{race.teamB}</span>
+                            </div>
+                            <div className="text-xs md:text-sm text-gray-500 text-center mt-1">
+                              ({race.boats.teamA}) vs ({race.boats.teamB})
+                              {race.result && (
+                                <span className="ml-2 text-blue-600 font-medium">
+                                  [{getRaceFormat(race.result)}]
+                                </span>
+                              )}
+                            </div>
+                            <div className="mt-2 flex gap-2">
+                              {race.stage && (
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getKnockoutStageTagColors(race.stage)}`}>
+                                  {getKnockoutStageDisplayName(race.stage)}
+                                  {race.matchNumber && ` #${race.matchNumber}`}
+                                </span>
+                              )}
+                              {/* Remove StatusTag from here - status is shown prominently in bottom section */}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {expandedRace === race.raceNumber && (
+                        <div className="p-4 bg-green-50 border-t border-green-100">
+                          <div className="space-y-2 text-sm">
+                            {race.startTime && (
+                              <p className="text-gray-600">
+                                Started: {new Date(race.startTime).toLocaleString()}
+                              </p>
+                            )}
+                            {race.endTime && (
+                              <p className="text-gray-600">
+                                Finished: {new Date(race.endTime).toLocaleString()}
+                              </p>
+                            )}
+                            {race.startTime && race.endTime && (
+                              <p className="text-gray-600">
+                                Duration: {formatDuration(new Date(race.endTime).getTime() - new Date(race.startTime).getTime())}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="p-4 bg-green-50">
+                        <div className="text-center mb-4">
+                          <h3 className="text-lg font-semibold text-green-600">
+                            🏆 Winner: {winner}
+                          </h3>
+                        </div>
+                        <div className="flex justify-around">
+                          <div className="flex-1 text-center">
+                            <h4 className="font-semibold text-green-600">{race.teamA}</h4>
+                            <div className="flex justify-center gap-2 mt-2">
+                              {race.result!.slice(0, race.result!.length / 2).map((pos, i) => (
+                                <div
+                                  key={i}
+                                  className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-bold ${
+                                    winner === race.teamA ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                  }`}
+                                >
+                                  {pos}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="flex-1 text-center">
+                            <h4 className="font-semibold text-green-600">{race.teamB}</h4>
+                            <div className="flex justify-center gap-2 mt-2">
+                              {race.result!.slice(race.result!.length / 2).map((pos, i) => (
+                                <div
+                                  key={i}
+                                  className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-bold ${
+                                    winner === race.teamB ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                  }`}
+                                >
+                                  {pos}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* REGULAR RACES SECTION */}
       <div className="bg-white p-4 rounded-lg shadow">
         <label htmlFor="filter" className="block text-sm font-medium text-gray-700 mb-1">
-          Filter Matches
+          Filter Round Races
         </label>
         <select
           id="filter"
@@ -380,7 +648,7 @@ export default function SchedulePage() {
           onChange={(e) => setFilter(e.target.value)}
           className="w-full rounded-lg border-gray-200 shadow-sm focus:border-blue-500 focus:ring-blue-500"
         >
-          <option value="all">All Races</option>
+          <option value="all">All Regular Races</option>
           
           {filterOptions
             .filter(opt => opt.startsWith('league:'))
@@ -406,294 +674,132 @@ export default function SchedulePage() {
         </select>
       </div>
 
-      {filteredRaces.length === 0 && (
-        <p className="text-center text-gray-500">No matches found for the selected filters.</p>
+      {regularRaces.length === 0 && (
+        <p className="text-center text-gray-500">No round races found for the selected filters.</p>
       )}
 
-      {(knockoutRaces.length > 0 || regularRaces.length > 0) && (
+      {/* Upcoming Regular Races - Only show races WITHOUT results */}
+      {upcomingRegularRaces.filter(race => !isValidResult(race.result)).length > 0 && (
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-gray-700">Next Races</h2>
-          
-          {/* Knockout Races */}
-          {knockoutRaces.length > 0 && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium text-purple-700 pl-2">Knockout Stage</h3>
-              <div className="grid gap-4">
-                {knockoutRaces.map((race) => (
-                  <div key={race.raceNumber} 
-                    className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
-                    onClick={() => setExpandedRace(expandedRace === race.raceNumber ? null : race.raceNumber)}
-                  >
-                    {/* Update the race card header structure */}
-                    <div className="flex items-center border-b border-gray-100">
-                      <div className="w-16 md:w-24 h-16 md:h-24 flex items-center justify-center bg-blue-500 text-white">
-                        <span className="text-2xl md:text-4xl font-bold">
-                          {race.raceNumber}
-                        </span>
+          <h2 className="text-xl font-semibold text-gray-700">Next Round Races</h2>
+          <div className="grid gap-4">
+            {upcomingRegularRaces
+              .filter(race => !isValidResult(race.result)) // Exclude races with results
+              .map((race) => (
+              <div
+                key={race.raceNumber}
+                className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
+                onClick={() => setExpandedRace(expandedRace === race.raceNumber ? null : race.raceNumber)}
+              >
+                <div className="flex items-center border-b border-gray-100">
+                  <div className="w-16 md:w-24 h-16 md:h-24 flex items-center justify-center bg-blue-600 text-white">
+                    <span className="text-2xl md:text-4xl font-bold">
+                      {race.raceNumber}
+                    </span>
+                  </div>
+                  <div className="flex-1 p-3">
+                    <div className="flex flex-col items-center">
+                      <div className="text-base md:text-lg font-semibold text-center w-full">
+                        <span className="text-blue-600">{race.teamA}</span>
+                        <span className="mx-1 md:mx-2 text-gray-400">vs</span>
+                        <span className="text-blue-600">{race.teamB}</span>
                       </div>
-                      <div className="flex-1 p-3">
-                        <div className="flex flex-col items-center">
-                          <div className="text-base md:text-lg font-semibold text-center w-full">
-                            <span className="text-blue-600">{race.teamA}</span>
-                            <span className="mx-1 md:mx-2 text-gray-400">vs</span>
-                            <span className="text-blue-600">{race.teamB}</span>
-                          </div>
-                          <div className="text-xs md:text-sm text-gray-500 text-center mt-1">
-                            ({race.boats.teamA}) vs ({race.boats.teamB})
-                          </div>
-                          {race.league && (
-                            <div className="mt-2">
-                              <span className={`
-                                inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                                ${getLeagueTagColors(race.league)}
-                              `}>
-                                {race.league === 'main' ? 'Overall' : `${race.league} League`}
-                              </span>
-                            </div>
-                          )}
-                          <div className="mt-2">
-                            <StatusTag 
-                              status={race.status} 
-                              isKnockout={race.isKnockout} 
-                              stage={race.stage}
-                            />
-                          </div>
-                        </div>
+                      <div className="text-xs md:text-sm text-gray-500 text-center mt-1">
+                        ({race.boats.teamA}) vs ({race.boats.teamB})
+                        {race.result && (
+                          <span className="ml-2 text-blue-600 font-medium">
+                            [{getRaceFormat(race.result)}]
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-2 flex gap-2 flex-wrap justify-center">
+                        {race.league && (
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getLeagueTagColors(race.league)}`}>
+                            {race.league === 'main' ? 'Overall' : `${race.league} League`}
+                          </span>
+                        )}
+                        {/* Remove StatusTag from here - status is shown prominently in bottom section */}
                       </div>
                     </div>
+                  </div>
+                  {/* Add estimated start time to the right side */}
+                  {!isValidResult(race.result) && race.status !== 'in_progress' && (
+                    <div className="w-24 md:w-32 p-2 text-center border-l border-gray-100">
+                      <div className="text-xs text-gray-500 mb-1">Expected:</div>
+                      <EstimatedStartTime 
+                        race={race} 
+                        lastStartedRace={lastStartedRace} 
+                        timeBetweenRaces={metrics?.timeBetweenRacesMs} 
+                      />
+                    </div>
+                  )}
+                </div>
 
-                    {expandedRace === race.raceNumber && (
-                      <div className="p-4 bg-gray-50 border-t border-gray-100">
-                        <div className="space-y-2 text-sm">
-                          {race.startTime && (
-                            <p className="text-gray-600">
-                              Started: {new Date(race.startTime).toLocaleString()}
-                            </p>
-                          )}
-                          {race.endTime && (
-                            <p className="text-gray-600">
-                              Finished: {new Date(race.endTime).toLocaleString()}
-                            </p>
-                          )}
-                          {race.status === 'in_progress' && race.startTime && (
-                            <p className="text-yellow-600">
-                              Duration: <LiveDuration startTime={race.startTime} />
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Update the race card result section in both knockout and regular races */}
-                    <div className="p-3 bg-gray-50">
-                      {isValidResult(race.result, race.racingFormat) && race.result ? (
-                        <div className="text-center space-y-2">
-                          <div className="flex justify-center items-center gap-2 md:gap-8">
-                            <RaceResults
-                              race={race}
-                              isWinner={getWinner(race.result, race.teamA, race.teamB, race.racingFormat) === race.teamA}
-                              team={race.teamA}
-                              positions={race.result.slice(0, getBoatsPerTeam(race.racingFormat))}
-                            />
-                            <div className="text-gray-400 font-bold px-1 md:px-2">VS</div>
-                            <RaceResults
-                              race={race}
-                              isWinner={getWinner(race.result, race.teamA, race.teamB, race.racingFormat) === race.teamB}
-                              team={race.teamB}
-                              positions={race.result.slice(getBoatsPerTeam(race.racingFormat))}
-                            />
-                          </div>
-                        </div>
-                      ) : (
-                        <p className="text-center text-gray-500 italic text-sm">
-                          No result yet
+                {expandedRace === race.raceNumber && (
+                  <div className="p-4 bg-blue-50 border-t border-blue-100">
+                    <div className="space-y-2 text-sm">
+                      {race.startTime && (
+                        <p className="text-gray-600">
+                          Started: {new Date(race.startTime).toLocaleString()}
                         </p>
                       )}
-                    </div>
-
-                    {!race.startTime && !race.status && lastStartedRace && (
-                      <div className="p-3 border-t border-gray-100">
-                        <EstimatedStartTime 
-                          race={race}
-                          lastStartedRace={lastStartedRace}
-                          timeBetweenRaces={metrics?.timeBetweenRacesMs || 180000}
-                        />
-                      </div>
-                    )}
-
-                    {!race.startTime && race.goToChangeover && !race.isLaunching && (
-                      <div className="p-3 bg-yellow-50 border-t border-yellow-100">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0">
-                            <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                              <path 
-                                fillRule="evenodd" 
-                                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" 
-                                clipRule="evenodd" 
-                              />
-                            </svg>
-                          </div>
-                          <div className="ml-3">
-                            <p className="text-sm font-medium text-yellow-800">
-                              Go to Changeover Area
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {!race.startTime && race.isLaunching && (
-                      <div className="p-3 bg-blue-50 border-t border-blue-100">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0">
-                            <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                              <path 
-                                fillRule="evenodd" 
-                                d="M6.672 1.911a1 1 0 10-1.932.518l.259.966a1 1 0 001.932-.518l-.26-.966zM2.429 4.74a1 1 0 10-.517 1.932l.966.259a1 1 0 00.517-1.932l-.966-.26zm8.814-.569a1 1 0 00-1.415-1.414l-.707.707a1 1 0 101.415 1.415l.707-.708zm-7.071 7.072l.707-.707A1 1 0 003.465 9.12l-.708.707a1 1 0 001.415 1.415zm3.2-5.171a1 1 0 00-1.3 1.3l4 10a1 1 0 001.823.075l1.38-2.759 3.018 3.02a1 1 0 001.414-1.415l-3.019-3.02 2.76-1.379a1 1 0 00-.076-1.822l-10-4z" 
-                                clipRule="evenodd" 
-                              />
-                            </svg>
-                          </div>
-                          <div className="ml-3">
-                            <p className="text-sm font-medium text-blue-800">
-                              You are launching
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Regular Races */}
-          {regularRaces.length > 0 && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium text-blue-700 pl-2">League Matches</h3>
-              <div className="grid gap-4">
-                {regularRaces.map((race) => (
-                  <div key={race.raceNumber} 
-                    className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
-                    onClick={() => setExpandedRace(expandedRace === race.raceNumber ? null : race.raceNumber)}
-                  >
-                    {/* Update the race card header structure */}
-                    <div className="flex items-center border-b border-gray-100">
-                      <div className="w-16 md:w-24 h-16 md:h-24 flex items-center justify-center bg-blue-500 text-white">
-                        <span className="text-2xl md:text-4xl font-bold">
-                          {race.raceNumber}
-                        </span>
-                      </div>
-                      <div className="flex-1 p-3">
-                        <div className="flex flex-col items-center">
-                          <div className="text-base md:text-lg font-semibold text-center w-full">
-                            <span className="text-blue-600">{race.teamA}</span>
-                            <span className="mx-1 md:mx-2 text-gray-400">vs</span>
-                            <span className="text-blue-600">{race.teamB}</span>
-                          </div>
-                          <div className="text-xs md:text-sm text-gray-500 text-center mt-1">
-                            ({race.boats.teamA}) vs ({race.boats.teamB})
-                          </div>
-                          {race.league && (
-                            <div className="mt-2">
-                              <span className={`
-                                inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                                ${getLeagueTagColors(race.league)}
-                              `}>
-                                {race.league === 'main' ? 'Overall' : `${race.league} League`}
-                              </span>
-                            </div>
-                          )}
-                          <div className="mt-2">
-                            <StatusTag status={race.status} />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {expandedRace === race.raceNumber && (
-                      <div className="p-4 bg-gray-50 border-t border-gray-100">
-                        <div className="space-y-2 text-sm">
-                          {race.startTime && (
-                            <p className="text-gray-600">
-                              Started: {new Date(race.startTime).toLocaleString()}
-                            </p>
-                          )}
-                          {race.endTime && (
-                            <p className="text-gray-600">
-                              Finished: {new Date(race.endTime).toLocaleString()}
-                            </p>
-                          )}
-                          {race.status === 'in_progress' && race.startTime && (
-                            <p className="text-yellow-600">
-                              Duration: <LiveDuration startTime={race.startTime} />
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Update the race card result section in both knockout and regular races */}
-                    <div className="p-3 bg-gray-50">
-                      {isValidResult(race.result, race.racingFormat) && race.result ? (
-                        <div className="text-center space-y-2">
-                          <div className="flex justify-center items-center gap-2 md:gap-8">
-                            <RaceResults
-                              race={race}
-                              isWinner={getWinner(race.result, race.teamA, race.teamB, race.racingFormat) === race.teamA}
-                              team={race.teamA}
-                              positions={race.result.slice(0, getBoatsPerTeam(race.racingFormat))}
-                            />
-                            <div className="text-gray-400 font-bold px-1 md:px-2">VS</div>
-                            <RaceResults
-                              race={race}
-                              isWinner={getWinner(race.result, race.teamA, race.teamB, race.racingFormat) === race.teamB}
-                              team={race.teamB}
-                              positions={race.result.slice(getBoatsPerTeam(race.racingFormat))}
-                            />
-                          </div>
-                        </div>
-                      ) : (
-                        <p className="text-center text-gray-500 italic text-sm">
-                          No result yet
+                      {race.endTime && (
+                        <p className="text-gray-600">
+                          Finished: {new Date(race.endTime).toLocaleString()}
+                        </p>
+                      )}
+                      {race.status === 'in_progress' && race.startTime && (
+                        <p className="text-yellow-600 font-semibold">
+                          ⏱️ Live Duration: <LiveDuration startTime={race.startTime} />
+                        </p>
+                      )}
+                      {race.status === 'finished' && race.startTime && race.endTime && (
+                        <p className="text-gray-600">
+                          Duration: {formatDuration(new Date(race.endTime).getTime() - new Date(race.startTime).getTime())}
                         </p>
                       )}
                     </div>
                   </div>
-                ))}
+                )}
+
+                <div className="p-3 bg-blue-50">
+                  {/* Remove isValidResult check since these races shouldn't have results */}
+                  <div className="text-center">
+                    {/* Prioritize "in_progress" status over launching/changeover tags */}
+                    {race.status === 'in_progress' ? (
+                      <span className="bg-yellow-100 text-yellow-800 px-4 py-3 rounded-full text-base font-medium inline-block">
+                        🏁 Race in Progress
+                      </span>
+                    ) : race.isLaunching ? (
+                      <span className="bg-purple-100 text-purple-800 px-4 py-3 rounded-full text-base font-medium inline-block">
+                        🚀 You Are Launching
+                      </span>
+                    ) : race.goToChangeover ? (
+                      <span className="bg-orange-100 text-orange-800 px-4 py-3 rounded-full text-base font-medium inline-block">
+                        ⛵ Go to Changeover
+                      </span>
+                    ) : (
+                      <span className="text-gray-400 italic text-sm">
+                        Waiting to start
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Fixed "Jump to Results" Button - now centered */}
-      <div className="fixed bottom-1 left-1/2 transform -translate-x-1/2 z-50">
-        <button
-          onClick={scrollToResults}
-          className="bg-blue-600 text-white px-6 py-2 rounded-full shadow hover:bg-blue-700 transition-colors flex items-center gap-2"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-          Jump to Results
-        </button>
-      </div>
-
-      {/* Results Section */}
-      <div ref={resultsRef} className="pt-24">
-        <h2 className="text-xl font-semibold text-gray-700 mb-4">
-          Race Results
-        </h2>
-        {completedRaces.length === 0 && (
-          <p className="text-center text-gray-500">No results available.</p>
-        )}
-        {completedRaces.length > 0 && (
+      {/* Completed sections remain the same - only show races WITH results */}
+      {completedKnockoutRaces.length > 0 && (
+        <div className="space-y-4" ref={knockoutResultsRef}>
+          <h3 className="text-lg font-semibold text-purple-700 border-b border-purple-300 pb-2">
+            ✅ Knockout Results
+          </h3>
           <div className="grid gap-4">
-            {completedRaces.map((race) => {
-              const winner = getWinner(race.result, race.teamA, race.teamB, race.racingFormat);
-              const boatsPerTeam = getBoatsPerTeam(race.racingFormat);
+            {completedKnockoutRaces.map((race) => {
+              const winner = getWinner(race.result, race.teamA, race.teamB);
 
               return (
                 <div
@@ -701,9 +807,8 @@ export default function SchedulePage() {
                   className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
                   onClick={() => setExpandedRace(expandedRace === race.raceNumber ? null : race.raceNumber)}
                 >
-                  {/* Race Header - updated structure */}
                   <div className="flex items-center border-b border-gray-100">
-                    <div className="w-16 md:w-24 h-16 md:h-24 flex items-center justify-center bg-blue-500 text-white">
+                    <div className="w-16 md:w-24 h-16 md:h-24 flex items-center justify-center bg-green-600 text-white">
                       <span className="text-2xl md:text-4xl font-bold">
                         {race.raceNumber}
                       </span>
@@ -711,43 +816,33 @@ export default function SchedulePage() {
                     <div className="flex-1 p-3">
                       <div className="flex flex-col items-center">
                         <div className="text-base md:text-lg font-semibold text-center w-full">
-                          <span className="text-blue-600">{race.teamA}</span>
+                          <span className="text-purple-600">{race.teamA}</span>
                           <span className="mx-1 md:mx-2 text-gray-400">vs</span>
-                          <span className="text-blue-600">{race.teamB}</span>
+                          <span className="text-purple-600">{race.teamB}</span>
                         </div>
                         <div className="text-xs md:text-sm text-gray-500 text-center mt-1">
                           ({race.boats.teamA}) vs ({race.boats.teamB})
-                        </div>
-                        {/* Add racing format indicator */}
-                        <div className="mt-1">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                            {race.racingFormat || '3v3'} Racing
-                          </span>
-                        </div>
-                        {race.league && (
-                          <div className="mt-2">
-                            <span className={`
-                              inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                              ${getLeagueTagColors(race.league)}
-                            `}>
-                              {race.league === 'main' ? 'Overall' : `${race.league} League`}
+                          {race.result && (
+                            <span className="ml-2 text-blue-600 font-medium">
+                              [{getRaceFormat(race.result)}]
                             </span>
-                          </div>
-                        )}
-                        <div className="mt-2">
-                          <StatusTag 
-                            status={race.status} 
-                            isKnockout={race.isKnockout} 
-                            stage={race.stage}
-                          />
+                          )}
+                        </div>
+                        <div className="mt-2 flex gap-2">
+                          {race.stage && (
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getKnockoutStageTagColors(race.stage)}`}>
+                              {getKnockoutStageDisplayName(race.stage)}
+                              {race.matchNumber && ` #${race.matchNumber}`}
+                            </span>
+                          )}
+                          {/* Remove StatusTag from here - status is shown prominently in bottom section */}
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Expandable Timing Info */}
                   {expandedRace === race.raceNumber && (
-                    <div className="p-4 bg-gray-50 border-t border-gray-100">
+                    <div className="p-4 bg-green-50 border-t border-green-100">
                       <div className="space-y-2 text-sm">
                         {race.startTime && (
                           <p className="text-gray-600">
@@ -759,31 +854,29 @@ export default function SchedulePage() {
                             Finished: {new Date(race.endTime).toLocaleString()}
                           </p>
                         )}
-                        {race.status === 'in_progress' && race.startTime && (
-                          <p className="text-yellow-600">
-                            Duration: <LiveDuration startTime={race.startTime} />
+                        {race.startTime && race.endTime && (
+                          <p className="text-gray-600">
+                            Duration: {formatDuration(new Date(race.endTime).getTime() - new Date(race.startTime).getTime())}
                           </p>
                         )}
                       </div>
                     </div>
                   )}
 
-                  {/* Winner and Positions */}
-                  <div className="p-4 bg-gray-50">
+                  <div className="p-4 bg-green-50">
                     <div className="text-center mb-4">
                       <h3 className="text-lg font-semibold text-green-600">
-                        Winner: {winner}
+                        🏆 Winner: {winner}
                       </h3>
                     </div>
                     <div className="flex justify-around">
-                      {/* Team A Positions */}
                       <div className="flex-1 text-center">
-                        <h4 className="font-semibold text-blue-600">{race.teamA}</h4>
+                        <h4 className="font-semibold text-green-600">{race.teamA}</h4>
                         <div className="flex justify-center gap-2 mt-2">
-                          {race.result!.slice(0, boatsPerTeam).map((pos, i) => (
+                          {race.result!.slice(0, race.result!.length / 2).map((pos, i) => (
                             <div
                               key={i}
-                              className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-sm md:text-lg font-bold ${
+                              className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-bold ${
                                 winner === race.teamA ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                               }`}
                             >
@@ -792,15 +885,13 @@ export default function SchedulePage() {
                           ))}
                         </div>
                       </div>
-
-                      {/* Team B Positions */}
                       <div className="flex-1 text-center">
-                        <h4 className="font-semibold text-blue-600">{race.teamB}</h4>
+                        <h4 className="font-semibold text-green-600">{race.teamB}</h4>
                         <div className="flex justify-center gap-2 mt-2">
-                          {race.result!.slice(boatsPerTeam).map((pos, i) => (
+                          {race.result!.slice(race.result!.length / 2).map((pos, i) => (
                             <div
                               key={i}
-                              className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-sm md:text-lg font-bold ${
+                              className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-bold ${
                                 winner === race.teamB ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                               }`}
                             >
@@ -815,22 +906,166 @@ export default function SchedulePage() {
               );
             })}
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Completed Regular Race Results - Make sure this section is visible */}
+      {completedRegularRaces.length > 0 && (
+        <div className="space-y-4" ref={resultsRef}>
+          <h2 className="text-xl font-semibold text-gray-700">Race Results</h2>
+          <div className="grid gap-4">
+            {completedRegularRaces.map((race) => {
+              const winner = getWinner(race.result, race.teamA, race.teamB);
+
+              return (
+                <div
+                  key={race.raceNumber}
+                  className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
+                  onClick={() => setExpandedRace(expandedRace === race.raceNumber ? null : race.raceNumber)}
+                >
+                  <div className="flex items-center border-b border-gray-100">
+                    <div className="w-16 md:w-24 h-16 md:h-24 flex items-center justify-center bg-green-600 text-white">
+                      <span className="text-2xl md:text-4xl font-bold">
+                        {race.raceNumber}
+                      </span>
+                    </div>
+                    <div className="flex-1 p-3">
+                      <div className="flex flex-col items-center">
+                        <div className="text-base md:text-lg font-semibold text-center w-full">
+                          <span className="text-green-600">{race.teamA}</span>
+                          <span className="mx-1 md:mx-2 text-gray-400">vs</span>
+                          <span className="text-green-600">{race.teamB}</span>
+                        </div>
+                        <div className="text-xs md:text-sm text-gray-500 text-center mt-1">
+                          ({race.boats.teamA}) vs ({race.boats.teamB})
+                          {race.result && (
+                            <span className="ml-2 text-blue-600 font-medium">
+                              [{getRaceFormat(race.result)}]
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-2 flex gap-2 flex-wrap justify-center">
+                          {race.league && (
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getLeagueTagColors(race.league)}`}>
+                              {race.league === 'main' ? 'Overall' : `${race.league} League`}
+                            </span>
+                          )}
+                          {/* Remove StatusTag from here - status is shown prominently in bottom section */}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {expandedRace === race.raceNumber && (
+                    <div className="p-4 bg-green-50 border-t border-green-100">
+                      <div className="space-y-2 text-sm">
+                        {race.startTime && (
+                          <p className="text-gray-600">
+                            Started: {new Date(race.startTime).toLocaleString()}
+                          </p>
+                        )}
+                        {race.endTime && (
+                          <p className="text-gray-600">
+                            Finished: {new Date(race.endTime).toLocaleString()}
+                          </p>
+                        )}
+                        {race.startTime && race.endTime && (
+                          <p className="text-gray-600">
+                            Duration: {formatDuration(new Date(race.endTime).getTime() - new Date(race.startTime).getTime())}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="p-4 bg-green-50">
+                    <div className="text-center mb-4">
+                      <h3 className="text-lg font-semibold text-green-600">
+                        🏆 Winner: {winner}
+                      </h3>
+                    </div>
+                    <div className="flex justify-around">
+                      <div className="flex-1 text-center">
+                        <h4 className="font-semibold text-green-600">{race.teamA}</h4>
+                        <div className="flex justify-center gap-2 mt-2">
+                          {race.result!.slice(0, race.result!.length / 2).map((pos, i) => (
+                            <div
+                              key={i}
+                              className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-bold ${
+                                winner === race.teamA ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                              }`}
+                            >
+                              {pos}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex-1 text-center">
+                        <h4 className="font-semibold text-green-600">{race.teamB}</h4>
+                        <div className="flex justify-center gap-2 mt-2">
+                          {race.result!.slice(race.result!.length / 2).map((pos, i) => (
+                            <div
+                              key={i}
+                              className={`w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center text-xs md:text-sm font-bold ${
+                                winner === race.teamB ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                              }`}
+                            >
+                              {pos}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Fixed Jump to Knockout Results Button - Left side */}
+      {completedKnockoutRaces.length > 0 && (
+        <button
+          onClick={scrollToKnockoutResults}
+          className="fixed bottom-4 left-4 bg-purple-600 text-white px-3 py-3 rounded-full shadow-lg hover:bg-purple-700 transition-colors z-50 flex items-center gap-2"
+          title="Jump to Knockout Results"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+          </svg>
+          <span className="text-sm font-medium">KO Results</span>
+        </button>
+      )}
+
+      {/* Fixed Jump to Results Button - Centered at bottom */}
+      {completedRegularRaces.length > 0 && (
+        <button
+          onClick={scrollToResults}
+          className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-3 rounded-full shadow-lg hover:bg-green-700 transition-colors z-50 flex items-center gap-2"
+          title="Jump to Results"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span className="text-sm font-medium">Results</span>
+        </button>
+      )}
 
       {/* Back to Top Button */}
       {showBackToTop && (
-        <div className="fixed bottom-4 right-4">
-          <button
-            onClick={scrollToTop}
-            className="bg-blue-600 text-white rounded-full p-3 shadow-md hover:bg-blue-700 transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15V9m0 0L9 12m3-3l3 3" />
-            </svg>
-          </button>
-        </div>
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-4 right-4 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors z-50"
+          title="Back to Top"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+          </svg>
+        </button>
       )}
+
+
     </div>
   );
 }
