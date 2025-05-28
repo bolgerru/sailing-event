@@ -1,33 +1,34 @@
 {
   "Gold": [
     {
-      "team": "gold1",
-      "wins": 2,
-      "totalRaces": 2,
+      "team": "Gold1",
+      "wins": 0,
+      "totalRaces": 0,
       "points": 0,
-      "winPercentage": 100,
+      "winPercentage": 0,
       "place": 1,
-      "league": "Gold"
+      "league": "Gold",
+      "tiebreakNote": "Tied with gold2, gold3, gold4, gold5, gold6 (all tiebreakers exhausted)"
     },
     {
       "team": "gold2",
       "wins": 0,
-      "totalRaces": 1,
+      "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
-      "place": 2,
+      "place": 1,
       "league": "Gold",
-      "tiebreakNote": "Tied with gold3, gold4 (all tiebreakers exhausted)"
+      "tiebreakNote": "Tied with Gold1, gold3, gold4, gold5, gold6 (all tiebreakers exhausted)"
     },
     {
       "team": "gold3",
       "wins": 0,
-      "totalRaces": 1,
+      "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
-      "place": 2,
+      "place": 1,
       "league": "Gold",
-      "tiebreakNote": "Tied with gold2, gold4 (all tiebreakers exhausted)"
+      "tiebreakNote": "Tied with Gold1, gold2, gold4, gold5, gold6 (all tiebreakers exhausted)"
     },
     {
       "team": "gold4",
@@ -35,50 +36,153 @@
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
-      "place": 2,
+      "place": 1,
       "league": "Gold",
-      "tiebreakNote": "Tied with gold2, gold3 (all tiebreakers exhausted)"
+      "tiebreakNote": "Tied with Gold1, gold2, gold3, gold5, gold6 (all tiebreakers exhausted)"
+    },
+    {
+      "team": "gold5",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "Gold",
+      "tiebreakNote": "Tied with Gold1, gold2, gold3, gold4, gold6 (all tiebreakers exhausted)"
+    },
+    {
+      "team": "gold6",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "Gold",
+      "tiebreakNote": "Tied with Gold1, gold2, gold3, gold4, gold5 (all tiebreakers exhausted)"
     }
   ],
   "Silver": [
     {
-      "team": "silver1",
-      "wins": 1,
-      "totalRaces": 1,
+      "team": "Silver1",
+      "wins": 0,
+      "totalRaces": 0,
       "points": 0,
-      "winPercentage": 100,
+      "winPercentage": 0,
       "place": 1,
-      "league": "Silver"
-    },
-    {
-      "team": "silver2",
-      "wins": 0,
-      "totalRaces": 1,
-      "points": 0,
-      "winPercentage": 0,
-      "place": 2,
       "league": "Silver",
-      "tiebreakNote": "Tied with silver3, silver4 (all tiebreakers exhausted)"
+      "tiebreakNote": "Tied with Silver2, Silver3, Silver4, Silver5, Silver6 (all tiebreakers exhausted)"
     },
     {
-      "team": "silver3",
+      "team": "Silver2",
       "wins": 0,
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
-      "place": 2,
+      "place": 1,
       "league": "Silver",
-      "tiebreakNote": "Tied with silver2, silver4 (all tiebreakers exhausted)"
+      "tiebreakNote": "Tied with Silver1, Silver3, Silver4, Silver5, Silver6 (all tiebreakers exhausted)"
     },
     {
-      "team": "silver4",
+      "team": "Silver3",
       "wins": 0,
       "totalRaces": 0,
       "points": 0,
       "winPercentage": 0,
-      "place": 2,
+      "place": 1,
       "league": "Silver",
-      "tiebreakNote": "Tied with silver2, silver3 (all tiebreakers exhausted)"
+      "tiebreakNote": "Tied with Silver1, Silver2, Silver4, Silver5, Silver6 (all tiebreakers exhausted)"
+    },
+    {
+      "team": "Silver4",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "Silver",
+      "tiebreakNote": "Tied with Silver1, Silver2, Silver3, Silver5, Silver6 (all tiebreakers exhausted)"
+    },
+    {
+      "team": "Silver5",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "Silver",
+      "tiebreakNote": "Tied with Silver1, Silver2, Silver3, Silver4, Silver6 (all tiebreakers exhausted)"
+    },
+    {
+      "team": "Silver6",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "Silver",
+      "tiebreakNote": "Tied with Silver1, Silver2, Silver3, Silver4, Silver5 (all tiebreakers exhausted)"
+    }
+  ],
+  "Bronze": [
+    {
+      "team": "Bronze1",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "Bronze",
+      "tiebreakNote": "Tied with Bronze2, Bronze3, Brozne4, Bronze5, Bronze6 (all tiebreakers exhausted)"
+    },
+    {
+      "team": "Bronze2",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "Bronze",
+      "tiebreakNote": "Tied with Bronze1, Bronze3, Brozne4, Bronze5, Bronze6 (all tiebreakers exhausted)"
+    },
+    {
+      "team": "Bronze3",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "Bronze",
+      "tiebreakNote": "Tied with Bronze1, Bronze2, Brozne4, Bronze5, Bronze6 (all tiebreakers exhausted)"
+    },
+    {
+      "team": "Brozne4",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "Bronze",
+      "tiebreakNote": "Tied with Bronze1, Bronze2, Bronze3, Bronze5, Bronze6 (all tiebreakers exhausted)"
+    },
+    {
+      "team": "Bronze5",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "Bronze",
+      "tiebreakNote": "Tied with Bronze1, Bronze2, Bronze3, Brozne4, Bronze6 (all tiebreakers exhausted)"
+    },
+    {
+      "team": "Bronze6",
+      "wins": 0,
+      "totalRaces": 0,
+      "points": 0,
+      "winPercentage": 0,
+      "place": 1,
+      "league": "Bronze",
+      "tiebreakNote": "Tied with Bronze1, Bronze2, Bronze3, Brozne4, Bronze5 (all tiebreakers exhausted)"
     }
   ]
 }

@@ -2,42 +2,65 @@
   "useLeagues": true,
   "leagues": [
     {
-      "id": "league-1748446337904",
+      "id": "league-1748441005478",
       "name": "Gold",
       "teams": [
-        "gold1",
+        "Gold1",
         "gold2",
         "gold3",
-        "gold4"
+        "gold4",
+        "gold5",
+        "gold6"
       ],
       "boatSets": [
         {
-          "id": "set-1748446337904",
+          "id": "set-1748441005478",
           "team1Color": "Red",
           "team2Color": "Black"
         }
       ]
     },
     {
-      "id": "league-1748446355295",
+      "id": "league-1748441028312",
       "name": "Silver",
       "teams": [
-        "silver1",
-        "silver2",
-        "silver3",
-        "silver4"
+        "Silver1",
+        "Silver2",
+        "Silver3",
+        "Silver4",
+        "Silver5",
+        "Silver6"
       ],
       "boatSets": [
         {
-          "id": "set-1748446355295",
+          "id": "set-1748441028312",
           "team1Color": "Blue",
           "team2Color": "White"
+        }
+      ]
+    },
+    {
+      "id": "league-1748441062895",
+      "name": "Bronze",
+      "teams": [
+        "Bronze1",
+        "Bronze2",
+        "Bronze3",
+        "Brozne4",
+        "Bronze5",
+        "Bronze6"
+      ],
+      "boatSets": [
+        {
+          "id": "set-1748441062895",
+          "team1Color": "Yellow",
+          "team2Color": "Green"
         }
       ]
     }
   ],
   "teamInput": "",
   "boatSets": [],
-  "racingFormat": "2v2",
-  "eventName": "Iusa event"
+  "racingFormat": "3v3",
+  "eventName": "IUSA Event 1"
 }
