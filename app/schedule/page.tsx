@@ -270,6 +270,10 @@ export default function SchedulePage() {
   const [loading, setLoading] = useState(true);
   const [expandedRace, setExpandedRace] = useState<number | null>(null);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  // Add these new state variables
+  const [showJumpToResults, setShowJumpToResults] = useState(true);
+  const [showJumpToKnockout, setShowJumpToKnockout] = useState(true);
+  
   const resultsRef = useRef<HTMLDivElement>(null);
   const knockoutResultsRef = useRef<HTMLDivElement>(null);
   const [metrics, setMetrics] = useState<Metrics | null>(null);
@@ -376,6 +380,20 @@ export default function SchedulePage() {
   useEffect(() => {
     const handleScroll = () => {
       setShowBackToTop(window.scrollY > 300);
+      
+      // Check if we've scrolled past the results section
+      if (resultsRef.current) {
+        const resultsPosition = resultsRef.current.getBoundingClientRect();
+        // Hide the button when the results section is already in view (top of element is above the middle of screen)
+        setShowJumpToResults(resultsPosition.top > window.innerHeight / 2);
+      }
+      
+      // Check if we've scrolled past the knockout results section
+      if (knockoutResultsRef.current) {
+        const knockoutPosition = knockoutResultsRef.current.getBoundingClientRect();
+        // Hide the button when the knockout results section is already in view
+        setShowJumpToKnockout(knockoutPosition.top > window.innerHeight / 2);
+      }
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -1118,7 +1136,7 @@ export default function SchedulePage() {
       )}
 
       {/* Fixed Jump to Knockout Results Button - Left side */}
-      {completedKnockoutRaces.length > 0 && (
+      {completedKnockoutRaces.length > 0 && showJumpToKnockout && (
         <button
           onClick={scrollToKnockoutResults}
           className="fixed bottom-4 left-4 bg-purple-600 text-white px-3 py-3 rounded-full shadow-lg hover:bg-purple-700 transition-colors z-50 flex items-center gap-2"
@@ -1132,7 +1150,7 @@ export default function SchedulePage() {
       )}
 
       {/* Fixed Jump to Results Button - Centered at bottom */}
-      {completedRegularRaces.length > 0 && (
+      {completedRegularRaces.length > 0 && showJumpToResults && (
         <button
           onClick={scrollToResults}
           className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-3 rounded-full shadow-lg hover:bg-green-700 transition-colors z-50 flex items-center gap-2"
